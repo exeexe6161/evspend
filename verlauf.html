@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<!-- Phase 2: Preload Inter Variable für FOIT-Vermeidung (font-display: swap) -->
+<link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+<link rel="canonical" href="https://www.evspend.com/verlauf.html">
+<link rel="alternate" hreflang="de" href="https://www.evspend.com/verlauf.html">
+<link rel="alternate" hreflang="en" href="https://www.evspend.com/verlauf.html">
+<link rel="alternate" hreflang="tr" href="https://www.evspend.com/verlauf.html">
+<link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/verlauf.html">
+<link rel="alternate" hreflang="x-default" href="https://www.evspend.com/verlauf.html">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+<link rel="manifest" href="/site.webmanifest">
+<title>Verlauf – EVSpend</title>
+<script src="./theme-init.js?v=20260427-30"></script>
+<script src="/vendor/lucide-0.511.0.min.js" defer></script>
+<link rel="stylesheet" href="./styles-app.css?v=20260428-52">
+</head>
+<body>
+<div class="top-controls" role="toolbar" aria-label="Einstellungen">
+  <div class="top-pill-wrap">
+    <button class="top-pill" id="marketSwitch" type="button" aria-label="Markt wählen" aria-haspopup="menu" aria-expanded="false">
+      <span class="top-pill-text" id="marketSwitchLabel">DE</span>
+      <svg class="top-pill-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="top-menu" id="marketMenu" role="menu" hidden>
+      <button class="top-menu-item" type="button" role="menuitem" data-market="de"><span class="top-menu-sym">€</span> <span data-i18n="marketDe">Deutschland</span></button>
+      <button class="top-menu-item" type="button" role="menuitem" data-market="eu"><span class="top-menu-sym">€</span> <span data-i18n="marketEu">Europa</span></button>
+      <button class="top-menu-item" type="button" role="menuitem" data-market="us"><span class="top-menu-sym">$</span> <span data-i18n="marketUs">USA</span></button>
+      <button class="top-menu-item" type="button" role="menuitem" data-market="tr"><span class="top-menu-sym">₺</span> <span data-i18n="marketTr">Türkei</span></button>
+    </div>
+  </div>
+  <button class="theme-btn" id="themeBtn" type="button" aria-label="Farbschema wechseln" title="Hell / Dunkel"></button>
+</div>
+
+<header class="hero" role="banner">
+  <a href="./" aria-label="Zurück zum Rechner">
+    <img class="hero-banner" src="./banner.png" alt="EVSpend Banner" width="1024" height="165">
+  </a>
+
+  <div class="verlauf-head">
+    <h1 class="verlauf-title" data-i18n="verlaufTitle">Verlauf</h1>
+    <p class="verlauf-sub" data-i18n="verlaufSub">Deine persönlichen Berechnungen</p>
+    <p class="verlauf-trust" data-i18n="verlaufTrust">Basierend auf deinen echten Fahrdaten</p>
+    <p class="verlauf-privacy" data-i18n="verlaufPrivacy">
+      Alle Berechnungen werden ausschließlich lokal auf deinem Gerät gespeichert.
+      Es erfolgt keine Übertragung oder Speicherung auf unseren Servern.
+      Die Daten bleiben im Speicher deines Browsers und können jederzeit gelöscht werden.
+      Bitte beachte, dass sie verloren gehen können, wenn du Browserdaten löschst oder ein anderes Gerät verwendest.
+    </p>
+  </div>
+</header>
+
+<main class="app-main">
+
+<!-- Diagramm: zeigt EV vs. Verbrenner-Kosten je Tag im gewählten Zeitraum. -->
+<div id="chartWrap" class="chart-wrap" hidden>
+  <div class="list-card chart-card">
+    <div class="chart-header"><h3 id="chartTitle"></h3></div>
+    <figure class="chart-figure" role="figure" aria-labelledby="chartCaption">
+      <canvas id="costChart" class="chart-canvas"></canvas>
+      <figcaption id="chartCaption" class="sr-only"></figcaption>
+      <table id="chartDataTable" class="sr-only">
+        <caption data-i18n="tableCaption">Detaillierte Verlaufs-Daten</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-i18n="tableHeaderDate">Datum</th>
+            <th scope="col" id="chartTableHeaderDistance">Kilometer</th>
+            <th scope="col" data-i18n="tableHeaderType">Typ</th>
+            <th scope="col" data-i18n="tableHeaderConsumption">Verbrauch</th>
+            <th scope="col" data-i18n="tableHeaderPrice">Preis</th>
+            <th scope="col" data-i18n="tableHeaderCostPer100">Kosten pro 100</th>
+          </tr>
+        </thead>
+        <tbody id="chartDataTableBody"></tbody>
+      </table>
+    </figure>
+  </div>
+</div>
+
+<!-- Statistik -->
+<section class="hist-stats-section" aria-labelledby="histStatsHead">
+<h2 class="sh" id="histStatsHead" data-i18n="statsHeader">Statistik</h2>
+
+<div class="period-tabs" role="tablist" aria-label="Zeitraum">
+  <button class="period-btn period-btn--active" role="tab" data-period="today" aria-selected="true" type="button" data-i18n="periodToday">Heute</button>
+  <button class="period-btn" role="tab" data-period="week"  aria-selected="false" type="button" data-i18n="periodWeek">Woche</button>
+  <button class="period-btn" role="tab" data-period="month" aria-selected="false" type="button" data-i18n="periodMonth">Monat</button>
+  <button class="period-btn" role="tab" data-period="year"  aria-selected="false" type="button" data-i18n="periodYear">Jahr</button>
+  <button class="period-btn" role="tab" data-period="yearly" aria-selected="false" type="button" data-i18n="yearly">Jahre</button>
+</div>
+
+<div class="list-card stats-card">
+  <div class="stats-top">
+    <div class="stats-top-lbl" data-i18n="statsInPeriod">Einträge im Zeitraum</div>
+    <div class="stats-top-val" id="statCount">0</div>
+  </div>
+
+  <div class="stats-block" id="statBlockEv" hidden>
+    <div class="stats-block-hdr">
+      <span class="mode-badge mode-badge--ev" data-i18n="typeEv">E-Auto</span>
+      <span class="stats-block-count" id="statEvN">0 Einträge</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsTotalKm">Gesamt km</div>
+        <div class="stats-cell-val"><span id="statEvKm">—</span><span class="stats-cell-unit">km</span></div>
+      </div>
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsTotalCost">Gesamt Kosten</div>
+        <div class="stats-cell-val"><span id="statEvMonthly">—</span><span class="stats-cell-unit">€</span></div>
+      </div>
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsAvgCost">Ø Kosten / 100 km</div>
+        <div class="stats-cell-val"><span id="statEvCost">—</span><span class="stats-cell-unit">€</span></div>
+      </div>
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsAvgConsumption">Ø Verbrauch</div>
+        <div class="stats-cell-val"><span id="statEvCons">—</span><span class="stats-cell-unit">kWh / 100 km</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-block" id="statBlockVb" hidden>
+    <div class="stats-block-hdr">
+      <span class="mode-badge mode-badge--vb" data-i18n="typeVb">Verbrenner</span>
+      <span class="stats-block-count" id="statVbN">0 Einträge</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsTotalKm">Gesamt km</div>
+        <div class="stats-cell-val"><span id="statVbKm">—</span><span class="stats-cell-unit">km</span></div>
+      </div>
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsTotalCost">Gesamt Kosten</div>
+        <div class="stats-cell-val"><span id="statVbMonthly">—</span><span class="stats-cell-unit">€</span></div>
+      </div>
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsAvgCost">Ø Kosten / 100 km</div>
+        <div class="stats-cell-val"><span id="statVbCost">—</span><span class="stats-cell-unit">€</span></div>
+      </div>
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsAvgConsumption">Ø Verbrauch</div>
+        <div class="stats-cell-val"><span id="statVbCons">—</span><span class="stats-cell-unit">L / 100 km</span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-empty" id="statsEmpty" data-i18n="statsEmpty">Noch keine Einzelberechnungen gespeichert</div>
+</div>
+
+</section>
+
+<!-- Einträge -->
+<section class="hist-entries-section" aria-labelledby="histEntriesHead">
+<h2 class="sh" id="histEntriesHead" data-i18n="entriesHeader">Einträge</h2>
+<div class="hist-search-wrap">
+  <svg class="hist-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    <circle cx="11" cy="11" r="8"/>
+    <path d="m21 21-4.3-4.3"/>
+  </svg>
+  <input id="searchInput" class="hist-search" type="text" placeholder="Eintrag suchen…" autocomplete="off" aria-label="Einträge suchen" data-i18n-placeholder="searchPlaceholder">
+</div>
+<div id="histList" class="hist-list"></div>
+<div id="histPager" class="hist-pager" hidden>
+  <button id="histPrevBtn" class="hist-pager-btn" type="button" aria-label="Vorherige Seite" data-i18n="pagerPrev">← Zurück</button>
+  <span id="histPagerInfo" class="hist-pager-info">1 / 1</span>
+  <button id="histNextBtn" class="hist-pager-btn" type="button" aria-label="Nächste Seite" data-i18n="pagerNext">Weiter →</button>
+</div>
+</section>
+
+<!-- Legacy (Vergleichs-Einträge aus älterer Version) -->
+<details id="legacyWrap" class="legacy-wrap" hidden>
+  <summary class="legacy-summary">
+    <span class="legacy-sum-label" data-i18n="legacyLabel">Alt-Einträge aus Vergleichsmodus</span>
+    <span class="legacy-sum-count" id="legacyCount">0</span>
+  </summary>
+  <div id="legacyList" class="hist-list legacy-list"></div>
+  <div class="hist-actions">
+    <button id="legacyClearBtn" class="hist-clear" type="button" data-i18n="legacyClear">Alt-Einträge löschen</button>
+  </div>
+</details>
+
+<div id="histActions" class="hist-actions" hidden>
+  <button id="histClearBtn" class="hist-clear" type="button" data-i18n="clearAll">Alle löschen</button>
+</div>
+
+<div class="result-actions">
+  <a href="./" class="ra-back-link" data-i18n="backToCalc">Zurück zum Rechner</a>
+</div>
+
+</main>
+
+<footer>
+  <div class="footer-links">
+    <a href="./" data-i18n="footerCalc">Rechner</a>
+    <span>·</span>
+    <a href="./impressum.html" data-i18n="footerImpressum">Impressum</a>
+    <span>·</span>
+    <a href="./datenschutz.html" data-i18n="footerDatenschutz">Datenschutz</a>
+    <span>·</span>
+    <a href="./terms.html" data-i18n="footerTerms">AGB</a>
+    <span>·</span>
+    <a href="./hinweise.html" data-i18n="footerHinweise">Hinweise zur Nutzung</a>
+    <span>·</span>
+    <a href="./barrierefreiheit.html" data-i18n="footerBarrierefreiheit">Barrierefreiheit</a>
+  </div>
+  <p class="footer-note" data-i18n="verlaufFooterNote">Gespeicherte Einträge bleiben nur lokal auf diesem Gerät.</p>
+  <p class="footer-copy">© 2026 EVSpend – www.evspend.com</p>
+</footer>
+
+<script src="/vendor/chart-4.4.6.umd.js" defer></script>
+<script src="./verlauf.js?v=20260427-34" defer></script>
+</body>
+</html>

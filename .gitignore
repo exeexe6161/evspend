@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.DS_Store
+
+# Phase 2: Inter Font Source-Verzeichnis (nur web/-Subset wird committed)
+Inter-4/
+*.zip
+*.tar.gz

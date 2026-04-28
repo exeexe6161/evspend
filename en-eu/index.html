@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+<link rel="manifest" href="/site.webmanifest">
+<meta charset="UTF-8">
+<!-- Phase 2: Preload Inter Variable für FOIT-Vermeidung (font-display: swap) -->
+<link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="EVSpend">
+<meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+<meta name="referrer" content="same-origin">
+<meta name="description" content="Compare costs of electric vehicles versus internal combustion engine cars across markets. Calculate savings, payback time, and long-term costs for free.">
+<link rel="canonical" href="https://www.evspend.com/en-eu/">
+<link rel="alternate" hreflang="de" href="https://www.evspend.com/">
+<link rel="alternate" hreflang="en" href="https://www.evspend.com/">
+<link rel="alternate" hreflang="tr" href="https://www.evspend.com/">
+<link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/">
+<link rel="alternate" hreflang="x-default" href="https://www.evspend.com/">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.evspend.com/en-eu/">
+<meta property="og:site_name" content="EVSpend">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="EV vs ICE – Cost Comparison">
+<meta property="og:description" content="How much does an EV really save? Compare now.">
+<meta property="og:image" content="https://www.evspend.com/banner.png">
+<meta property="og:image:width" content="1024">
+<meta property="og:image:height" content="165">
+<meta property="og:image:alt" content="EVSpend Banner">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="EV vs ICE – Cost Comparison">
+<meta name="twitter:description" content="How much does an EV really save? Compare now.">
+<meta name="twitter:image" content="https://www.evspend.com/banner.png">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"EVSpend","url":"https://www.evspend.com/en-eu/","description":"EV vs ICE cost comparison: operating costs and payback.","applicationCategory":"UtilitiesApplication","operatingSystem":"Web, iOS, Android","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"inLanguage":"en","author":{"@type":"Person","name":"Hakan Guer"}}</script>
+<meta name="mobile-web-app-capable" content="yes">
+<title>EVSpend – EV vs ICE Cost Calculator</title>
+<script src="/theme-init.js?v=20260427-30"></script>
+<script src="/en-eu/init-eu.js?v=20260426-1"></script>
+<script src="/vendor/lucide-0.511.0.min.js" defer></script>
+<link rel="stylesheet" href="/styles-app.css?v=20260428-52">
+<link rel="stylesheet" href="/en-eu/styles-en-eu.css?v=20260426-1">
+</head>
+<body data-app-mode="compare" data-single-type="ev">
+<noscript><div class="noscript-overlay"><p data-i18n="noscriptText">This app requires JavaScript. Please enable JavaScript in your browser.</p></div></noscript>
+
+<!-- Screen-reader live region for slider change announcements (BFSG / WCAG 2.1) -->
+<div id="sliderAnnouncer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<div class="top-controls" role="toolbar" aria-label="Settings">
+  <div class="top-pill-wrap">
+    <button class="top-pill" id="marketSwitch" type="button" aria-label="Select market" aria-haspopup="menu" aria-expanded="false">
+      <span class="top-pill-text" id="marketSwitchLabel">DE</span>
+      <svg class="top-pill-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="top-menu" id="marketMenu" role="menu" hidden>
+      <button class="top-menu-item" type="button" role="menuitem" data-market="de"><span class="top-menu-sym">€</span> <span data-i18n="marketDe">Germany</span></button>
+      <button class="top-menu-item" type="button" role="menuitem" data-market="eu"><span class="top-menu-sym">€</span> <span data-i18n="marketEu">EU</span></button>
+      <button class="top-menu-item" type="button" role="menuitem" data-market="us"><span class="top-menu-sym">$</span> <span data-i18n="marketUs">USA</span></button>
+      <button class="top-menu-item" type="button" role="menuitem" data-market="tr"><span class="top-menu-sym">₺</span> <span data-i18n="marketTr">Türkiye</span></button>
+    </div>
+  </div>
+  <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle theme" title="Light / Dark"></button>
+</div>
+
+<header class="hero" role="banner">
+  <img class="hero-banner" src="/banner.png" alt="EVSpend Banner" width="1024" height="165" fetchpriority="high" decoding="async">
+
+  <div class="hdr">
+    <h1 data-i18n="heroTitle">EV vs. ICE</h1>
+    <p><span data-i18n="heroSubtitle1">Costs</span> <span class="hdr-accent" data-i18n="heroSubtitle2">side by side</span></p>
+  </div>
+
+  <ul class="trust-list" aria-label="Benefits">
+    <li class="trust-chip">
+      <svg class="trust-chip-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"/></svg>
+      <span data-i18n="trustNoSignup">No signup</span>
+    </li>
+    <li class="trust-chip">
+      <svg class="trust-chip-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"/></svg>
+      <span data-i18n="trustLocal">Stored locally</span>
+    </li>
+  </ul>
+  <p class="disclaimer" data-i18n="brandTagline">Comparison based on your input</p>
+</header>
+
+<main class="app-main">
+
+<!-- Mode (Single / Compare) -->
+<div class="mode-toggle" role="tablist" aria-label="Calculation mode">
+  <button id="modeSingleBtn"  class="mode-btn"                  role="tab" aria-selected="false" data-mode="single"  type="button" data-i18n="modeSingle">Single</button>
+  <button id="modeCompareBtn" class="mode-btn mode-btn--active" role="tab" aria-selected="true"  data-mode="compare" type="button" data-i18n="modeCompare">Compare</button>
+</div>
+
+<!-- Vehicle type (visible only in single mode) -->
+<div id="typeToggle" class="type-toggle mode-single-only" role="tablist" aria-label="Vehicle type">
+  <button id="typeEvBtn" class="type-btn type-btn--ev type-btn--active" role="tab" aria-selected="true" data-type="ev" type="button" data-i18n="typeEv">EV</button>
+  <button id="typeVbBtn" class="type-btn type-btn--vb" role="tab" aria-selected="false" data-type="vb" type="button" data-i18n="typeVb">ICE</button>
+</div>
+
+<section class="calc-section" aria-label="Inputs">
+
+<!-- Quick calculator -->
+<div class="quick-compact">
+  <div class="qc-caption" data-i18n="quickCalc">Quick Calculator</div>
+
+  <!-- Shared mileage (visible only in compare mode) -->
+  <div class="qc-shared mode-compare-only">
+    <div class="qc-hdr qc-hdr--shared" data-i18n="sectionMileage">Mileage</div>
+    <div class="sl-row">
+      <div class="sl-head">
+        <label for="kmShared" class="sl-lbl" data-i18n="labelKilometer">Kilometres</label>
+        <span class="sl-val" id="kmSharedV">1,000 km</span>
+      </div>
+      <input id="kmShared" class="sl sl--shared" type="range" min="50" max="10000" step="10" value="1000" aria-label="Kilometres (for both vehicles)">
+    </div>
+  </div>
+
+  <div class="calc-wrapper">
+  <div class="qc-section qc-section--ev" data-section="ev">
+    <div class="qc-hdr qc-hdr--ev" data-i18n="sectionEv">EV</div>
+    <div class="sl-row sl-row--km">
+      <div class="sl-head">
+        <label for="kmEv" class="sl-lbl" data-i18n="labelKilometer">Kilometres</label>
+        <span class="sl-val" id="kmEvV">500 km</span>
+      </div>
+      <input id="kmEv" class="sl sl--ev" type="range" min="0" max="2000" step="1" value="500" aria-label="EV kilometres">
+    </div>
+    <div class="sl-row">
+      <div class="sl-head">
+        <label for="evVerbrauch" class="sl-lbl" data-i18n="labelEvConsumption">EV consumption</label>
+        <span class="sl-val" id="evVerbrauchV">17.0 kWh/100 km</span>
+      </div>
+      <input id="evVerbrauch" class="sl sl--ev" type="range" min="8" max="35" step="0.5" value="17" aria-label="EV consumption">
+      <div class="sl-hint" data-i18n="hintEvConsumption">Typical: 15–20 kWh/100 km</div>
+    </div>
+    <div class="sl-row">
+      <div class="sl-head">
+        <label for="strompreis" class="sl-lbl" data-i18n="labelElectricityPrice">Electricity price</label>
+        <span class="sl-val" id="strompreisV">0.35 €/kWh</span>
+      </div>
+      <input id="strompreis" class="sl sl--ev" type="range" min="0.10" max="1.00" step="0.01" value="0.35" aria-label="Electricity price">
+    </div>
+    <div class="sl-row">
+      <div class="sl-head">
+        <label for="batteryKwh" class="sl-lbl" data-i18n="labelBatterySize">Battery size</label>
+        <span class="sl-val" id="batteryKwhV">60 kWh</span>
+      </div>
+      <input id="batteryKwh" class="sl sl--ev" type="range" min="20" max="150" step="1" value="60" aria-label="Battery size in kWh">
+    </div>
+    <div class="range-box" id="rangeBox" hidden>
+      <div class="range-display" id="rangeDisplay" aria-live="polite" data-i18n="rangeEmpty">Approx. — km range</div>
+    </div>
+    <div class="range-hint" data-i18n="rangeHintText">Estimate. May vary by driving style.</div>
+  </div>
+
+  <div class="qc-section qc-section--vb" data-section="vb">
+    <div class="qc-hdr qc-hdr--vb" data-i18n="sectionVb">ICE</div>
+    <div class="sl-row sl-row--km">
+      <div class="sl-head">
+        <label for="kmVb" class="sl-lbl" data-i18n="labelKilometer">Kilometres</label>
+        <span class="sl-val" id="kmVbV">500 km</span>
+      </div>
+      <input id="kmVb" class="sl sl--vb" type="range" min="0" max="2000" step="1" value="500" aria-label="ICE kilometres">
+    </div>
+    <div class="sl-row">
+      <div class="sl-head">
+        <label for="verbrauchVerbrenner" class="sl-lbl" data-i18n="labelIceConsumption">ICE consumption</label>
+        <span class="sl-val" id="verbrauchVerbrennerV">7.0 L/100 km</span>
+      </div>
+      <input id="verbrauchVerbrenner" class="sl sl--vb" type="range" min="3" max="20" step="0.1" value="7.0" aria-label="ICE consumption">
+      <div class="sl-hint" data-i18n="hintIceConsumption">Typical: 5–8 L/100 km</div>
+    </div>
+    <div class="sl-row">
+      <div class="sl-head">
+        <label for="benzinpreis" class="sl-lbl" data-i18n="labelGasPrice">Petrol price</label>
+        <span class="sl-val" id="benzinpreisV">1.85 €/L</span>
+      </div>
+      <input id="benzinpreis" class="sl sl--vb" type="range" min="1.00" max="3.00" step="0.01" value="1.85" aria-label="Petrol price">
+    </div>
+  </div>
+
+  <!-- Note: appears directly under the active EV/ICE section inside the wrapper -->
+  <div class="note-wrap mode-single-only">
+    <label for="noteInput" class="note-label" data-i18n="noteLabel">Trip note (optional)</label>
+    <input id="noteInput" class="note-input" type="text" maxlength="80"
+           placeholder="e.g., trip, commute, or drive to Frankfurt"
+           data-i18n-placeholder="notePlaceholder"
+           autocomplete="off">
+  </div>
+  </div><!-- /.calc-wrapper -->
+</div>
+
+<!-- Carpool -->
+<div class="rideshare-wrap">
+  <div class="rideshare-head">
+    <div class="rideshare-lbl">
+      <i data-lucide="users" aria-hidden="true"></i>
+      <span data-i18n="rideshareLabel">Carpool</span>
+    </div>
+    <label class="toggle-switch" aria-label="Enable carpool">
+      <input type="checkbox" id="rideshareToggle">
+      <span class="toggle-switch-slider"></span>
+    </label>
+  </div>
+  <div class="rideshare-body" id="rideshareBody" hidden>
+    <div class="sl-row sl-row--rs">
+      <div class="sl-head">
+        <label for="ridesharePersons" class="sl-lbl" data-i18n="labelPersons">People</label>
+        <span class="sl-val" id="ridesharePersonsV">1</span>
+      </div>
+      <input id="ridesharePersons" class="sl sl--rs" type="range" min="1" max="6" step="1" value="1" aria-label="Number of people">
+    </div>
+    <div class="rideshare-hint" data-i18n="rideshareHint">Costs are split across all people.</div>
+  </div>
+</div>
+
+<button id="calcBtn" class="calc-btn" type="button">
+  <span data-i18n="calculate">Calculate</span>
+</button>
+
+<!-- Long-term analysis (Compare) -->
+<div class="longterm-wrap mode-compare-only" id="longtermWrap">
+  <div class="longterm-head">
+    <div class="longterm-lbl">
+      <i data-lucide="line-chart" aria-hidden="true"></i>
+      <span data-i18n="longtermLabel">Long-term analysis</span>
+    </div>
+    <label class="toggle-switch" aria-label="Enable long-term analysis">
+      <input type="checkbox" id="longtermToggle">
+      <span class="toggle-switch-slider"></span>
+    </label>
+  </div>
+  <div class="longterm-body" id="longtermBody" hidden>
+    <div class="lt-info-hint" data-i18n="longtermInfoHint">Long-term analysis active – focus on total cost over time</div>
+    <div class="sl-row sl-row--lt">
+      <div class="sl-head">
+        <label for="kmMonat" class="sl-lbl" data-i18n="labelKmPerMonth">Monthly mileage</label>
+        <span class="sl-val" id="kmMonatV">1,000 km</span>
+      </div>
+      <input id="kmMonat" class="sl sl--lt" type="range" min="100" max="5000" step="50" value="1000" aria-label="Monthly mileage in kilometres">
+      <div class="lt-km-jahr" id="ltKmJahr">≈ 12,000 km per year</div>
+      <div class="lt-km-hint" data-i18n="longtermKmMonthHint">Average use per month</div>
+      <div class="lt-km-warn" id="ltKmWarn" hidden data-i18n="longtermKmWarn">Very high monthly mileage – results may differ from typical use.</div>
+    </div>
+    <div class="sl-row sl-row--lt">
+      <div class="sl-head">
+        <label for="longtermYears" class="sl-lbl" data-i18n="longtermPeriod">Period</label>
+        <span class="sl-val" id="longtermYearsV">10 years</span>
+      </div>
+      <input id="longtermYears" class="sl sl--lt" type="range" min="0" max="20" step="1" value="10" aria-label="Period in years">
+    </div>
+    <div class="sl-row sl-row--lt">
+      <div class="sl-head">
+        <label for="longtermPremium" class="sl-lbl" data-i18n="longtermPremiumLabel">EV price premium</label>
+        <span class="sl-val" id="longtermPremiumV">5,000 €</span>
+      </div>
+      <input id="longtermPremium" class="sl sl--ev" type="range" min="0" max="40000" step="100" value="5000" aria-label="EV price premium">
+    </div>
+    <div class="longterm-result">
+      <div class="longterm-totals">
+        <div class="lt-line">
+          <span class="lt-dot lt-dot--ev" aria-hidden="true"></span>
+          <span class="lt-lbl" data-i18n="typeEv">EV</span>
+          <span class="lt-val" id="ltEvTotal">— €</span>
+        </div>
+        <div class="lt-line">
+          <span class="lt-dot lt-dot--vb" aria-hidden="true"></span>
+          <span class="lt-lbl" data-i18n="typeVb">ICE</span>
+          <span class="lt-val" id="ltVbTotal">— €</span>
+        </div>
+      </div>
+      <div class="lt-block lt-block--loss" id="ltBlockLoss" hidden>
+        <div class="lt-block-lbl" data-i18n="longtermRemainingPremium">Remaining premium</div>
+        <div class="lt-block-val" id="ltLossVal">— €</div>
+        <div class="lt-block-hint" data-i18n="longtermLossHint">Difference after operating costs over period</div>
+      </div>
+      <div class="lt-block lt-block--done" id="ltBlockDone" hidden>
+        <div class="lt-block-lbl" data-i18n="longtermAmortized">EV has paid off</div>
+        <div class="lt-block-val" id="ltDoneVal">Total savings: — €</div>
+        <div class="lt-block-hint" data-i18n="longtermDoneHint">Calculated from your input</div>
+      </div>
+      <div class="longterm-breakeven" id="ltBreakeven">Break-even after approx. — years</div>
+      <div class="longterm-be-hint" data-i18n="longtermBeHint">Based on your monthly mileage</div>
+    </div>
+    <div class="longterm-hint" data-i18n="longtermFootnote">Operating costs only. Purchase modelled as premium.</div>
+  </div>
+</div>
+
+</section>
+
+<!-- Primary Actions -->
+<section class="cta-section" aria-label="Actions">
+<div class="primary-cta-row">
+
+  <div class="cta-group cta-group--action">
+    <button id="ltSwitchBtn" class="qc-btn qc-btn--switch" type="button" disabled>
+      <i data-lucide="arrow-left" aria-hidden="true"></i><span data-i18n="backToCompare">Back to direct comparison</span>
+    </button>
+    <div class="primary-cta-pair">
+      <button id="qImgBtn" class="qc-btn qc-btn--secondary" type="button">
+        <i data-lucide="image-down" aria-hidden="true"></i><span data-i18n="shareImage">Share as image</span>
+      </button>
+      <button id="qTxtBtn" class="qc-btn qc-btn--secondary" type="button">
+        <i data-lucide="message-square-text" aria-hidden="true"></i><span data-i18n="shareText">Share as text</span>
+      </button>
+    </div>
+  </div>
+
+  <div class="cta-group cta-group--save">
+    <button id="qSaveBtn" class="qc-btn qc-btn--save" type="button">
+      <i data-lucide="save" aria-hidden="true"></i><span data-i18n="saveToHistory">Save to history</span>
+    </button>
+    <button id="qVerlaufBtn" class="qc-btn qc-btn--verlauf" type="button">
+      <i data-lucide="clock" aria-hidden="true"></i><span data-i18n="showHistory">Show history</span>
+    </button>
+  </div>
+
+  <div class="cta-group cta-group--meta">
+    <button id="resetBtn" class="qc-btn qc-btn--reset" type="button">
+      <i data-lucide="rotate-ccw" aria-hidden="true"></i><span data-i18n="reset">Reset</span>
+    </button>
+  </div>
+
+  <div class="cta-group cta-group--feedback" role="status" aria-live="polite">
+    <div id="saveHint" class="save-hint" hidden></div>
+    <div id="verlaufHint" class="verlauf-hint" hidden data-i18n="verlaufHintText">Your costs are now in history</div>
+    <div id="shareHint" class="share-hint" hidden data-i18n="shareHintText">Share your result as image</div>
+  </div>
+
+</div>
+</section>
+
+<section class="result-section" aria-label="Result">
+
+<!-- Phase E — Order swapped: Chart first (visualization), result below -->
+<!-- Cost evolution chart (Compare) — above the result -->
+<div id="chartSection" class="mode-compare-only chart-section" hidden>
+  <div class="list-card chart-card-v2">
+    <div class="chart-legend">
+      <span class="chart-dot chart-dot--ev" aria-hidden="true"></span><span class="chart-legend-lbl" data-i18n="typeEv">EV</span>
+      <span class="chart-dot chart-dot--vb" aria-hidden="true"></span><span class="chart-legend-lbl" data-i18n="typeVb">ICE</span>
+    </div>
+    <canvas id="costChart" class="cost-chart" aria-label="Cost evolution over kilometres"></canvas>
+    <div class="chart-axes">
+      <span class="chart-axis-x" data-i18n="chartAxisX">Kilometres</span>
+      <span class="chart-axis-y" data-i18n="chartAxisY">Cost (€)</span>
+    </div>
+  </div>
+</div>
+
+<!-- Result (Compare) — below the chart -->
+<div id="compareResult" class="list-card single-result mode-compare-only">
+  <div class="single-empty" id="compareEmpty">
+    <div class="cmp-empty-wrap">
+      <div class="cmp-empty-ico" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+      <div class="cmp-empty-title" data-i18n="emptyCompareTitle">Cost difference appears after calculation</div>
+      <div class="cmp-empty-sub" data-i18n-html="emptyCompareSub">Enter values and select <strong>Calculate</strong>.</div>
+    </div>
+  </div>
+  <div class="single-body" id="compareBody" hidden>
+    <div class="single-hdr">
+      <span id="compareBadge" class="mode-badge mode-badge--ev">EV cheaper</span>
+    </div>
+    <div class="single-hero">
+      <div class="single-hero-lbl" id="compareHeroLbl">Savings per year</div>
+      <div class="single-hero-val" id="compareHeroVal">— €</div>
+      <div class="per-person-line" id="comparePerPerson" hidden>— € per person</div>
+    </div>
+    <div class="single-grid">
+      <div class="single-cell">
+        <div class="single-cell-lbl" id="compareMonthlyLbl">per trip</div>
+        <div class="single-cell-val" id="compareMonthly">— €</div>
+      </div>
+      <div class="single-cell">
+        <div class="single-cell-lbl" id="compareDiff100Lbl">per 100 km</div>
+        <div class="single-cell-val" id="compareDiff100">— €</div>
+      </div>
+    </div>
+    <div class="single-meta" id="compareMeta"></div>
+  </div>
+  <div class="hint hint--foot" data-i18n="hintCompareFoot">Results are based on your input and average values. Actual costs may vary.</div>
+</div>
+
+<!-- Result (Single calculation) -->
+<h2 class="sh mode-single-only" data-i18n="yourCosts">Your costs</h2>
+<div id="singleResult" class="list-card single-result mode-single-only">
+  <div class="single-empty" id="singleEmpty">
+    <div class="cmp-empty-wrap">
+      <div class="cmp-empty-ico" aria-hidden="true"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg></div>
+      <div class="cmp-empty-title" data-i18n="emptySingleTitle">Costs appear after calculation</div>
+      <div class="cmp-empty-sub" data-i18n-html="emptyCompareSub">Enter values and select <strong>Calculate</strong>.</div>
+    </div>
+  </div>
+  <div class="single-body" id="singleBody" hidden>
+    <div class="single-hdr">
+      <span id="singleBadge" class="mode-badge mode-badge--ev">EV</span>
+    </div>
+    <div class="single-hero">
+      <div class="single-hero-val" id="singleHeroVal">— €</div>
+      <div class="single-hero-lbl" id="singleHeroLbl">Cost for — km</div>
+      <div class="per-person-line" id="singlePerPerson" hidden></div>
+    </div>
+    <div class="single-cost100-line" id="singleCost100">Avg — € / 100 km</div>
+    <div class="single-meta" id="singleMeta"></div>
+  </div>
+  <div class="hint hint--foot" data-i18n="hintSingleFoot">Results are based on your input and average values. Actual costs may vary.</div>
+</div>
+
+<!-- Stale-result hint (shown only while data-result-stale is set on body) -->
+<div class="stale-hint" data-i18n="staleHint">Inputs changed — please recalculate</div>
+
+<!-- Calculation explanation + disclaimer (visible in both single + compare modes) -->
+<div class="calc-info" data-i18n-html="calcInfoBlock"></div>
+
+</section>
+
+</main>
+
+<footer>
+  <div class="footer-links">
+    <a href="/en-eu/impressum.html" data-i18n="footerImpressum">Legal Notice</a>
+    <span>·</span>
+    <a href="/en-eu/datenschutz.html" data-i18n="footerDatenschutz">Privacy</a>
+    <span>·</span>
+    <a href="/en-eu/terms.html" data-i18n="footerTerms">Terms</a>
+    <span>·</span>
+    <a href="/en-eu/hinweise.html" data-i18n="footerHinweise">Usage Notes</a>
+    <span>·</span>
+    <a href="/en-eu/barrierefreiheit.html" data-i18n="footerBarrierefreiheit">Accessibility</a>
+    <span>·</span>
+    <a href="/en-eu/verlauf.html" data-i18n="footerVerlauf">History</a>
+  </div>
+  <p class="footer-note" data-i18n="footerNote">Manufacturer-neutral cost comparison · No advertising</p>
+  <p class="footer-privacy" data-i18n="privacyNotice">Data is stored locally in the browser. No transmission to servers.</p>
+  <p class="footer-copy">© 2026 EVSpend – www.evspend.com</p>
+</footer>
+
+<!-- ── PWA Install Bottom Bar (stage 1) ───────────────────────────────── -->
+<div id="pwaBar" class="pwa-bar" aria-hidden="true">
+  <div class="pwa-bar-card">
+    <button class="pwa-bar-x" id="pwaBarClose" type="button" aria-label="Close">✕</button>
+    <div class="pwa-bar-text">Install app for faster access?</div>
+    <div class="pwa-bar-btns">
+      <button class="pwa-bar-btn pwa-bar-btn--primary" id="pwaBarInstall" type="button">Install</button>
+      <button class="pwa-bar-btn pwa-bar-btn--ghost" id="pwaBarLater" type="button">Later</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── PWA Install Popup (stage 2, unified iOS / Android / Desktop) ───── -->
+<div id="pwaPopup" class="pwa-popup" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="pwaPopupTitle">
+  <div class="pwa-popup-backdrop" id="pwaPopupBackdrop"></div>
+  <div class="pwa-popup-card">
+    <button class="pwa-popup-x" id="pwaPopupClose" type="button" aria-label="Close">✕</button>
+    <img src="/apple-touch-icon.png" class="pwa-popup-icon" alt="" loading="lazy" decoding="async">
+    <div class="pwa-popup-title" id="pwaPopupTitle">Add to Home Screen</div>
+    <div class="pwa-popup-sub" id="pwaPopupSub">Here's how on your device:</div>
+    <div class="pwa-popup-steps" id="pwaPopupSteps"></div>
+    <div class="pwa-popup-btns">
+      <button class="pwa-btn pwa-btn--primary" id="pwaPopupAdd" type="button">Got it</button>
+      <button class="pwa-btn pwa-btn--ghost" id="pwaPopupLater" type="button">Later</button>
+    </div>
+  </div>
+</div>
+
+<script src="/script.js?v=20260428-45"></script>
+</body>
+</html>
