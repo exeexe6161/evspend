@@ -2042,32 +2042,26 @@ function _pwaCanShow() {
 }
 
 // ── PWA: Device-specific steps ──────────────────────────────────────────────
+// Phase J Sprint 1 (F5.2): step copy is i18n-driven via _t(). Each translation
+// returns a small HTML snippet (with <strong>) that we render through
+// innerHTML on a span. Safe because the source is the in-app translations
+// object (no user input flows into these strings).
 function _pwaBuildSteps(platform) {
   const sets = {
-    ios: [
-      'Tippe auf <strong>Teilen</strong> unten in Safari',
-      '<strong>Zum Home-Bildschirm</strong> auswählen',
-      'Oben rechts <strong>Hinzufügen</strong> tippen',
-    ],
-    android: [
-      'Tippe auf das <strong>Menü (⋮)</strong> oben rechts',
-      '<strong>App installieren</strong> auswählen',
-    ],
-    desktop: [
-      'Öffne das <strong>Browser-Menü</strong>',
-      'Wähle <strong>„App installieren"</strong>',
-    ],
+    ios:     ['pwaStepIosShare', 'pwaStepIosHome', 'pwaStepIosAdd'],
+    android: ['pwaStepAndroidMenu', 'pwaStepAndroidInstall'],
+    desktop: ['pwaStepDesktopMenu', 'pwaStepDesktopInstall'],
   };
-  const steps = sets[platform] || sets.desktop;
+  const keys = sets[platform] || sets.desktop;
   const frag = document.createDocumentFragment();
-  steps.forEach((text, i) => {
+  keys.forEach((key, i) => {
     const row = document.createElement('div');
     row.className = 'pwa-popup-step';
     const num = document.createElement('span');
     num.className = 'pwa-popup-step-num';
     num.textContent = String(i + 1);
     const body = document.createElement('span');
-    body.innerHTML = text;
+    body.innerHTML = _t(key);
     row.appendChild(num);
     row.appendChild(body);
     frag.appendChild(row);
@@ -2338,11 +2332,14 @@ setTimeout(() => {
       sectionEv: "E-Auto",
       sectionVb: "Verbrenner",
       labelKilometer: "Kilometer",
+      labelKilometerUs: "Meilen",
       labelConsumption: "Verbrauch",
       labelEvConsumption: "Stromverbrauch",
       labelIceConsumption: "Spritverbrauch",
       hintEvConsumption: "E-Autos: meist 15–20 kWh/100 km",
+      hintEvConsumptionUs: "E-Autos: meist 25–35 kWh/100 mi",
       hintIceConsumption: "Verbrenner: meist 5–8 L/100 km",
+      hintIceConsumptionUs: "Verbrenner: meist 20–30 mpg",
       labelElectricityPrice: "Strompreis",
       labelBatterySize: "Batteriekapazität",
       labelGasPrice: "Benzinpreis",
@@ -2454,6 +2451,21 @@ setTimeout(() => {
       shareHintText: "Teile dein Ergebnis als Bild",
       saveHintText: "Nur Einzelberechnungen werden gespeichert",
       noscriptText: "Diese App benötigt JavaScript. Bitte aktiviere JavaScript in deinem Browser.",
+      // Phase J Sprint 1 (F5.1 + F5.2) — PWA install copy
+      pwaClose: "Schließen",
+      pwaBarText: "App installieren für schnelleren Zugriff?",
+      pwaInstall: "Installieren",
+      pwaLater: "Später",
+      pwaPopupTitle: "Zum Home-Bildschirm",
+      pwaPopupSub: "So geht’s auf deinem Gerät:",
+      pwaPopupAdd: "Alles klar",
+      pwaStepIosShare:       "Tippe auf <strong>Teilen</strong> unten in Safari",
+      pwaStepIosHome:        "<strong>Zum Home-Bildschirm</strong> auswählen",
+      pwaStepIosAdd:         "Oben rechts <strong>Hinzufügen</strong> tippen",
+      pwaStepAndroidMenu:    "Tippe auf das <strong>Menü (⋮)</strong> oben rechts",
+      pwaStepAndroidInstall: "<strong>App installieren</strong> auswählen",
+      pwaStepDesktopMenu:    "Öffne das <strong>Browser-Menü</strong>",
+      pwaStepDesktopInstall: "Wähle <strong>„App installieren“</strong>",
       footerCalc: "Rechner",
       chartAxisX: "Kilometer",
       chartAxisY: "Kosten ({symbol})",
@@ -2565,12 +2577,15 @@ setTimeout(() => {
       sectionMileage: "Distance",
       sectionEv: "Electric",
       sectionVb: "Combustion",
-      labelKilometer: "Miles",
+      labelKilometer: "Kilometres",
+      labelKilometerUs: "Miles",
       labelConsumption: "Efficiency",
       labelEvConsumption: "Electric efficiency",
       labelIceConsumption: "Fuel efficiency",
-      hintEvConsumption: "Most EVs: 25–35 kWh/100 mi",
-      hintIceConsumption: "Most gas cars: 25–35 mpg",
+      hintEvConsumption: "Most EVs: 15–22 kWh/100 km",
+      hintEvConsumptionUs: "Most EVs: 25–35 kWh/100 mi",
+      hintIceConsumption: "Most cars: 5–8 L/100 km",
+      hintIceConsumptionUs: "Most cars: 20–30 mpg",
       labelElectricityPrice: "Electricity cost",
       labelBatterySize: "Battery size",
       labelGasPrice: "Gas price",
@@ -2682,6 +2697,21 @@ setTimeout(() => {
       shareHintText: "Share your result as an image",
       saveHintText: "Only single calculations are saved",
       noscriptText: "This app requires JavaScript. Please enable JavaScript in your browser.",
+      // Phase J Sprint 1 (F5.1 + F5.2) — PWA install copy
+      pwaClose: "Close",
+      pwaBarText: "Install the app for faster access?",
+      pwaInstall: "Install",
+      pwaLater: "Later",
+      pwaPopupTitle: "Add to Home Screen",
+      pwaPopupSub: "Here’s how on your device:",
+      pwaPopupAdd: "Got it",
+      pwaStepIosShare:       "Tap <strong>Share</strong> at the bottom of Safari",
+      pwaStepIosHome:        "Choose <strong>Add to Home Screen</strong>",
+      pwaStepIosAdd:         "Tap <strong>Add</strong> in the top right",
+      pwaStepAndroidMenu:    "Tap the <strong>menu (⋮)</strong> in the top right",
+      pwaStepAndroidInstall: "Choose <strong>Install app</strong>",
+      pwaStepDesktopMenu:    "Open the <strong>browser menu</strong>",
+      pwaStepDesktopInstall: "Pick <strong>“Install app”</strong>",
       footerCalc: "Calculator",
       chartAxisX: "{unit}",
       chartAxisY: "Cost ({symbol})",
@@ -2794,10 +2824,13 @@ setTimeout(() => {
       sectionEv: "Elektrikli",
       sectionVb: "Benzinli",
       labelKilometer: "Kilometre",
+      labelKilometerUs: "Mil",
       labelEvConsumption: "Elektrik tüketimi",
       labelIceConsumption: "Yakıt tüketimi",
       hintEvConsumption: "Elektrikli: 15–20 kWh/100 km",
+      hintEvConsumptionUs: "Elektrikli: 25–35 kWh/100 mi",
       hintIceConsumption: "Benzinli: 5–8 L/100 km",
+      hintIceConsumptionUs: "Benzinli: 20–30 mpg",
       labelConsumption: "Tüketim",
       labelElectricityPrice: "Elektrik fiyatı",
       labelBatterySize: "Batarya kapasitesi",
@@ -2910,6 +2943,21 @@ setTimeout(() => {
       shareHintText: "Sonucunuzu resim olarak paylaşın",
       saveHintText: "Yalnızca tekli hesaplamalar kaydedilir",
       noscriptText: "Bu uygulama JavaScript gerektirir. Lütfen tarayıcınızda JavaScript'i etkinleştirin.",
+      // Phase J Sprint 1 (F5.1 + F5.2) — PWA kurulum metinleri
+      pwaClose: "Kapat",
+      pwaBarText: "Daha hızlı erişim için uygulamayı yükle?",
+      pwaInstall: "Yükle",
+      pwaLater: "Sonra",
+      pwaPopupTitle: "Ana Ekrana Ekle",
+      pwaPopupSub: "Cihazında şu şekilde yapılır:",
+      pwaPopupAdd: "Tamam",
+      pwaStepIosShare:       "Safari'nin altındaki <strong>Paylaş</strong> simgesine dokun",
+      pwaStepIosHome:        "<strong>Ana Ekrana Ekle</strong> seçeneğini seç",
+      pwaStepIosAdd:         "Sağ üstte <strong>Ekle</strong> seçeneğine dokun",
+      pwaStepAndroidMenu:    "Sağ üstteki <strong>menüye (⋮)</strong> dokun",
+      pwaStepAndroidInstall: "<strong>Uygulamayı yükle</strong> seçeneğini seç",
+      pwaStepDesktopMenu:    "<strong>Tarayıcı menüsünü</strong> aç",
+      pwaStepDesktopInstall: "<strong>„Uygulamayı yükle“</strong> seçeneğini tıkla",
       footerCalc: "Hesaplayıcı",
       chartAxisX: "Kilometre",
       chartAxisY: "Maliyet ({symbol})",
@@ -3165,8 +3213,11 @@ setTimeout(() => {
     setMarket: setMarket,
     formatCurrency: formatCurrency,
     t: function (key) {
+      // Phase J Sprint 1 (F1.3 / F1.4): use _resolveKey so callers like
+      // _t("hintEvConsumption") get the US variant when market === "us".
       var dict = translations[currentLanguage] || translations.de;
-      return (dict && dict[key]) || (translations.de[key] || key);
+      var val = _resolveKey(dict, translations.de, key);
+      return (val != null) ? val : key;
     }
   };
 
@@ -3245,6 +3296,21 @@ setTimeout(() => {
     }
   }
 
+  // Phase J Sprint 1 (F1.3 / F1.4): US-market override resolver. If the
+  // active market is "us", a translation may provide a `${key}Us` variant
+  // that takes precedence — used for distance labels and consumption hints
+  // where the EU-formulated base copy uses km/L and the US copy uses mi/mpg.
+  // For every other market the base key is returned. Falls back to the DE
+  // dict if the active language doesn't define the key at all.
+  function _resolveKey(dict, fallback, key) {
+    if (currentMarket === "us") {
+      var usKey = key + "Us";
+      if (dict[usKey] != null) return dict[usKey];
+      if (fallback[usKey] != null) return fallback[usKey];
+    }
+    return (dict && dict[key] != null) ? dict[key] : (fallback[key] != null ? fallback[key] : undefined);
+  }
+
   function applyTranslations() {
     var dict = translations[currentLanguage] || translations.de;
     var fallback = translations.de;
@@ -3263,22 +3329,22 @@ setTimeout(() => {
     }
     document.querySelectorAll("[data-i18n]").forEach(function (el) {
       var key = el.getAttribute("data-i18n");
-      var val = dict[key] || fallback[key];
+      var val = _resolveKey(dict, fallback, key);
       if (typeof val === "string") el.textContent = sub(val);
     });
     document.querySelectorAll("[data-i18n-html]").forEach(function (el) {
       var key = el.getAttribute("data-i18n-html");
-      var val = dict[key] || fallback[key];
+      var val = _resolveKey(dict, fallback, key);
       if (typeof val === "string") el.innerHTML = sub(val);
     });
     document.querySelectorAll("[data-i18n-placeholder]").forEach(function (el) {
       var key = el.getAttribute("data-i18n-placeholder");
-      var val = dict[key] || fallback[key];
+      var val = _resolveKey(dict, fallback, key);
       if (typeof val === "string") el.setAttribute("placeholder", sub(val));
     });
     document.querySelectorAll("[data-i18n-aria]").forEach(function (el) {
       var key = el.getAttribute("data-i18n-aria");
-      var val = dict[key] || fallback[key];
+      var val = _resolveKey(dict, fallback, key);
       if (typeof val === "string") el.setAttribute("aria-label", sub(val));
     });
   }

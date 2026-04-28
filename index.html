@@ -445,11 +445,11 @@
 <!-- ── PWA Install Bottom Bar (stage 1) ───────────────────────────────── -->
 <div id="pwaBar" class="pwa-bar" aria-hidden="true">
   <div class="pwa-bar-card">
-    <button class="pwa-bar-x" id="pwaBarClose" type="button" aria-label="Schließen">✕</button>
-    <div class="pwa-bar-text">App installieren für schnelleren Zugriff?</div>
+    <button class="pwa-bar-x" id="pwaBarClose" type="button" data-i18n-aria="pwaClose" aria-label="Schließen">✕</button>
+    <div class="pwa-bar-text" data-i18n="pwaBarText">App installieren für schnelleren Zugriff?</div>
     <div class="pwa-bar-btns">
-      <button class="pwa-bar-btn pwa-bar-btn--primary" id="pwaBarInstall" type="button">Installieren</button>
-      <button class="pwa-bar-btn pwa-bar-btn--ghost" id="pwaBarLater" type="button">Später</button>
+      <button class="pwa-bar-btn pwa-bar-btn--primary" id="pwaBarInstall" type="button" data-i18n="pwaInstall">Installieren</button>
+      <button class="pwa-bar-btn pwa-bar-btn--ghost" id="pwaBarLater" type="button" data-i18n="pwaLater">Später</button>
     </div>
   </div>
 </div>
@@ -458,19 +458,19 @@
 <div id="pwaPopup" class="pwa-popup" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="pwaPopupTitle">
   <div class="pwa-popup-backdrop" id="pwaPopupBackdrop"></div>
   <div class="pwa-popup-card">
-    <button class="pwa-popup-x" id="pwaPopupClose" type="button" aria-label="Schließen">✕</button>
+    <button class="pwa-popup-x" id="pwaPopupClose" type="button" data-i18n-aria="pwaClose" aria-label="Schließen">✕</button>
     <img src="./apple-touch-icon.png" class="pwa-popup-icon" alt="" loading="lazy" decoding="async">
-    <div class="pwa-popup-title" id="pwaPopupTitle">Zum Home-Bildschirm</div>
-    <div class="pwa-popup-sub" id="pwaPopupSub">So geht’s auf deinem Gerät:</div>
+    <div class="pwa-popup-title" id="pwaPopupTitle" data-i18n="pwaPopupTitle">Zum Home-Bildschirm</div>
+    <div class="pwa-popup-sub" id="pwaPopupSub" data-i18n="pwaPopupSub">So geht’s auf deinem Gerät:</div>
     <div class="pwa-popup-steps" id="pwaPopupSteps"></div>
     <div class="pwa-popup-btns">
-      <button class="pwa-btn pwa-btn--primary" id="pwaPopupAdd" type="button">Alles klar</button>
-      <button class="pwa-btn pwa-btn--ghost" id="pwaPopupLater" type="button">Später</button>
+      <button class="pwa-btn pwa-btn--primary" id="pwaPopupAdd" type="button" data-i18n="pwaPopupAdd">Alles klar</button>
+      <button class="pwa-btn pwa-btn--ghost" id="pwaPopupLater" type="button" data-i18n="pwaLater">Später</button>
     </div>
   </div>
 </div>
 
-<script src="./script.js?v=20260428-49"></script>
+<script src="./script.js?v=20260428-50"></script>
 </body>
 </html>
  
