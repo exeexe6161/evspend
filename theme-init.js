@@ -64,14 +64,5 @@
 
     var back = document.querySelector('[data-action="back"]');
     if (back) back.addEventListener("click", function () { history.back(); });
-
-    // Lucide: render any [data-lucide] once the CDN script has loaded
-    function renderLucide() {
-      if (window.lucide && typeof window.lucide.createIcons === "function") {
-        try { window.lucide.createIcons(); } catch (_) {}
-      }
-    }
-    if (window.lucide) renderLucide();
-    else window.addEventListener("load", renderLucide, { once: true });
   });
 })();

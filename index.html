@@ -41,8 +41,7 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"EVSpend","url":"https://www.evspend.com","description":"Kostenvergleich E-Auto und Verbrenner: Betriebskosten und Amortisation.","applicationCategory":"UtilitiesApplication","operatingSystem":"Web, iOS, Android","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"inLanguage":"de","author":{"@type":"Person","name":"Hakan Guer"}}</script>
 <meta name="mobile-web-app-capable" content="yes">
 <title>EVSpend – E Auto vs Verbrenner Kosten Rechner</title>
-<script src="./theme-init.js?v=20260427-30"></script>
-<script src="/vendor/lucide-0.511.0.min.js" defer></script>
+<script src="./theme-init.js?v=20260428-31"></script>
 <link rel="stylesheet" href="./styles-app.css?v=20260428-52">
 </head>
 <body data-app-mode="compare" data-single-type="ev">
@@ -68,7 +67,10 @@
 </div>
 
 <header class="hero" role="banner">
-  <img class="hero-banner" src="./banner.png" alt="EVSpend Banner" width="1024" height="165" fetchpriority="high" decoding="async">
+  <picture>
+    <source srcset="./banner.webp" type="image/webp">
+    <img class="hero-banner" src="./banner.png" alt="EVSpend Banner" width="1024" height="165" fetchpriority="high" decoding="async">
+  </picture>
 
   <div class="hdr">
     <h1 data-i18n="heroTitle">E-Auto vs. Verbrenner</h1>
@@ -116,7 +118,7 @@
         <label for="kmShared" class="sl-lbl" data-i18n="labelKilometer">Kilometer</label>
         <span class="sl-val" id="kmSharedV">1.000 km</span>
       </div>
-      <input id="kmShared" class="sl sl--shared" type="range" min="50" max="10000" step="10" value="1000" aria-label="Kilometer (für beide Fahrzeuge)">
+      <input id="kmShared" class="sl sl--shared" type="range" min="50" max="10000" step="10" value="1000" data-i18n-aria="ariaKmShared" aria-label="Kilometer (für beide Fahrzeuge)">
     </div>
   </div>
 
@@ -128,14 +130,14 @@
         <label for="kmEv" class="sl-lbl" data-i18n="labelKilometer">Kilometer</label>
         <span class="sl-val" id="kmEvV">500 km</span>
       </div>
-      <input id="kmEv" class="sl sl--ev" type="range" min="0" max="2000" step="1" value="500" aria-label="E-Auto Kilometer">
+      <input id="kmEv" class="sl sl--ev" type="range" min="0" max="2000" step="1" value="500" data-i18n-aria="ariaKmEv" aria-label="E-Auto Kilometer">
     </div>
     <div class="sl-row">
       <div class="sl-head">
         <label for="evVerbrauch" class="sl-lbl" data-i18n="labelEvConsumption">Stromverbrauch</label>
         <span class="sl-val" id="evVerbrauchV">17,0 kWh/100 km</span>
       </div>
-      <input id="evVerbrauch" class="sl sl--ev" type="range" min="8" max="35" step="0.5" value="17" aria-label="E-Auto Verbrauch">
+      <input id="evVerbrauch" class="sl sl--ev" type="range" min="8" max="35" step="0.5" value="17" data-i18n-aria="labelEvConsumption" aria-label="E-Auto Verbrauch">
       <div class="sl-hint" data-i18n="hintEvConsumption">Typisch: 15–20 kWh/100 km</div>
     </div>
     <div class="sl-row">
@@ -143,14 +145,14 @@
         <label for="strompreis" class="sl-lbl" data-i18n="labelElectricityPrice">Strompreis</label>
         <span class="sl-val" id="strompreisV">0,35 €/kWh</span>
       </div>
-      <input id="strompreis" class="sl sl--ev" type="range" min="0.10" max="1.00" step="0.01" value="0.35" aria-label="Strompreis">
+      <input id="strompreis" class="sl sl--ev" type="range" min="0.10" max="1.00" step="0.01" value="0.35" data-i18n-aria="labelElectricityPrice" aria-label="Strompreis">
     </div>
     <div class="sl-row">
       <div class="sl-head">
         <label for="batteryKwh" class="sl-lbl" data-i18n="labelBatterySize">Batteriegröße</label>
         <span class="sl-val" id="batteryKwhV">60 kWh</span>
       </div>
-      <input id="batteryKwh" class="sl sl--ev" type="range" min="20" max="150" step="1" value="60" aria-label="Batteriegröße in kWh">
+      <input id="batteryKwh" class="sl sl--ev" type="range" min="20" max="150" step="1" value="60" data-i18n-aria="labelBatterySize" aria-label="Batteriegröße in kWh">
     </div>
     <div class="range-box" id="rangeBox" hidden>
       <div class="range-display" id="rangeDisplay" aria-live="polite" data-i18n="rangeEmpty">Ca. — km Reichweite</div>
@@ -165,14 +167,14 @@
         <label for="kmVb" class="sl-lbl" data-i18n="labelKilometer">Kilometer</label>
         <span class="sl-val" id="kmVbV">500 km</span>
       </div>
-      <input id="kmVb" class="sl sl--vb" type="range" min="0" max="2000" step="1" value="500" aria-label="Verbrenner Kilometer">
+      <input id="kmVb" class="sl sl--vb" type="range" min="0" max="2000" step="1" value="500" data-i18n-aria="ariaKmVb" aria-label="Verbrenner Kilometer">
     </div>
     <div class="sl-row">
       <div class="sl-head">
         <label for="verbrauchVerbrenner" class="sl-lbl" data-i18n="labelIceConsumption">Spritverbrauch</label>
         <span class="sl-val" id="verbrauchVerbrennerV">7,0 L/100 km</span>
       </div>
-      <input id="verbrauchVerbrenner" class="sl sl--vb" type="range" min="3" max="20" step="0.1" value="7.0" aria-label="Verbrenner Verbrauch">
+      <input id="verbrauchVerbrenner" class="sl sl--vb" type="range" min="3" max="20" step="0.1" value="7.0" data-i18n-aria="labelIceConsumption" aria-label="Verbrenner Verbrauch">
       <div class="sl-hint" data-i18n="hintIceConsumption">Typisch: 5–8 L/100 km</div>
     </div>
     <div class="sl-row">
@@ -180,7 +182,7 @@
         <label for="benzinpreis" class="sl-lbl" data-i18n="labelGasPrice">Benzinpreis</label>
         <span class="sl-val" id="benzinpreisV">1,85 €/L</span>
       </div>
-      <input id="benzinpreis" class="sl sl--vb" type="range" min="1.00" max="3.00" step="0.01" value="1.85" aria-label="Benzinpreis">
+      <input id="benzinpreis" class="sl sl--vb" type="range" min="1.00" max="3.00" step="0.01" value="1.85" data-i18n-aria="labelGasPrice" aria-label="Benzinpreis">
     </div>
   </div>
 
@@ -199,7 +201,7 @@
 <div class="rideshare-wrap">
   <div class="rideshare-head">
     <div class="rideshare-lbl">
-      <i data-lucide="users" aria-hidden="true"></i>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span data-i18n="rideshareLabel">Fahrgemeinschaft</span>
     </div>
     <label class="toggle-switch" aria-label="Fahrgemeinschaft aktivieren">
@@ -213,7 +215,7 @@
         <label for="ridesharePersons" class="sl-lbl" data-i18n="labelPersons">Personen</label>
         <span class="sl-val" id="ridesharePersonsV">1</span>
       </div>
-      <input id="ridesharePersons" class="sl sl--rs" type="range" min="1" max="6" step="1" value="1" aria-label="Anzahl Personen">
+      <input id="ridesharePersons" class="sl sl--rs" type="range" min="1" max="6" step="1" value="1" data-i18n-aria="labelPersons" aria-label="Anzahl Personen">
     </div>
     <div class="rideshare-hint" data-i18n="rideshareHint">Kosten werden auf alle Personen aufgeteilt.</div>
   </div>
@@ -227,7 +229,7 @@
 <div class="longterm-wrap mode-compare-only" id="longtermWrap">
   <div class="longterm-head">
     <div class="longterm-lbl">
-      <i data-lucide="line-chart" aria-hidden="true"></i>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
       <span data-i18n="longtermLabel">Langzeitanalyse</span>
     </div>
     <label class="toggle-switch" aria-label="Langzeitanalyse aktivieren">
@@ -242,7 +244,7 @@
         <label for="kmMonat" class="sl-lbl" data-i18n="labelKmPerMonth">Monatliche Fahrleistung</label>
         <span class="sl-val" id="kmMonatV">1.000 km</span>
       </div>
-      <input id="kmMonat" class="sl sl--lt" type="range" min="100" max="5000" step="50" value="1000" aria-label="Monatliche Fahrleistung in Kilometern">
+      <input id="kmMonat" class="sl sl--lt" type="range" min="100" max="5000" step="50" value="1000" data-i18n-aria="labelKmPerMonth" aria-label="Monatliche Fahrleistung in Kilometern">
       <div class="lt-km-jahr" id="ltKmJahr">≈ 12.000 km pro Jahr</div>
       <div class="lt-km-hint" data-i18n="longtermKmMonthHint">Durchschnittliche Nutzung pro Monat</div>
       <div class="lt-km-warn" id="ltKmWarn" hidden data-i18n="longtermKmWarn">Sehr hohe monatliche Fahrleistung – Ergebnisse können stark von typischer Nutzung abweichen.</div>
@@ -252,14 +254,14 @@
         <label for="longtermYears" class="sl-lbl" data-i18n="longtermPeriod">Zeitraum</label>
         <span class="sl-val" id="longtermYearsV">10 Jahre</span>
       </div>
-      <input id="longtermYears" class="sl sl--lt" type="range" min="0" max="20" step="1" value="10" aria-label="Zeitraum in Jahren">
+      <input id="longtermYears" class="sl sl--lt" type="range" min="0" max="20" step="1" value="10" data-i18n-aria="longtermPeriod" aria-label="Zeitraum in Jahren">
     </div>
     <div class="sl-row sl-row--lt">
       <div class="sl-head">
         <label for="longtermPremium" class="sl-lbl" data-i18n="longtermPremiumLabel">Kaufpreis E-Auto (Mehrkosten)</label>
         <span class="sl-val" id="longtermPremiumV">5.000 €</span>
       </div>
-      <input id="longtermPremium" class="sl sl--ev" type="range" min="0" max="40000" step="100" value="5000" aria-label="Kaufpreis E-Auto Mehrkosten">
+      <input id="longtermPremium" class="sl sl--ev" type="range" min="0" max="40000" step="100" value="5000" data-i18n-aria="longtermPremiumLabel" aria-label="Kaufpreis E-Auto Mehrkosten">
     </div>
     <div class="longterm-result">
       <div class="longterm-totals">
@@ -299,30 +301,30 @@
 
   <div class="cta-group cta-group--action">
     <button id="ltSwitchBtn" class="qc-btn qc-btn--switch" type="button" disabled>
-      <i data-lucide="arrow-left" aria-hidden="true"></i><span data-i18n="backToCompare">Zurück zum direkten Vergleich</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg><span data-i18n="backToCompare">Zurück zum direkten Vergleich</span>
     </button>
     <div class="primary-cta-pair">
       <button id="qImgBtn" class="qc-btn qc-btn--secondary" type="button">
-        <i data-lucide="image-down" aria-hidden="true"></i><span data-i18n="shareImage">Als Bild teilen</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v5.3"/><path d="m14 19.5 3 3v-6"/><path d="m17 22.5 3-3"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg><span data-i18n="shareImage">Als Bild teilen</span>
       </button>
       <button id="qTxtBtn" class="qc-btn qc-btn--secondary" type="button">
-        <i data-lucide="message-square-text" aria-hidden="true"></i><span data-i18n="shareText">Als Text teilen</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><path d="M13 8H7"/><path d="M17 12H7"/></svg><span data-i18n="shareText">Als Text teilen</span>
       </button>
     </div>
   </div>
 
   <div class="cta-group cta-group--save">
     <button id="qSaveBtn" class="qc-btn qc-btn--save" type="button">
-      <i data-lucide="save" aria-hidden="true"></i><span data-i18n="saveToHistory">Im Verlauf speichern</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8"/><path d="M7 3v5h8"/></svg><span data-i18n="saveToHistory">Im Verlauf speichern</span>
     </button>
     <button id="qVerlaufBtn" class="qc-btn qc-btn--verlauf" type="button">
-      <i data-lucide="clock" aria-hidden="true"></i><span data-i18n="showHistory">Verlauf anzeigen</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg><span data-i18n="showHistory">Verlauf anzeigen</span>
     </button>
   </div>
 
   <div class="cta-group cta-group--meta">
     <button id="resetBtn" class="qc-btn qc-btn--reset" type="button">
-      <i data-lucide="rotate-ccw" aria-hidden="true"></i><span data-i18n="reset">Zurücksetzen</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></svg><span data-i18n="reset">Zurücksetzen</span>
     </button>
   </div>
 
@@ -423,17 +425,17 @@
 
 <footer>
   <div class="footer-links">
-    <a href="./impressum.html" data-i18n="footerImpressum">Impressum</a>
+    <a href="./impressum" data-i18n="footerImpressum">Impressum</a>
     <span>·</span>
-    <a href="./datenschutz.html" data-i18n="footerDatenschutz">Datenschutz</a>
+    <a href="./datenschutz" data-i18n="footerDatenschutz">Datenschutz</a>
     <span>·</span>
-    <a href="./terms.html" data-i18n="footerTerms">AGB</a>
+    <a href="./terms" data-i18n="footerTerms">AGB</a>
     <span>·</span>
-    <a href="./hinweise.html" data-i18n="footerHinweise">Hinweise zur Nutzung</a>
+    <a href="./hinweise" data-i18n="footerHinweise">Hinweise zur Nutzung</a>
     <span>·</span>
-    <a href="./barrierefreiheit.html" data-i18n="footerBarrierefreiheit">Barrierefreiheit</a>
+    <a href="./barrierefreiheit" data-i18n="footerBarrierefreiheit">Barrierefreiheit</a>
     <span>·</span>
-    <a href="./verlauf.html" data-i18n="footerVerlauf">Verlauf</a>
+    <a href="./verlauf" data-i18n="footerVerlauf">Verlauf</a>
   </div>
   <p class="footer-note" data-i18n="footerNote">Herstellerneutraler Kostenvergleich · Keine Werbung</p>
   <p class="footer-privacy" data-i18n="privacyNotice">Daten werden lokal im Browser gespeichert. Es erfolgt keine Übertragung an Server.</p>
@@ -468,7 +470,7 @@
   </div>
 </div>
 
-<script src="./script.js?v=20260428-46"></script>
+<script src="./script.js?v=20260428-47"></script>
 </body>
 </html>
  

@@ -9,11 +9,12 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
-<link rel="canonical" href="https://www.evspend.com/verlauf.html">
-<link rel="alternate" hreflang="de" href="https://www.evspend.com/verlauf.html">
-<link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/verlauf.html">
-<link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/verlauf.html">
-<link rel="alternate" hreflang="x-default" href="https://www.evspend.com/verlauf.html">
+<meta name="description" content="Persönlicher Verlauf deiner E-Auto- und Verbrenner-Berechnungen — vollständig lokal im Browser gespeichert, keine Übertragung.">
+<link rel="canonical" href="https://www.evspend.com/verlauf">
+<link rel="alternate" hreflang="de" href="https://www.evspend.com/verlauf">
+<link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/verlauf">
+<link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/verlauf">
+<link rel="alternate" hreflang="x-default" href="https://www.evspend.com/verlauf">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
 <link rel="shortcut icon" href="/favicon.ico">
@@ -22,8 +23,7 @@
 <link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
 <link rel="manifest" href="/site.webmanifest">
 <title>Verlauf – EVSpend</title>
-<script src="./theme-init.js?v=20260427-30"></script>
-<script src="/vendor/lucide-0.511.0.min.js" defer></script>
+<script src="./theme-init.js?v=20260428-31"></script>
 <link rel="stylesheet" href="./styles-app.css?v=20260428-52">
 </head>
 <body>
@@ -45,7 +45,10 @@
 
 <header class="hero" role="banner">
   <a href="./" aria-label="Zurück zum Rechner">
-    <img class="hero-banner" src="./banner.png" alt="EVSpend Banner" width="1024" height="165">
+    <picture>
+      <source srcset="./banner.webp" type="image/webp">
+      <img class="hero-banner" src="./banner.png" alt="EVSpend Banner" width="1024" height="165">
+    </picture>
   </a>
 
   <div class="verlauf-head">
@@ -205,15 +208,15 @@
   <div class="footer-links">
     <a href="./" data-i18n="footerCalc">Rechner</a>
     <span>·</span>
-    <a href="./impressum.html" data-i18n="footerImpressum">Impressum</a>
+    <a href="./impressum" data-i18n="footerImpressum">Impressum</a>
     <span>·</span>
-    <a href="./datenschutz.html" data-i18n="footerDatenschutz">Datenschutz</a>
+    <a href="./datenschutz" data-i18n="footerDatenschutz">Datenschutz</a>
     <span>·</span>
-    <a href="./terms.html" data-i18n="footerTerms">AGB</a>
+    <a href="./terms" data-i18n="footerTerms">AGB</a>
     <span>·</span>
-    <a href="./hinweise.html" data-i18n="footerHinweise">Hinweise zur Nutzung</a>
+    <a href="./hinweise" data-i18n="footerHinweise">Hinweise zur Nutzung</a>
     <span>·</span>
-    <a href="./barrierefreiheit.html" data-i18n="footerBarrierefreiheit">Barrierefreiheit</a>
+    <a href="./barrierefreiheit" data-i18n="footerBarrierefreiheit">Barrierefreiheit</a>
   </div>
   <p class="footer-note" data-i18n="verlaufFooterNote">Gespeicherte Einträge bleiben nur lokal auf diesem Gerät.</p>
   <p class="footer-copy">© 2026 EVSpend – www.evspend.com</p>

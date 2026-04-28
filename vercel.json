@@ -19,6 +19,12 @@
       ]
     },
     {
+      "source": "/(banner\\.png|banner\\.webp|fonts/.+|vendor/.+|styles-app\\.css|styles-pages\\.css|script\\.js|verlauf\\.js|theme-init\\.js|lang-switch\\.js|en-eu/init-eu\\.js|en-eu/styles-en-eu\\.css)",
+      "headers": [
+        { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
       "source": "/favicon.ico",
       "headers": [
         { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }

@@ -305,7 +305,7 @@ function saveInputs() {
 // ── Quick share / save (primary UI actions) ──────────────────────────────────
 function _shareFallback(text, url) {
   const full = text + "\n" + url;
-  const done = () => alert(_t("toastClipboard"));
+  const done = () => eafToast(_t("toastClipboard"), "var(--green)");
   if (navigator.clipboard?.writeText) {
     navigator.clipboard.writeText(full).then(done).catch(() => {
       const ta = document.createElement("textarea");
@@ -442,7 +442,7 @@ function canSave() {
 }
 function saveEntrySafe() {
   if (!canSave()) {
-    alert(_t("saveCooldown"));
+    eafToast(_t("saveCooldown"));
     return;
   }
   saveQuick();
@@ -2341,6 +2341,10 @@ setTimeout(() => {
       footerBarrierefreiheit: "Barrierefreiheit",
       srSliderSetTo: "{label} auf {value} gesetzt",
       srResultUpdated: "Neues Ergebnis: {value}",
+      // Phase P Sprint 2 (F4.8) — Slider-aria-Labels mit Fahrzeug-Kontext
+      ariaKmShared: "Kilometer für beide Fahrzeuge",
+      ariaKmEv: "E-Auto Kilometer",
+      ariaKmVb: "Verbrenner Kilometer",
       footerVerlauf: "Verlauf",
       footerNote: "Herstellerneutraler Kostenvergleich. Keine Werbung. Daten lokal gespeichert.",
       privacyNotice: "Daten werden lokal im Browser gespeichert. Es erfolgt keine Übertragung an Server.",
@@ -2565,6 +2569,10 @@ setTimeout(() => {
       footerBarrierefreiheit: "Accessibility",
       srSliderSetTo: "{label} set to {value}",
       srResultUpdated: "New result: {value}",
+      // Phase P Sprint 2 (F4.8) — Slider aria-labels with vehicle context
+      ariaKmShared: "Distance for both vehicles",
+      ariaKmEv: "EV distance",
+      ariaKmVb: "Combustion distance",
       footerVerlauf: "History",
       footerNote: "Manufacturer-neutral cost comparison · No advertising",
       privacyNotice: "Data is stored locally in your browser. No data is transmitted to servers.",
@@ -2789,6 +2797,10 @@ setTimeout(() => {
       footerBarrierefreiheit: "Erişilebilirlik",
       srSliderSetTo: "{label} {value} olarak ayarlandı",
       srResultUpdated: "Yeni sonuç: {value}",
+      // Phase P Sprint 2 (F4.8) — Slider aria-labels with vehicle context
+      ariaKmShared: "Her iki araç için mesafe",
+      ariaKmEv: "Elektrikli araç mesafesi",
+      ariaKmVb: "Benzinli araç mesafesi",
       footerVerlauf: "Geçmiş",
       footerNote: "Üreticiden bağımsız maliyet karşılaştırması · Reklam yok",
       privacyNotice: "Veriler yalnızca tarayıcınızda saklanır. Sunuculara aktarılmaz.",
@@ -3147,10 +3159,15 @@ setTimeout(() => {
     }
   };
 
-  // Phase 8: Browser-Locale → Markt. Wird NUR als Initial-Default verwendet,
-  // wenn weder localStorage.eaf.market noch der alte Phase-1–5-LANG_KEY
-  // bereits eine Wahl persistiert haben. Mapping: en-US → us, tr*/tr-TR → tr,
-  // alles andere → null (ruft Default de auf).
+  // Phase 8 / Phase P Sprint 2 (F6.3): Browser-Locale → Markt.
+  //   de*  → de
+  //   tr*  → tr
+  //   en-us → us
+  //   en-* (en-GB / en-IE / en-AU / en-CA / …) → eu
+  //   anything else → eu  (server middleware redirects non-domestic to /en-eu/
+  //                        anyway; EU is the right JS-side fallback too)
+  // Only used when no eaf.market is persisted yet — explicit user choice
+  // always wins.
   function _detectMarketFromBrowser() {
     try {
       var list = [];
@@ -3160,12 +3177,14 @@ setTimeout(() => {
         list = [navigator.language];
       }
       for (var i = 0; i < list.length; i++) {
-        var L = String(list[i] || "").toLowerCase();
-        if (L === "de" || L.indexOf("de-") === 0 || L.indexOf("de_") === 0) return "de";
-        if (L === "tr" || L.indexOf("tr-") === 0 || L.indexOf("tr_") === 0) return "tr";
+        var L = String(list[i] || "").toLowerCase().replace(/_/g, "-");
+        if (L === "de" || L.indexOf("de-") === 0) return "de";
+        if (L === "tr" || L.indexOf("tr-") === 0) return "tr";
+        if (L === "en-us") return "us";
+        if (L === "en" || L.indexOf("en-") === 0) return "eu";
       }
     } catch (_) {}
-    return "us";
+    return "eu";
   }
 
   // Phase 6/8: liest primär den Markt; fällt bei Bedarf auf ältere Phase-1–5-
@@ -3202,13 +3221,16 @@ setTimeout(() => {
         currentCurrency = MARKET_CONFIG[autoMk].currency;
         return;
       }
-      currentMarket = "us";
+      // Phase P Sprint 2 (F6.3): EU is the safer fallback than US, since the
+      // server middleware also redirects unknown / non-domestic countries to
+      // /en-eu/. Keeps client default in sync with server intent.
+      currentMarket = "eu";
       currentLanguage = "en";
-      currentCurrency = "USD";
+      currentCurrency = "EUR";
     } catch (_) {
-      currentMarket = "us";
+      currentMarket = "eu";
       currentLanguage = "en";
-      currentCurrency = "USD";
+      currentCurrency = "EUR";
     }
   }
 
@@ -3439,20 +3461,3 @@ window.addEventListener("beforeprint", () => {
 window.addEventListener("afterprint", () => {
   document.body.classList.remove("printing");
 });
-
-// ── Install popup: show at most once every 24h ──────────────────────────────
-const INSTALL_INTERVAL = 24 * 60 * 60 * 1000;
-function shouldShowInstall() {
-  const last = localStorage.getItem("installPromptLastShown");
-  if (!last) return true;
-  return Date.now() - Number(last) > INSTALL_INTERVAL;
-}
-function showInstallPromptIfNeeded() {
-  if (!shouldShowInstall()) return;
-  const popup = document.getElementById("installPopup");
-  if (!popup) return;
-  popup.style.display = "block";
-  try { localStorage.setItem("installPromptLastShown", String(Date.now())); } catch (_) {}
-}
-window.addEventListener("load", showInstallPromptIfNeeded);
-
