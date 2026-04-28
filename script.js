@@ -3461,3 +3461,13 @@ window.addEventListener("beforeprint", () => {
 window.addEventListener("afterprint", () => {
   document.body.classList.remove("printing");
 });
+
+// ── Service Worker registration (Phase P Sprint 3) ──────────────────────────
+// Registers /sw.js for offline caching + faster revisits. Defers to `load` so
+// the SW install never competes with the first paint. Failures are silent —
+// the app works fully without a SW; the SW is only an enhancement layer.
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker.register("/sw.js").catch(() => {});
+  });
+}
