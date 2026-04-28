@@ -12,16 +12,15 @@
   src: url("/fonts/InterVariable.woff2") format("woff2-variations"),
        url("/fonts/InterVariable.woff2") format("woff2");
 }
-@font-face {
-  font-family: "Inter";
-  font-style: italic;
-  font-weight: 100 900;
-  font-display: swap;
-  src: url("/fonts/InterVariable-Italic.woff2") format("woff2-variations"),
-       url("/fonts/InterVariable-Italic.woff2") format("woff2");
-}
+/* Phase P Sprint 4 (F1.11): italic @font-face removed — no template, label,
+   or share-image text uses font-style:italic, so the 380 KB woff2 was never
+   actually fetched. The file stays in /fonts/ in case future copy needs it. */
 
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+/* Phase P Sprint 4 (F1.10): tells the browser the app supports both schemes
+   so UA-styled controls (scrollbars, datepickers, default form widgets)
+   pick the matching variant in dark mode. */
+html{color-scheme:light dark;}
 html,body{background:#f5f7fa;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}
 html,body{overflow-x:clip;}
 body{min-width:0;}
@@ -42,6 +41,13 @@ html[data-theme="dark"],html[data-theme="dark"] body{background:#0f1115;}
   --ev-soft-strong:rgba(34,197,94,.18);
   --ev-shadow:rgba(34,197,94,.28);
   --savings-color:#16a34a;     /* dunkleres Grün für Ersparnis-Indikator */
+
+  /* Phase P Sprint 4 (F4.9) — text-specific brand variants for WCAG AA.
+     Use these (not --ev-color / --orange) anywhere a brand color is set as
+     `color:` on visible text. Decorative usages (backgrounds, dots, borders)
+     keep the original tokens. Light-mode variants pass 4.5:1 against --bg. */
+  --ev-text:#15803d;           /* 4.67:1 vs #f5f7fa */
+  --orange-text:#b45309;       /* 4.68:1 vs #f5f7fa */
 
   /* ── Surfaces / text ── */
   --bg:#f5f7fa;
@@ -405,8 +411,8 @@ body::before{
   text-transform:none;
   letter-spacing:0;
 }
-.ev-pill{background:var(--ev-soft);color:var(--ev-color);}
-.vb-pill{background:rgba(245,158,11,.12);color:var(--orange);}
+.ev-pill{background:var(--ev-soft);color:var(--ev-text);}
+.vb-pill{background:rgba(245,158,11,.12);color:var(--orange-text);}
 [data-theme="dark"] .ev-pill{background:var(--ev-soft);}
 [data-theme="dark"] .vb-pill{background:rgba(245,158,11,.16);}
 
@@ -1168,6 +1174,10 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
   --ev-soft-strong:rgba(74,222,128,.22);
   --ev-shadow:rgba(74,222,128,.32);
   --savings-color:#4ade80;
+  /* Phase P Sprint 4 (F4.9) — dark-mode text variants. Bright shades on
+     dark bg already exceed WCAG AA (~10:1) so they double as text colours. */
+  --ev-text:#4ade80;
+  --orange-text:#fbbf24;
   --bg:#0f1115;
   --s1:#1a1d24;
   --s2:#23262f;
@@ -1809,10 +1819,10 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
   box-shadow:inset 0 0 0 .5px currentColor;
 }
 .mode-badge--schnell{background:var(--s2);color:var(--l2);box-shadow:inset 0 0 0 .5px var(--sep);}
-.mode-badge--ev{background:var(--ev-soft);color:var(--ev-color);box-shadow:inset 0 0 0 1px var(--ev-soft-strong);}
-.mode-badge--vb{background:rgba(245,158,11,.12);color:var(--orange);box-shadow:inset 0 0 0 1px rgba(245,158,11,.22);}
+.mode-badge--ev{background:var(--ev-soft);color:var(--ev-text);box-shadow:inset 0 0 0 1px var(--ev-soft-strong);}
+.mode-badge--vb{background:rgba(245,158,11,.12);color:var(--orange-text);box-shadow:inset 0 0 0 1px rgba(245,158,11,.22);}
 [data-theme="dark"] .mode-badge--schnell{background:rgba(255,255,255,.08);color:rgba(235,235,245,.82);box-shadow:inset 0 0 0 .5px rgba(255,255,255,.08);}
-[data-theme="dark"] .mode-badge--ev{background:var(--ev-soft);color:var(--ev-color);box-shadow:inset 0 0 0 1px var(--ev-soft-strong);}
+[data-theme="dark"] .mode-badge--ev{background:var(--ev-soft);color:var(--ev-text);box-shadow:inset 0 0 0 1px var(--ev-soft-strong);}
 [data-theme="dark"] .mode-badge--vb{background:rgba(245,158,11,.18);color:#fbbf24;box-shadow:inset 0 0 0 1px rgba(245,158,11,.32);}
 
 /* ══ Period selector (statistics) ══ */
@@ -2142,8 +2152,8 @@ html:not([data-theme="dark"]) .stats-card{border:1px solid rgba(0,0,0,0.04);}
   margin-top:6px;
   border-top:1px solid var(--sep);
 }
-.qc-hdr--ev{color:var(--ev-color);}
-.qc-hdr--vb{color:var(--orange);}
+.qc-hdr--ev{color:var(--ev-text);}
+.qc-hdr--vb{color:var(--orange-text);}
 .qc-hdr--shared{color:var(--l3);border-top:0;padding-top:2px;margin-top:0;}
 .qc-shared{padding:0;}
 .sl--shared{--fill:var(--l2);}
@@ -2215,23 +2225,23 @@ html:not([data-theme="dark"]) .stats-card{border:1px solid rgba(0,0,0,0.04);}
 
 .type-btn--ev.type-btn--active{
   background:transparent;
-  color:var(--ev-color);
-  border-bottom-color:var(--ev-color);
+  color:var(--ev-text);
+  border-bottom-color:var(--ev-text);
   box-shadow:none;
 }
 .type-btn--vb.type-btn--active{
   background:transparent;
-  color:var(--orange);
-  border-bottom-color:var(--orange);
+  color:var(--orange-text);
+  border-bottom-color:var(--orange-text);
   box-shadow:none;
 }
 [data-theme="dark"] .type-btn--ev.type-btn--active{
-  background:transparent;color:var(--ev-color);
-  border-bottom-color:var(--ev-color);box-shadow:none;
+  background:transparent;color:var(--ev-text);
+  border-bottom-color:var(--ev-text);box-shadow:none;
 }
 [data-theme="dark"] .type-btn--vb.type-btn--active{
-  background:transparent;color:var(--orange);
-  border-bottom-color:var(--orange);box-shadow:none;
+  background:transparent;color:var(--orange-text);
+  border-bottom-color:var(--orange-text);box-shadow:none;
 }
 
 /* ══ Mode-based visibility ══ */
@@ -2582,7 +2592,7 @@ body[data-longterm="on"] .longterm-wrap .toggle-switch-slider{
   color:#0f766e;
 }
 [data-theme="dark"] .longterm-hero-val{color:#5eead4;}
-.longterm-hero-val[data-sign="loss"]{color:var(--orange);}
+.longterm-hero-val[data-sign="loss"]{color:var(--orange-text);}
 .longterm-hero-val[data-sign="zero"]{color:var(--l2);}
 
 /* Phase 3e: Subtle reveal animation on initial render — reuses existing cardFadeIn */
@@ -2636,7 +2646,7 @@ body[data-longterm="on"] .longterm-wrap .toggle-switch-slider{
   font-variant-numeric:tabular-nums;
   line-height:1.08;
 }
-.lt-block--loss .lt-block-val{color:var(--orange);}
+.lt-block--loss .lt-block-val{color:var(--orange-text);}
 .lt-block--done .lt-block-val{color:var(--savings-color);}
 .lt-block-sub{
   margin-top:2px;
@@ -2691,7 +2701,7 @@ body[data-longterm="on"] .longterm-wrap .toggle-switch-slider{
   font-size:12.5px;
   line-height:1.5;
   background:rgba(255,159,10,.10);
-  color:var(--orange);
+  color:var(--orange-text);
   border:1px solid rgba(255,159,10,.25);
 }
 .longterm-be-hint{

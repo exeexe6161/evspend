@@ -42,7 +42,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>EVSpend – E Auto vs Verbrenner Kosten Rechner</title>
 <script src="./theme-init.js?v=20260428-31"></script>
-<link rel="stylesheet" href="./styles-app.css?v=20260428-52">
+<link rel="stylesheet" href="./styles-app.css?v=20260428-53">
 </head>
 <body data-app-mode="compare" data-single-type="ev">
 <noscript><div class="noscript-overlay"><p data-i18n="noscriptText">Diese App benötigt JavaScript. Bitte aktiviere JavaScript in deinem Browser.</p></div></noscript>
@@ -118,7 +118,7 @@
         <label for="kmShared" class="sl-lbl" data-i18n="labelKilometer">Kilometer</label>
         <span class="sl-val" id="kmSharedV">1.000 km</span>
       </div>
-      <input id="kmShared" class="sl sl--shared" type="range" min="50" max="10000" step="10" value="1000" data-i18n-aria="ariaKmShared" aria-label="Kilometer (für beide Fahrzeuge)">
+      <input id="kmShared" class="sl sl--shared" type="range" min="0" max="10000" step="1" value="1000" data-i18n-aria="ariaKmShared" aria-label="Kilometer (für beide Fahrzeuge)">
     </div>
   </div>
 
@@ -130,7 +130,7 @@
         <label for="kmEv" class="sl-lbl" data-i18n="labelKilometer">Kilometer</label>
         <span class="sl-val" id="kmEvV">500 km</span>
       </div>
-      <input id="kmEv" class="sl sl--ev" type="range" min="0" max="2000" step="1" value="500" data-i18n-aria="ariaKmEv" aria-label="E-Auto Kilometer">
+      <input id="kmEv" class="sl sl--ev" type="range" min="0" max="10000" step="1" value="500" data-i18n-aria="ariaKmEv" aria-label="E-Auto Kilometer">
     </div>
     <div class="sl-row">
       <div class="sl-head">
@@ -167,7 +167,7 @@
         <label for="kmVb" class="sl-lbl" data-i18n="labelKilometer">Kilometer</label>
         <span class="sl-val" id="kmVbV">500 km</span>
       </div>
-      <input id="kmVb" class="sl sl--vb" type="range" min="0" max="2000" step="1" value="500" data-i18n-aria="ariaKmVb" aria-label="Verbrenner Kilometer">
+      <input id="kmVb" class="sl sl--vb" type="range" min="0" max="10000" step="1" value="500" data-i18n-aria="ariaKmVb" aria-label="Verbrenner Kilometer">
     </div>
     <div class="sl-row">
       <div class="sl-head">
@@ -470,7 +470,7 @@
   </div>
 </div>
 
-<script src="./script.js?v=20260428-48"></script>
+<script src="./script.js?v=20260428-49"></script>
 </body>
 </html>
  

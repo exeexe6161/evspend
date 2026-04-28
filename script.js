@@ -5,8 +5,9 @@ function debounce(fn, ms) {
   let t;
   return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
 }
-// Slider handler: direct calc for instant response (no debounce)
-const _calcDebounced = () => calc();
+// Phase P Sprint 4 (F1.1): the former `_calcDebounced` alias was removed —
+// it was never debounced (just `() => calc()`) and the name misled readers.
+// Slider input listeners and setter callbacks now call `calc()` directly.
 
 // ── Persistence ──────────────────────────────────────────────────────────────
 // kmMonat ist NICHT Teil von INPUT_IDS — wird ausschließlich über LT_KM_MONAT_KEY
@@ -23,11 +24,20 @@ const HIST_KEY     = "eautofakten_history";
 const HIST_MAX     = 50;
 const MODE_KEY     = "eaf.mode";
 const TYPE_KEY     = "eaf.type";
-const APP_VERSION     = "20260420-1";
+const APP_VERSION     = "20260428-1";
 const APP_VERSION_KEY = "eaf.appVersion";
-const RELOAD_FLAG_KEY = "eaf.migrationReload." + APP_VERSION;
+const PURGE_DONE_KEY  = "eaf.legacyPurgeDone";
+const PURGE_TRIES_KEY = "eaf.legacyPurgeTries";
 
 // ── App-state migration (runs first, before any state is read) ───────────────
+// Two layers:
+//   1. Cleanup steps (always run on APP_VERSION change). Cheap localStorage
+//      hygiene — drop known-dead keys, validate JSON blobs, etc.
+//   2. Legacy hard-purge (unregister old SW + drop caches + reload). Runs at
+//      most ONCE per browser, guarded by `eaf.legacyPurgeDone` in
+//      localStorage (Phase P Sprint 4 / F1.6: was sessionStorage, which
+//      could fail-loop in private modes). Additional reload-loop counter
+//      bails out after 3 unsuccessful attempts.
 (function migrateAppState() {
   let stored = null;
   try { stored = localStorage.getItem(APP_VERSION_KEY); } catch(_) {}
@@ -77,13 +87,27 @@ const RELOAD_FLAG_KEY = "eaf.migrationReload." + APP_VERSION;
   // 5. Mark migration done
   try { localStorage.setItem(APP_VERSION_KEY, APP_VERSION); } catch(_) {}
 
-  // 6. One-time hard purge for upgraders: unregister old SW + drop caches + reload once.
-  //    Guarded by sessionStorage so we never loop. Fresh installs skip this.
-  let alreadyReloaded = null;
-  try { alreadyReloaded = sessionStorage.getItem(RELOAD_FLAG_KEY); } catch(_) {}
-  if (!hasOldState || alreadyReloaded) return;
-
-  try { sessionStorage.setItem(RELOAD_FLAG_KEY, "1"); } catch(_) {}
+  // 6. Legacy purge (one-shot, lifetime of the browser). Skipped when:
+  //    - PURGE_DONE_KEY already set (already purged once before),
+  //    - or no legacy state to clean,
+  //    - or this is just an APP_VERSION bump for an already-tracked install
+  //      (stored !== null means a previous Phase P sprint already migrated
+  //      this browser; we record purge-done silently so future bumps skip).
+  //    Reload-loop guard via PURGE_TRIES_KEY — if we already tried ≥ 3
+  //    times without succeeding, give up and continue normally.
+  let purgeDone = null, purgeTries = 0;
+  try { purgeDone = localStorage.getItem(PURGE_DONE_KEY); } catch(_) {}
+  if (!purgeDone && stored !== null) {
+    try { localStorage.setItem(PURGE_DONE_KEY, "1"); } catch(_) {}
+    return;
+  }
+  if (purgeDone === "1" || !hasOldState) return;
+  try { purgeTries = parseInt(localStorage.getItem(PURGE_TRIES_KEY) || "0", 10) || 0; } catch(_) {}
+  if (purgeTries >= 3) {
+    try { localStorage.setItem(PURGE_DONE_KEY, "1"); } catch(_) {}
+    return;
+  }
+  try { localStorage.setItem(PURGE_TRIES_KEY, String(purgeTries + 1)); } catch(_) {}
 
   const tasks = [];
   if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
@@ -101,6 +125,8 @@ const RELOAD_FLAG_KEY = "eaf.migrationReload." + APP_VERSION;
     );
   }
   Promise.all(tasks).finally(() => {
+    try { localStorage.setItem(PURGE_DONE_KEY, "1"); } catch(_) {}
+    try { localStorage.removeItem(PURGE_TRIES_KEY); } catch(_) {}
     setTimeout(() => { try { location.reload(); } catch(_) {} }, 40);
   });
 })();
@@ -243,7 +269,7 @@ function loadInputs() {
 
 INPUT_IDS.forEach(id => {
   const el = $(id); if (!el) return;
-  el.addEventListener("input", () => { saveInputs(); _calcDebounced(); });
+  el.addEventListener("input", () => { saveInputs(); calc(); });
 });
 
 // "Show results" CTA — meaningful confirm action.
@@ -267,9 +293,9 @@ INPUT_IDS.forEach(id => {
   scope.addEventListener("input",  markStale);
   scope.addEventListener("change", markStale);
   btn.addEventListener("click", () => {
-    _calcDebounced();
+    calc();
     clearStale();
-    // Phase D/E — Smooth-Scroll. 100ms gibt _calcDebounced Zeit zu rendern.
+    // Phase D/E — Smooth-Scroll. 100ms gibt calc() Zeit zu rendern.
     // Compare-Modus: scroll zu chartSection (Chart oben → Werte darunter →
     //                Sticky-Button = komplette Section auf einen Blick).
     // Single-Modus:  scroll zu singleResult (kein Chart vorhanden).
@@ -665,11 +691,8 @@ function _currencySymbol() {
 }
 
 // ── Phase 2 / Phase 5: Markt-basierter Geldwert-Formatter ───────────────────
-// Ab Phase 5 sind Rohwerte in der aktiven Marktwährung (kein interner EUR-
-// Fixpunkt mehr). Der Formatter nimmt den Wert wie er ist und lokalisiert ihn
-// gemäß der aktuell aktiven Marktwährung. Keine Wechselkurs-Konversion mehr.
-// convertFromEur/convertToEur bleiben auf window.EAF_I18N verfügbar für
-// künftige Admin-/Migrationsszenarien, sind hier aber bewusst nicht aktiv.
+// Rohwerte sind seit Phase 5 immer in der aktiven Marktwährung — der
+// Formatter lokalisiert sie nur, ohne Wechselkurs-Konversion.
 function _fmtMoney(v, decimals) {
   if (!isFinite(v)) return "—";
   if (decimals == null) decimals = 2;
@@ -903,7 +926,7 @@ function setKmMonat(v) {
   // Warnschwelle marktabhängig: 3000 km oder 1900 mi ≈ entsprechender Bereich
   const warnThreshold = _isUsMarket() ? 1900 : 3000;
   if (warnEl) warnEl.hidden = !(v > warnThreshold);
-  _calcDebounced();
+  calc();
 }
 function setLongtermYears(v) {
   if (!isFinite(v)) return;
@@ -912,7 +935,7 @@ function setLongtermYears(v) {
   try { localStorage.setItem(LT_YEARS_KEY, String(v)); } catch (_) {}
   const valEl = $("longtermYearsV");
   if (valEl) valEl.textContent = `${v} ${v === 1 ? _t("yearOne") : _t("yearOther")}`;
-  _calcDebounced();
+  calc();
 }
 function setLongtermPremium(v) {
   if (!isFinite(v)) return;
@@ -927,7 +950,7 @@ function setLongtermPremium(v) {
   try { localStorage.setItem(LT_PREMIUM_KEY, String(v)); } catch (_) {}
   const valEl = $("longtermPremiumV");
   if (valEl) valEl.textContent = v.toLocaleString(_currentLocale()) + " " + _currencySymbol();
-  _calcDebounced();
+  calc();
 }
 
 function animCount(el, to, d, col, prefix, suffix) {
@@ -1013,7 +1036,9 @@ function calcSingle() {
 
   const heroLblEl = $("singleHeroLbl"), heroValEl = $("singleHeroVal");
   const c100El = $("singleCost100"), metaEl = $("singleMeta");
-  const heroColor = isEv ? "var(--ev-color)" : "var(--orange)";
+  // Phase P Sprint 4 (F4.9): use the WCAG-AA text variants (not the brand
+  // backgrounds). Same hue, dark enough against light --bg.
+  const heroColor = isEv ? "var(--ev-text)" : "var(--orange-text)";
 
   // 1) Hero: Gesamtkosten (groß) + Subtitle "Kosten für X km/mi"
   if (heroValEl) _animCountMoney(heroValEl, d.monthlyCost, heroColor);
@@ -1081,14 +1106,15 @@ function calcCompare() {
 
   // Phase 9: Distanz in Markt-Einheiten anzeigen (km oder mi).
   const kmLabel = `${fmt(_kmToDist(km), 0)} ${_distanceUnit()}`;
+  // Phase P Sprint 4 (F4.9): hero/value colours use the WCAG-AA text variants.
   let color, badgeTxt, badgeCls, heroLbl;
   if (d.diffSig > 0) {
-    color    = "var(--green)";
+    color    = "var(--ev-text)";
     badgeTxt = _t("evCheaper");
     badgeCls = "mode-badge mode-badge--ev";
     heroLbl  = _t("savingsFor", { km: kmLabel });
   } else if (d.diffSig < 0) {
-    color    = "var(--orange)";
+    color    = "var(--orange-text)";
     badgeTxt = _t("vbCheaper");
     badgeCls = "mode-badge mode-badge--vb";
     heroLbl  = _t("extraCostFor", { km: kmLabel });
@@ -1108,9 +1134,9 @@ function calcCompare() {
   if (moLblEl)   moLblEl.textContent   = _t("costLabelEv");
   if (d100LblEl) d100LblEl.textContent = _t("costLabelVb");
 
-  if (moEl) _animCountMoney(moEl, d.eAutoTotal, "var(--ev-color)");
+  if (moEl) _animCountMoney(moEl, d.eAutoTotal, "var(--ev-text)");
   if (d100El) {
-    d100El.style.color = "var(--orange)";
+    d100El.style.color = "var(--orange-text)";
     d100El.textContent = _fmtMoney(d.verbrennerTotal);
   }
   const ppEl = $("comparePerPerson");
@@ -1361,6 +1387,16 @@ const _CF = '"Inter", system-ui, sans-serif';
 
 // ── Unified result objects (single source of truth for UI + Share) ──────────
 // Fahrgemeinschaft: persons = 1 wenn inaktiv; perPerson = Total / persons (niemals doppelt).
+//
+// Naming caveat (Phase P Sprint 4 / F1.2):
+//   `monthlyCost` is historically named but represents the cost for the
+//   user-entered km value (a single trip), NOT a literal monthly figure.
+//   `yearlyCost = monthlyCost * 12` therefore models "if you drove this
+//   distance every month for a year". The name is preserved because the
+//   localStorage entry schema (`schema: "v2"`) persists `monthlyCost` as
+//   a field — renaming the variable without a migration would break
+//   already-saved entries. Treat it as `tripCost` semantically; rename
+//   when a v3 history schema is introduced.
 const _getSingleData = () => {
   const isEv = singleType === "ev";
   const km          = isEv ? n("kmEv")        : n("kmVb");
@@ -1368,8 +1404,8 @@ const _getSingleData = () => {
   const price       = isEv ? n("strompreis")  : n("benzinpreis");
   if (![km, consumption, price].every(x => isFinite(x) && x > 0)) return null;
   const costPer100  = consumption * price;
-  const monthlyCost = costPer100 * km / 100;
-  const yearlyCost  = monthlyCost * 12;
+  const monthlyCost = costPer100 * km / 100;   // = trip cost (see header)
+  const yearlyCost  = monthlyCost * 12;        // = trip × 12 (see header)
 
   const persons = rideshareActive ? Math.max(1, ridesharePersons) : 1;
   const ridesharing = rideshareActive && persons > 1;
@@ -1949,7 +1985,7 @@ function initApp() {
   try { applyRideshare(); } catch (_) {}
   try { applyLongterm(); } catch (_) {}
   // Skip initial calc(): empty-state stays visible until first user interaction.
-  // First input/slider event will trigger _calcDebounced() and render the result.
+  // First input/slider event will trigger calc() and render the result.
   try { updateRangeDisplay(); } catch (_) {}
 }
 
@@ -2995,9 +3031,12 @@ setTimeout(() => {
         benzinpreis:         { value: 1.85,   min: 1.00,  max: 3.00,    step: 0.01 },  // €/L
         verbrauchVerbrenner: { value: 7.0,    min: 3,     max: 20,      step: 0.1 },   // L/100 km
         evVerbrauch:         { value: 17,     min: 8,     max: 35,      step: 0.5 },   // kWh/100 km
-        kmEv:                { value: 500,    min: 0,     max: 2000,    step: 1 },     // km
-        kmVb:                { value: 500,    min: 0,     max: 2000,    step: 1 },     // km
-        kmShared:            { value: 1000,   min: 50,    max: 10000,   step: 10 },    // km
+        // Phase P Sprint 4 (F6.1): km* sliders harmonised at 0-10000 step 1
+        // for consistent UX between single (kmEv/kmVb) and compare (kmShared)
+        // mode — a "trip distance" means the same thing in both.
+        kmEv:                { value: 500,    min: 0,     max: 10000,   step: 1 },     // km
+        kmVb:                { value: 500,    min: 0,     max: 10000,   step: 1 },     // km
+        kmShared:            { value: 1000,   min: 0,     max: 10000,   step: 1 },     // km
         kmMonat:             { value: 1000,   min: 100,   max: 5000,    step: 50 },    // km
         batteryKwh:          { value: 60,     min: 20,    max: 150,     step: 1 },     // kWh
         longtermPremium:     { value: 5000,   min: 0,     max: 40000,   step: 100 }    // €
@@ -3012,9 +3051,9 @@ setTimeout(() => {
         benzinpreis:         { value: 1.70,   min: 1.00,  max: 3.00,    step: 0.01 },  // €/L (EU-Schnitt; DE 1.85, ES 1.50)
         verbrauchVerbrenner: { value: 6.5,    min: 3,     max: 20,      step: 0.1 },   // L/100 km (EU-Schnitt; DE 7.0)
         evVerbrauch:         { value: 17,     min: 8,     max: 35,      step: 0.5 },   // kWh/100 km (wie DE)
-        kmEv:                { value: 500,    min: 0,     max: 2000,    step: 1 },     // km
-        kmVb:                { value: 500,    min: 0,     max: 2000,    step: 1 },     // km
-        kmShared:            { value: 1000,   min: 50,    max: 10000,   step: 10 },    // km
+        kmEv:                { value: 500,    min: 0,     max: 10000,   step: 1 },     // km — F6.1
+        kmVb:                { value: 500,    min: 0,     max: 10000,   step: 1 },     // km — F6.1
+        kmShared:            { value: 1000,   min: 0,     max: 10000,   step: 1 },     // km — F6.1
         kmMonat:             { value: 1000,   min: 100,   max: 5000,    step: 50 },    // km
         batteryKwh:          { value: 60,     min: 20,    max: 150,     step: 1 },     // kWh
         longtermPremium:     { value: 5000,   min: 0,     max: 40000,   step: 100 }    // €
@@ -3029,9 +3068,9 @@ setTimeout(() => {
         benzinpreis:         { value: 3.20,   min: 2.00,  max: 6.00,    step: 0.05 },  // $/gallon
         verbrauchVerbrenner: { value: 26,     min: 10,    max: 80,      step: 1 },     // mpg
         evVerbrauch:         { value: 30,     min: 15,    max: 50,      step: 0.5 },   // kWh/100 mi
-        kmEv:                { value: 300,    min: 0,     max: 1500,    step: 1 },     // mi
-        kmVb:                { value: 300,    min: 0,     max: 1500,    step: 1 },     // mi
-        kmShared:            { value: 600,    min: 30,    max: 6000,    step: 10 },    // mi
+        kmEv:                { value: 300,    min: 0,     max: 6000,    step: 1 },     // mi — F6.1 (≈10000 km)
+        kmVb:                { value: 300,    min: 0,     max: 6000,    step: 1 },     // mi — F6.1
+        kmShared:            { value: 600,    min: 0,     max: 6000,    step: 1 },     // mi — F6.1
         kmMonat:             { value: 1000,   min: 60,    max: 3100,    step: 50 },    // mi
         batteryKwh:          { value: 75,     min: 20,    max: 150,     step: 1 },     // kWh
         longtermPremium:     { value: 5500,   min: 0,     max: 45000,   step: 100 }    // USD
@@ -3046,9 +3085,9 @@ setTimeout(() => {
         benzinpreis:         { value: 48.00,  min: 20.00, max: 80.00,   step: 0.50 },  // ₺/L
         verbrauchVerbrenner: { value: 7.0,    min: 3,     max: 20,      step: 0.1 },   // L/100 km
         evVerbrauch:         { value: 17,     min: 8,     max: 35,      step: 0.5 },   // kWh/100 km
-        kmEv:                { value: 500,    min: 0,     max: 2000,    step: 1 },     // km
-        kmVb:                { value: 500,    min: 0,     max: 2000,    step: 1 },     // km
-        kmShared:            { value: 1000,   min: 50,    max: 10000,   step: 10 },    // km
+        kmEv:                { value: 500,    min: 0,     max: 10000,   step: 1 },     // km — F6.1
+        kmVb:                { value: 500,    min: 0,     max: 10000,   step: 1 },     // km — F6.1
+        kmShared:            { value: 1000,   min: 0,     max: 10000,   step: 1 },     // km — F6.1
         kmMonat:             { value: 1000,   min: 100,   max: 5000,    step: 50 },    // km
         batteryKwh:          { value: 60,     min: 20,    max: 150,     step: 1 },     // kWh
         longtermPremium:     { value: 250000, min: 0,     max: 2000000, step: 5000 }   // ₺
@@ -3100,48 +3139,22 @@ setTimeout(() => {
     });
   }
 
-  // ── Phase 4: Zentrale Währungsraten (ab Phase 5 nicht mehr im Render-Pfad) ─
-  // Werte bleiben für künftige Admin-/Migrations-/Export-Szenarien als
-  // Nachschlagetabelle über window.EAF_I18N.rates verfügbar. Der Standard-Flow
-  // (formatCurrency / _fmtMoney / fmtMoneyEntry) ruft keine Konversion mehr
-  // auf — Rohwerte werden in der aktiven Marktwährung interpretiert.
-  var CURRENCY_RATES = {
-    EUR: 1.0,
-    USD: 1.17,
-    TRY: 52.79
-  };
-
-  var LANG_LOCALE = { de: "de-DE", en: "en-US", tr: "tr-TR" };
+  // Phase P Sprint 4 (F1.5): hard-coded CURRENCY_RATES + convertFromEur /
+  // convertToEur removed. They were last touched in Phase 4 and untouched by
+  // every render path since Phase 5; the comment promised "future Admin /
+  // Migration scenarios" but nothing ever consumed them. Removing them
+  // eliminates the risk of someone wiring up the API later and getting
+  // months-old exchange rates.
 
   var currentMarket   = "de";
   var currentLanguage = "de";
   var currentCurrency = "EUR";
 
-  // Konvertiert einen EUR-Wert in die Zielwährung. Fallback bei unbekannter
-  // Währung oder ungültigem Wert: unveränderter EUR-Wert.
-  function convertFromEur(valueInEur, targetCurrency) {
-    if (!isFinite(Number(valueInEur))) return valueInEur;
-    var tgt = targetCurrency || currentCurrency;
-    var rate = CURRENCY_RATES[tgt];
-    if (!isFinite(rate) || rate <= 0) rate = 1.0;
-    return Number(valueInEur) * rate;
-  }
-
-  // Rückumrechnung: Wert in Quellwährung → EUR. Fallback: Wert unverändert.
-  function convertToEur(valueInTarget, sourceCurrency) {
-    if (!isFinite(Number(valueInTarget))) return valueInTarget;
-    var src = sourceCurrency || currentCurrency;
-    var rate = CURRENCY_RATES[src];
-    if (!isFinite(rate) || rate <= 0) rate = 1.0;
-    return Number(valueInTarget) / rate;
-  }
-
-  // Expose on window so other code (and future Phase 2) can read without refactoring.
+  // Expose on window so other code can read state without re-deriving it.
   window.EAF_I18N = {
     translations: translations,
     currencyConfig: currencyConfig,
     market: MARKET_CONFIG,
-    rates: CURRENCY_RATES,
     getLanguage: function () { return currentLanguage; },
     getCurrency: function () { return currentCurrency; },
     // Phase 6: Markt ist Single Source — liefert das volle Config-Objekt.
@@ -3151,8 +3164,6 @@ setTimeout(() => {
     setCurrency: setCurrency,
     setMarket: setMarket,
     formatCurrency: formatCurrency,
-    convertFromEur: convertFromEur,
-    convertToEur: convertToEur,
     t: function (key) {
       var dict = translations[currentLanguage] || translations.de;
       return (dict && dict[key]) || (translations.de[key] || key);
