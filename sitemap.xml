@@ -6,8 +6,7 @@
   <url>
     <loc>https://www.evspend.com/</loc>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/"/>
     <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/"/>
     <changefreq>monthly</changefreq>
@@ -16,8 +15,7 @@
   <url>
     <loc>https://www.evspend.com/en-eu/</loc>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/"/>
     <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/"/>
     <changefreq>monthly</changefreq>
@@ -28,8 +26,7 @@
   <url>
     <loc>https://www.evspend.com/verlauf.html</loc>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/verlauf.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/verlauf.html"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/verlauf.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/verlauf.html"/>
     <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/verlauf.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/verlauf.html"/>
     <changefreq>monthly</changefreq>
@@ -38,8 +35,7 @@
   <url>
     <loc>https://www.evspend.com/en-eu/verlauf.html</loc>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/verlauf.html"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/verlauf.html"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/verlauf.html"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/verlauf.html"/>
     <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/verlauf.html"/>
     <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/verlauf.html"/>
     <changefreq>monthly</changefreq>

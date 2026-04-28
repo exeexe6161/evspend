@@ -1,11 +1,17 @@
-// /lang-switch.js — Sets evspend_locale cookie + currentMarket localStorage
-// before navigation. Phase 4 Etappe 3: v2.0-en-eu-market
-// Strictly necessary cookie (ePrivacy Art. 5(3)) — no consent banner required.
+// /lang-switch.js — Persists market choice in localStorage before navigation.
+// Phase P Sprint 1: cookie-free implementation (Datenschutz alignment).
+//
+// Why localStorage only:
+//   The Datenschutzerklärung promises "Verzicht auf Cookies". Earlier versions
+//   set a `evspend_locale` cookie for middleware-side override (kept user choice
+//   across sessions for non-domestic IP-geo). That cookie is now removed.
+//   The matching cookie-respect block in middleware.js is gone too — geo-IP
+//   redirect remains the only middleware behaviour, and it only fires on the
+//   first / load for non-domestic countries. Manual market switches are now
+//   purely client-side via localStorage `eaf.market` (read by script.js).
 
 (function() {
   // Locale → eaf.market mapping for script.js (loadI18nState) consistency.
-  // Mapping ist technisch (User-transparent), siehe datenschutz.html Cookie Notice.
-  // Phase 5: 'en-eu' Cookie sets market='eu' (EU-Market in MARKET_CONFIG since 5b).
   var LOCALE_TO_MARKET = {
     'de': 'de',
     'us': 'us',
@@ -19,18 +25,13 @@
       var locale = el.dataset.setLocale;
       var target = el.getAttribute('href');
 
-      // 1. Cookie (middleware.js — Geo-Override, 1 year)
-      document.cookie = 'evspend_locale=' + locale +
-                       '; path=/; max-age=31536000; SameSite=Lax';
-
-      // 2. localStorage eaf.market (script.js — UI language + currency + slider defaults)
+      // localStorage eaf.market (script.js — UI language + currency + slider defaults)
       var market = LOCALE_TO_MARKET[locale];
       if (market) {
         try {
           localStorage.setItem('eaf.market', market);
         } catch (_) {}
       }
-      // 3. Navigate
       window.location.href = target;
     });
   });

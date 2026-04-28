@@ -2416,7 +2416,7 @@ setTimeout(() => {
       noscriptText: "Diese App benötigt JavaScript. Bitte aktiviere JavaScript in deinem Browser.",
       footerCalc: "Rechner",
       chartAxisX: "Kilometer",
-      chartAxisY: "Kosten (€)",
+      chartAxisY: "Kosten ({symbol})",
       // Share text templates (mit Platzhaltern)
       shareEvCostHeader: "E-Auto Kosten ⚡",
       shareVbCostHeader: "Verbrenner Kosten ⛽",
@@ -2639,8 +2639,8 @@ setTimeout(() => {
       saveHintText: "Only single calculations are saved",
       noscriptText: "This app requires JavaScript. Please enable JavaScript in your browser.",
       footerCalc: "Calculator",
-      chartAxisX: "Miles",
-      chartAxisY: "Cost ($)",
+      chartAxisX: "{unit}",
+      chartAxisY: "Cost ({symbol})",
       // Share text
       shareEvCostHeader: "Electric cost ⚡",
       shareVbCostHeader: "Combustion cost ⛽",
@@ -2864,7 +2864,7 @@ setTimeout(() => {
       noscriptText: "Bu uygulama JavaScript gerektirir. Lütfen tarayıcınızda JavaScript'i etkinleştirin.",
       footerCalc: "Hesaplayıcı",
       chartAxisX: "Kilometre",
-      chartAxisY: "Maliyet (₺)",
+      chartAxisY: "Maliyet ({symbol})",
       // Share text
       shareEvCostHeader: "Elektrikli maliyet ⚡",
       shareVbCostHeader: "Benzinli maliyet ⛽",
@@ -3293,8 +3293,13 @@ setTimeout(() => {
     if (!mk) return;
     currentMarket = code;
     try { localStorage.setItem(MARKET_KEY, code); } catch (_) {}
-    setLanguage(mk.language);
+    // Phase P Sprint 1 (F6.2): currency MUST be set before language, because
+    // setLanguage() runs applyTranslations() which substitutes {symbol} into
+    // chart-axis labels (and any future symbol-based translation). Without
+    // this order, switching markets renders the previous currency on the
+    // chart axis until the next translation pass.
     setCurrency(mk.currency);
+    setLanguage(mk.language);
     // Phase 7: marktabhängige Slider-Ranges + Preis-Defaults anwenden.
     applyMarketDefaults(mk);
     _refreshMarketPillLabel();

@@ -1,5 +1,12 @@
-// middleware.js — Smart Hard-Redirect for EN-EU Market
-// Phase 4: v2.0-en-eu-market
+// middleware.js — Geo-IP Hard-Redirect for EN-EU Market.
+//
+// Phase P Sprint 1: cookie-free. The previous `evspend_locale` cookie + its
+// "respect user override" block were removed to align with Datenschutz
+// "Verzicht auf Cookies". Manual market choice now lives in localStorage
+// (purely client-side, read by script.js after page load). Trade-off: a
+// non-domestic visitor who manually switches to / via the market pill will
+// land on /en-eu/ again on the next session — JS then immediately switches
+// the UI back to their stored market preference.
 
 export const config = {
   matcher: [
@@ -15,36 +22,13 @@ export default function middleware(request) {
   const url = new URL(request.url);
   const country = request.headers.get('x-vercel-ip-country') || '';
   const ua = request.headers.get('user-agent') || '';
-  const cookie = request.headers.get('cookie') || '';
 
-  // 1. Bot? Skip redirect (SEO-Crawler must reach all variants)
+  // 1. Bot? Skip redirect (SEO-Crawler must reach all variants).
   if (BOT_UA_REGEX.test(ua)) {
     return;
   }
 
-  // 2. Cookie set? Respect user override
-  const localeMatch = cookie.match(/evspend_locale=(de|us|tr|en-eu)/);
-  if (localeMatch) {
-    const locale = localeMatch[1];
-
-    // User explicitly chose en-eu but is on / → redirect
-    if (locale === 'en-eu' && !url.pathname.startsWith('/en-eu')) {
-      return Response.redirect(
-        new URL('/en-eu' + url.pathname, request.url),
-        302
-      );
-    }
-
-    // User chose domestic locale (de/us/tr) but is on /en-eu/ → redirect to /
-    if (locale !== 'en-eu' && url.pathname.startsWith('/en-eu')) {
-      const newPath = url.pathname.replace(/^\/en-eu/, '') || '/';
-      return Response.redirect(new URL(newPath, request.url), 302);
-    }
-
-    return; // Cookie matches current location
-  }
-
-  // 3. First visit + non-domestic country?
+  // 2. Non-domestic country on / → redirect to /en-eu/.
   if (!DOMESTIC_COUNTRIES.includes(country) && !url.pathname.startsWith('/en-eu')) {
     return Response.redirect(
       new URL('/en-eu' + url.pathname, request.url),
