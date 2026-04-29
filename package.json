@@ -1,5 +1,11 @@
 {
-  "name": "eautofakten",
-  "version": "1.0.0",
-  "private": true
+  "name": "evspend",
+  "version": "1.3.0",
+  "private": true,
+  "description": "EVSpend — EV vs ICE cost calculator (vanilla HTML/CSS/JS, self-hosted Inter font, Chart.js MIT, Lucide ISC).",
+  "scripts": {
+    "build:css": "npx -y esbuild styles-app.css --minify --legal-comments=inline --target=es2020 > styles-app.min.css && npx -y esbuild styles-pages.css --minify --legal-comments=inline --target=es2020 > styles-pages.min.css",
+    "build:js": "npx -y esbuild script.js --minify --legal-comments=inline --sourcemap --target=es2020 --outfile=script.min.js && npx -y esbuild verlauf.js --minify --legal-comments=inline --sourcemap --target=es2020 --outfile=verlauf.min.js",
+    "build": "npm run build:css && npm run build:js"
+  }
 }

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+<meta name="robots" content="noindex">
+<meta name="description" content="Seite nicht gefunden. Zurück zum EVSpend Kostenrechner.">
+<link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="manifest" href="/site.webmanifest">
+<title>404 – Seite nicht gefunden | EVSpend</title>
+<script src="/theme-init.js?v=20260428-31"></script>
+<link rel="stylesheet" href="/styles-pages.min.css?v=20260429-1">
+<style>
+  .err-wrap{
+    max-width:480px;margin:0 auto;
+    padding:calc(60px + var(--safe-top)) var(--gutter) 40px;
+    text-align:center;
+  }
+  .err-code{
+    font-size:88px;font-weight:800;letter-spacing:-3px;
+    color:var(--blue);line-height:1;margin-bottom:8px;
+    font-variant-numeric:tabular-nums;
+  }
+  .err-title{
+    font-size:24px;font-weight:700;letter-spacing:-.4px;
+    color:var(--l1);margin-bottom:12px;line-height:1.2;
+  }
+  .err-text{
+    font-size:15.5px;color:var(--l3);line-height:1.6;
+    margin-bottom:28px;
+  }
+  .err-cta{
+    display:inline-block;
+    padding:14px 32px;min-height:44px;
+    border-radius:999px;
+    background:var(--blue);color:#fff;
+    font-size:14.5px;font-weight:600;letter-spacing:-.15px;
+    text-decoration:none;
+    box-shadow:0 2px 8px rgba(37,99,235,.25),0 1px 2px rgba(0,0,0,.08);
+    transition:background .15s ease,transform .12s ease;
+  }
+  .err-cta:hover{background:#1e40af;text-decoration:none;}
+  .err-cta:active{transform:scale(.97);}
+  @media(max-width:480px){
+    .err-code{font-size:72px;letter-spacing:-2px;}
+    .err-title{font-size:21px;}
+  }
+</style>
+</head>
+<body>
+<main class="page">
+  <div class="err-wrap">
+    <div class="err-code" aria-hidden="true">404</div>
+    <h1 class="err-title" id="errTitle">Seite nicht gefunden</h1>
+    <p class="err-text" id="errText">Die angeforderte Seite existiert nicht oder wurde verschoben.</p>
+    <a href="/" class="err-cta" id="errCta">Zurück zum Rechner</a>
+  </div>
+</main>
+<script>
+// Lang-detect: localStorage eaf.market → fallback navigator.language → de.
+(function(){
+  var lang = "de";
+  try {
+    var market = localStorage.getItem("eaf.market");
+    if (market === "us" || market === "eu") lang = "en";
+    else if (market === "tr") lang = "tr";
+    else if (market === "de") lang = "de";
+    else {
+      var navLang = (navigator.language || "de").toLowerCase();
+      if (navLang.startsWith("tr")) lang = "tr";
+      else if (navLang.startsWith("en") && !navLang.startsWith("en-us") && !navLang.startsWith("en-de")) lang = "en";
+      else if (navLang.startsWith("en-us")) lang = "en";
+    }
+  } catch(_) {}
+
+  var t = {
+    de: { title: "Seite nicht gefunden", text: "Die angeforderte Seite existiert nicht oder wurde verschoben.", cta: "Zurück zum Rechner", htmlLang: "de", pageTitle: "404 – Seite nicht gefunden | EVSpend" },
+    en: { title: "Page not found", text: "The page you requested doesn’t exist or has been moved.", cta: "Back to calculator", htmlLang: "en", pageTitle: "404 – Page not found | EVSpend", href: "/en-eu/" },
+    tr: { title: "Sayfa bulunamadı", text: "İstenen sayfa mevcut değil veya taşınmış.", cta: "Hesaplayıcıya dön", htmlLang: "tr", pageTitle: "404 – Sayfa bulunamadı | EVSpend" }
+  };
+  var d = t[lang] || t.de;
+  document.documentElement.lang = d.htmlLang;
+  document.getElementById("errTitle").textContent = d.title;
+  document.getElementById("errText").textContent = d.text;
+  var cta = document.getElementById("errCta");
+  cta.textContent = d.cta;
+  if (d.href) cta.setAttribute("href", d.href);
+  document.title = d.pageTitle;
+})();
+</script>
+</body>
+</html>
