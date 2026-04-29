@@ -3335,7 +3335,7 @@ body[data-result-stale="true"] .stale-hint {
 }
 .calc-info details{
   display:inline-block;
-  text-align:left;
+  text-align:center;
 }
 .calc-info summary{
   display:inline-flex;
