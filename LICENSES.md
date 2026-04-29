@@ -39,17 +39,17 @@ The OFL permits use, modification, and redistribution including bundling and emb
 
 ### Lucide v0.511.0
 
-- **File:** `vendor/lucide-0.511.0.min.js`
 - **Source:** https://lucide.dev (fork of Feather Icons)
 - **License:** ISC License
-- **License notice in file:**
+- **Original library file:** `vendor/lucide-0.511.0.min.js` was bundled until Phase P Sprint 2 (commit `9177e70`, April 2026). At that point the library was removed and the same icon path data was copied directly into the HTML as inline `<svg>` elements (rationale: −348 KB per page load). Lucide's License notice from the original file:
 
   ```
   @license lucide v0.511.0 - ISC
   This source code is licensed under the ISC license.
   ```
 
-The Lucide icon set is also the source of the inline `<svg>` icons embedded directly in the HTML/JS (e.g., `chevron-down`, `check`, `moon`, `sun`). These inline copies fall under the same ISC license.
+- **Inline `<svg>` provenance:** Every `<svg>` in `index.html`, `en-eu/index.html` and all legal pages (`impressum`, `datenschutz`, `terms`, `hinweise`, `barrierefreiheit`, plus their language variants) follows the Lucide stroke-style convention (`viewBox="0 0 24 24"`, `fill="none"`, `stroke="currentColor"`, `stroke-width="2"`, `stroke-linecap="round"`, `stroke-linejoin="round"`). The path data is copied verbatim from Lucide v0.511.0 — `users`, `line-chart`, `arrow-left`, `image-down`, `message-square-text`, `save`, `clock`, `rotate-ccw`, `check`, `chevron-down`, `cookie`, `shield`, `globe`, `mail`, `lock`, `eye-off`, `file-text`, `alert-triangle`, `accessibility`, etc.
+- **ISC compliance:** The ISC license requires the copyright notice be preserved "in all copies or substantial portions of the Software." The notice above (and this entire entry) preserves the attribution at the project level, which is the conventional way to attribute icon path-data after de-bundling. No header-comment per inline `<svg>` is required by ISC; one is added for clarity above the first SVG block on the calculator pages.
 
 ---
 
@@ -101,8 +101,10 @@ No third-party stock photography, paid icon sets, or commercial brand marks are 
 ## License Compliance Notes
 
 - All bundled third-party code is permissively licensed (OFL, MIT, ISC). None requires copyleft, source disclosure, or restricts commercial use.
-- Font stack uses Inter (self-hosted, OFL) with `system-ui` as a neutral OS-agnostic fallback. No vendor-specific font keywords are present in the codebase.
-- All visual effects use W3C-standard CSS only (borders, single-layer shadows, solid backgrounds, custom-styled form controls). No proprietary OS or vendor visual frameworks are required.
+- Font stack uses Inter (self-hosted, OFL) with `system-ui` as a neutral OS-agnostic fallback. No vendor-specific font keywords (`-apple-system`, `BlinkMacSystemFont`, `Helvetica Neue`, `Segoe UI`, etc.) are present in the codebase.
+- All visual effects use W3C-standard CSS only (borders, single-layer shadows, solid backgrounds, custom-styled form controls). No proprietary OS or vendor visual frameworks are required. Glassmorphism / `backdrop-filter: blur` is intentionally absent (per Phase L.2 architecture decision) so the app does not lean on the Apple Aqua / Big Sur visual language.
+- The `apple-mobile-web-app-*` HTML meta tags and the `apple-touch-icon` link `rel` are W3C de-facto standards (Apple-introduced, adopted by Android Chrome, Microsoft Edge, Firefox). Their use here is purely functional — required for iOS Safari "Add to Home Screen" PWA support — and does not constitute Apple branding or trademark use.
+- No external scripts, stylesheets, fonts, or tracking pixels are loaded at runtime; the strict CSP `default-src 'none'; connect-src 'self'` enforces this on the browser layer.
 
 ---
 
@@ -111,7 +113,7 @@ No third-party stock photography, paid icon sets, or commercial brand marks are 
 EVSpend is independent of any operating-system vendor or design framework:
 
 - **Visual design** — independent. Custom CSS-only implementation aligned with the Linear / Stripe / GitHub tool aesthetic.
-- **Color palette** — proprietary brand colors (`#2563eb` blue, `#22c55e` EV green, `#f59e0b` ICE orange, `#16a34a` savings green). No Apple, Google, or Microsoft system-color values are used.
+- **Color palette** — chosen from the Tailwind CSS palette family (`#2563eb` = `blue-600`, `#22c55e` = `green-500`, `#f59e0b` = `amber-500`, `#16a34a` = `green-600`, `#15803d` = `green-700`, `#b45309` = `amber-700`, …). RGB hex values are factual data and are not subject to copyright; Tailwind CSS itself (the framework) is MIT-licensed but is not bundled here — only individual color values are referenced. Verified that **no Apple System Colors** (e.g., `#34C759`, `#0A84FF`, `#FF3B30`), **no Material Design 3 default colors**, and **no Microsoft Fluent palette values** are used.
 - **Iconography** — Lucide (ISC license, see above) — community open-source icon set.
 - **Typography** — Inter (OFL license) self-hosted; `system-ui` neutral fallback.
 - **Components** — original implementations: custom range sliders (WebKit + Mozilla), custom buttons, custom toggles, custom tabs.

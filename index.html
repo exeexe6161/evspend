@@ -12,6 +12,9 @@
 <!-- Phase 2: Preload Inter Variable für FOIT-Vermeidung (font-display: swap) -->
 <link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- iOS Safari "Add to Home Screen" PWA hooks (W3C de-facto standard,
+     also honoured by Android Chrome, Edge, Firefox; not Apple branding —
+     functional necessity for installable PWA support). -->
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EVSpend">
@@ -43,6 +46,11 @@
 <title>EVSpend – E Auto vs Verbrenner Kosten Rechner</title>
 <script src="./theme-init.js?v=20260428-31"></script>
 <link rel="stylesheet" href="./styles-app.css?v=20260428-53">
+<!-- Inline <svg> icon-set provenance:
+     Path data taken verbatim from Lucide v0.511.0 (https://lucide.dev,
+     ISC License, © Lucide Contributors). Library bundled until Phase P
+     Sprint 2; afterwards inlined to save ~348 KB per page load.
+     Full attribution in /LICENSES.md. -->
 </head>
 <body data-app-mode="compare" data-single-type="ev">
 <noscript><div class="noscript-overlay"><p data-i18n="noscriptText">Diese App benötigt JavaScript. Bitte aktiviere JavaScript in deinem Browser.</p></div></noscript>
