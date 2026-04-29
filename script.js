@@ -2334,10 +2334,6 @@ setTimeout(() => {
       labelKilometerUs: "Meilen",
       labelEvConsumption: "Stromverbrauch",
       labelIceConsumption: "Spritverbrauch",
-      hintEvConsumption: "E-Autos: meist 15–20 kWh/100 km",
-      hintEvConsumptionUs: "E-Autos: meist 25–35 kWh/100 mi",
-      hintIceConsumption: "Verbrenner: meist 5–8 L/100 km",
-      hintIceConsumptionUs: "Verbrenner: meist 20–30 mpg",
       labelElectricityPrice: "Strompreis",
       labelBatterySize: "Batteriekapazität",
       labelGasPrice: "Benzinpreis",
@@ -2357,7 +2353,7 @@ setTimeout(() => {
       backToCompare: "Zurück zum direkten Vergleich",
       noteLabel: "Notiz zur Fahrt (optional)",
       noteInlineLabel: "Notiz",
-      notePlaceholder: "z. B. Pendelstrecke, Ausflug oder Fahrt nach Frankfurt",
+      notePlaceholder: "z. B. Pendelstrecke oder Ausflug",
       emptyCompareTitle: "Kostendifferenz erscheint nach Berechnung",
       emptySingleTitle: "Kosten erscheinen nach Berechnung",
       emptyCompareSub: "Werte eingeben – Ergebnis erscheint sofort.",
@@ -2550,10 +2546,6 @@ setTimeout(() => {
       labelKilometerUs: "Miles",
       labelEvConsumption: "Electric efficiency",
       labelIceConsumption: "Fuel efficiency",
-      hintEvConsumption: "Most EVs: 15–22 kWh/100 km",
-      hintEvConsumptionUs: "Most EVs: 25–35 kWh/100 mi",
-      hintIceConsumption: "Most cars: 5–8 L/100 km",
-      hintIceConsumptionUs: "Most cars: 20–30 mpg",
       labelElectricityPrice: "Electricity cost",
       labelBatterySize: "Battery size",
       labelGasPrice: "Petrol price",
@@ -2573,7 +2565,7 @@ setTimeout(() => {
       backToCompare: "Back to direct comparison",
       noteLabel: "Trip note (optional)",
       noteInlineLabel: "Note",
-      notePlaceholder: "e.g. commute, trip or drive to the city",
+      notePlaceholder: "e.g. commute or trip",
       emptyCompareTitle: "Cost difference appears after calculation",
       emptySingleTitle: "Costs appear after calculation",
       emptyCompareSub: "Enter your data – result appears instantly.",
@@ -2766,10 +2758,6 @@ setTimeout(() => {
       labelKilometerUs: "Mil",
       labelEvConsumption: "Elektrik tüketimi",
       labelIceConsumption: "Yakıt tüketimi",
-      hintEvConsumption: "Elektrikli: 15–20 kWh/100 km",
-      hintEvConsumptionUs: "Elektrikli: 25–35 kWh/100 mi",
-      hintIceConsumption: "Benzinli: 5–8 L/100 km",
-      hintIceConsumptionUs: "Benzinli: 20–30 mpg",
       labelElectricityPrice: "Elektrik fiyatı",
       labelBatterySize: "Batarya kapasitesi",
       labelGasPrice: "Benzin fiyatı",
@@ -2789,7 +2777,7 @@ setTimeout(() => {
       backToCompare: "Doğrudan karşılaştırmaya dön",
       noteLabel: "Yolculuk notu (isteğe bağlı)",
       noteInlineLabel: "Not",
-      notePlaceholder: "ör. işe gidiş, gezi veya şehir yolculuğu",
+      notePlaceholder: "ör. işe gidiş veya gezi",
       emptyCompareTitle: "Maliyet farkı hesaplamadan sonra görünür",
       emptySingleTitle: "Maliyet hesaplamadan sonra görünür",
       emptyCompareSub: "Verilerini gir, sonucu anında gör.",
@@ -3123,8 +3111,8 @@ setTimeout(() => {
     setMarket: setMarket,
     formatCurrency: formatCurrency,
     t: function (key) {
-      // Phase J Sprint 1 (F1.3 / F1.4): use _resolveKey so callers like
-      // _t("hintEvConsumption") get the US variant when market === "us".
+      // Phase J Sprint 1 (F1.3 / F1.4): use _resolveKey so any key with
+      // an "*Us" variant in the dict gets the US variant when market==="us".
       var dict = translations[currentLanguage] || translations.de;
       var val = _resolveKey(dict, translations.de, key);
       return (val != null) ? val : key;
