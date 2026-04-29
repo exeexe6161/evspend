@@ -1131,10 +1131,10 @@ button .ico,a .ico{margin-right:6px;}
   .lt-line{font-size:13.5px;gap:10px;}
   .longterm-breakeven{font-size:12.5px;}
 
-  /* Phase L.3 — Underline-Tabs auf Mobile minimal kompakter. Padding/Radius
-     bleiben 0 (Underline-Style); Tap-Zone via min-height. */
+  /* Phase T2 — Pill-Tabs auf Small-Mobile: kompakteres Padding-X
+     spart Platz auf 320-375px (Pill-Radius bleibt --r-pill). */
   .mode-btn,
-  .type-btn{padding:10px 14px;min-height:44px;font-size:13.5px;}
+  .type-btn{padding:10px 14px;font-size:13.5px;}
 
   .note-input{padding:11px 13px;font-size:14px;}
   .note-label{font-size:12px;}
@@ -1857,39 +1857,54 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
 [data-theme="dark"] .mode-badge--ev{background:var(--ev-soft);color:var(--ev-text);box-shadow:inset 0 0 0 1px var(--ev-soft-strong);}
 [data-theme="dark"] .mode-badge--vb{background:rgba(245,158,11,.18);color:#fbbf24;box-shadow:inset 0 0 0 1px rgba(245,158,11,.32);}
 
-/* ══ Period selector (statistics) ══ */
+/* ══ Period selector — Phase T Sprint T2: Pill-Style ══
+   Container: transparent (kein Pill-Wrapper mehr).
+   Tabs: round pills, inactive transparent + --l3, active solid --blue.
+   5 Items → kompaktes padding-x für Mobile-Fit. */
 .period-tabs{
   display:flex;
-  gap:4px;
+  gap:var(--sp-1);
   margin:0 var(--gutter) 12px;
-  padding:4px;
-  background:var(--s3);
-  border-radius:12px;
+  padding:0;
+  background:transparent;
+  border-radius:0;
 }
-[data-theme="dark"] .period-tabs{background:rgba(255,255,255,.06);}
 .period-btn{
   flex:1;
   padding:10px 8px;
+  min-height:var(--h-btn-md);
   border:none;
   background:transparent;
-  color:var(--l2);
+  color:var(--l3);
   font-family:inherit;
-  font-size:14px;
+  font-size:var(--fs-base);
   font-weight:600;
   letter-spacing:-.1px;
-  border-radius:9px;
+  border-radius:var(--r-pill);
   cursor:pointer;
-  transition:background .22s ease,color .22s ease,transform .12s,box-shadow .22s ease;
+  transition:background var(--t-base) ease,color var(--t-base) ease,transform var(--t-fast) ease;
   -webkit-tap-highlight-color:transparent;
 }
-.period-btn:hover:not(.period-btn--active){color:var(--l1);}
+.period-btn:hover:not(.period-btn--active){
+  background:var(--s2);
+  color:var(--l1);
+}
 .period-btn:active{transform:scale(var(--press-scale));}
 .period-btn--active{
-  background:var(--s1);
-  color:var(--l1);
-  box-shadow:none;
+  background:var(--blue);
+  color:#fff;
+  box-shadow:0 1px 2px rgba(37,99,235,.18);
 }
-[data-theme="dark"] .period-btn--active{background:rgba(255,255,255,.14);color:#fff;box-shadow:none;}
+[data-theme="dark"] .period-btn{color:var(--l3);}
+[data-theme="dark"] .period-btn:hover:not(.period-btn--active){
+  background:rgba(255,255,255,.06);
+  color:var(--l1);
+}
+[data-theme="dark"] .period-btn--active{
+  background:var(--blue);
+  color:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.30);
+}
 
 /* ══ Stats card ══ */
 .stats-card{padding:0;}
@@ -2196,44 +2211,48 @@ html:not([data-theme="dark"]) .stats-card{border:1px solid rgba(0,0,0,0.04);}
 [data-theme="dark"] .qc-hdr{border-color:rgba(255,255,255,.06);}
 [data-theme="dark"] .qc-inp{color:#f3f4f6;}
 
-/* ══ Mode toggle (segmented control) ══ */
-/* Phase L.3 — Underline-Style Tabs (Linear/GitHub-Stil). */
+/* ══ Mode toggle / Type toggle — Phase T Sprint T2: Pill-Style ══
+   Container: kein Border-Bottom mehr, reines flex mit gap.
+   Tabs: rund (--r-pill), inactive transparent + --l3 grey,
+   active solid --blue + white. Mood-Differenzierung (EV/VB) lebt
+   weiterhin in Badges, Slider-Tracks, Result-Hero-Tints. */
 .mode-toggle,
 .type-toggle{
   display:flex;
-  gap:0;
+  gap:var(--sp-2);
   margin:22px var(--gutter) 0;
   padding:0;
   background:transparent;
-  border-bottom:1px solid var(--sep);
+  border:0;
   border-radius:0;
   box-shadow:none;
 }
 .type-toggle{margin:10px var(--gutter) 0;}
-[data-theme="dark"] .mode-toggle,
-[data-theme="dark"] .type-toggle{background:transparent;box-shadow:none;}
 
 .mode-btn,
 .type-btn{
   flex:1;
-  padding:12px 16px;
-  min-height:44px;
+  padding:10px 20px;
+  min-height:var(--h-btn-md);
   border:0;
   background:transparent;
-  color:var(--l2);
+  color:var(--l3);
   font-family:inherit;
-  font-size:14.5px;
+  font-size:var(--fs-md);
   font-weight:600;
-  letter-spacing:-.15px;
-  border-radius:0;
-  border-bottom:2px solid transparent;
-  margin-bottom:-1px;            /* überlappt Container-Border, sodass aktiver Tab nahtlos wirkt */
+  letter-spacing:var(--ls-snug);
+  border-radius:var(--r-pill);
   cursor:pointer;
-  transition:color .15s ease,border-color .15s ease;
+  transition:background var(--t-base) ease,color var(--t-base) ease,transform var(--t-fast) ease;
   -webkit-tap-highlight-color:transparent;
 }
 .mode-btn:hover:not(.mode-btn--active):not(:disabled),
-.type-btn:hover:not(.type-btn--active):not(:disabled){color:var(--l1);}
+.type-btn:hover:not(.type-btn--active):not(:disabled){
+  background:var(--s2);
+  color:var(--l1);
+}
+.mode-btn:active:not(:disabled),
+.type-btn:active:not(:disabled){transform:scale(var(--press-scale));}
 .mode-btn:disabled,
 .type-btn:disabled{
   opacity:.4;
@@ -2241,35 +2260,27 @@ html:not([data-theme="dark"]) .stats-card{border:1px solid rgba(0,0,0,0.04);}
   cursor:not-allowed;
   filter:grayscale(.4);
 }
-[data-theme="dark"] .type-btn{color:#e5e7eb;}
-
-.mode-btn--active{
-  background:transparent;
-  color:var(--blue);
-  border-bottom-color:var(--blue);
-  box-shadow:none;
-}
-[data-theme="dark"] .mode-btn--active{
-  background:transparent;
-  color:var(--blue);
-  border-bottom-color:var(--blue);
-  box-shadow:none;
+[data-theme="dark"] .mode-btn,
+[data-theme="dark"] .type-btn{color:var(--l3);}
+[data-theme="dark"] .mode-btn:hover:not(.mode-btn--active):not(:disabled),
+[data-theme="dark"] .type-btn:hover:not(.type-btn--active):not(:disabled){
+  background:rgba(255,255,255,.06);
+  color:var(--l1);
 }
 
-/* Phase S2.2 — Tab-Akzent harmonisiert: ALLE aktiven Tabs verwenden --blue.
-   Mood-Differenzierung (EV/VB) lebt weiterhin in Badges, Slider-Tracks und
-   Result-Hero-Tints. Tabs bleiben strukturell neutral (Linear/GitHub-Stil). */
+.mode-btn--active,
 .type-btn--ev.type-btn--active,
 .type-btn--vb.type-btn--active{
-  background:transparent;
-  color:var(--blue);
-  border-bottom-color:var(--blue);
-  box-shadow:none;
+  background:var(--blue);
+  color:#fff;
+  box-shadow:0 1px 2px rgba(37,99,235,.18);
 }
+[data-theme="dark"] .mode-btn--active,
 [data-theme="dark"] .type-btn--ev.type-btn--active,
 [data-theme="dark"] .type-btn--vb.type-btn--active{
-  background:transparent;color:var(--blue);
-  border-bottom-color:var(--blue);box-shadow:none;
+  background:var(--blue);
+  color:#fff;
+  box-shadow:0 1px 2px rgba(0,0,0,.30);
 }
 
 /* ══ Mode-based visibility ══ */
