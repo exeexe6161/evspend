@@ -127,6 +127,10 @@ html[data-theme="dark"],html[data-theme="dark"] body{background:#0f1115;}
 html{
   -webkit-tap-highlight-color:transparent;
   scroll-behavior:smooth;
+  /* Phase X Sprint X1.2: prevent iOS-Safari Landscape-Auto-Zoom.
+     Vendor-prefix für iOS 4.2+, standard für moderne Browsers. */
+  -webkit-text-size-adjust:100%;
+  text-size-adjust:100%;
 }
 
 body{
@@ -840,7 +844,12 @@ button .ico,a .ico{margin-right:6px;}
   text-align:center;
   transform:translateY(36px);
   transition:transform .32s cubic-bezier(.32,1.1,.4,1);
-  max-height:calc(100vh - 40px);overflow-y:auto;
+  /* Phase X Sprint X1.1: 100vh → 100dvh fallback-pair für iOS-Safari
+     Address-Bar-Bug. dvh berücksichtigt Address-Bar-Toggle automatisch
+     (Safari 15.4+ / Chrome 108+ / Firefox 101+). */
+  max-height:calc(100vh - 40px);
+  max-height:calc(100dvh - 40px);
+  overflow-y:auto;
 }
 .pwa-popup.visible .pwa-popup-card{transform:translateY(0);}
 [data-theme="dark"] .pwa-popup-card{

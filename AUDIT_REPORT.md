@@ -2782,3 +2782,86 @@ Vollständiger Bericht: [`PHASE_Q_BUG_HUNT_AUDIT.md`](./PHASE_Q_BUG_HUNT_AUDIT.m
 ---
 
 *Ende Phase-Q-Doku.*
+
+---
+
+## Phase X — Cross-Browser & Cross-Device Optimization Audit — 29. April 2026
+
+**Audit-Modus:** Read-Only Static + Lighthouse Audit (KEIN Code geändert)
+**Auditor:** Claude (Opus 4.7) per Anthropic
+**Tag at Audit:** `v1.3-quality-final` (HEAD: `4e73872`)
+**Output-Datei:** [`PHASE_X_CROSS_COMPAT_AUDIT.md`](./PHASE_X_CROSS_COMPAT_AUDIT.md)
+**Trigger:** User-Wunsch „Optimierung anpassen auf alle Browser und alle Handys, iPad, iPhone, Windows, Mac, Edge, Chrome — komplette Anpassung + Optimierung."
+
+### X-Audit-Ergebnis
+
+| Severity | Count | Details |
+|----------|-------|---------|
+| 🔴 HOCH | **0** | Keine Show-Stopper |
+| 🟡 MITTEL | **3** | X-1 (100vh), X-2 (text-size-adjust), X-3 (manifest theme_color) |
+| 🟢 NIEDRIG | **5** | X-4 bis X-8 — Polish-Optimization |
+| ✅ POSITIVE | **8** | Cross-Browser-Quality bestätigt |
+
+### Lighthouse-Status post v1.3
+
+A11y/BP/SEO **100** ✅ · Performance **83** ✅ (+26 vs Q1+Q2+Q3 minification gain)
+
+### 🟡 3 MEDIUM-Findings
+
+| ID | Finding | Track | Effort |
+|----|---------|-------|--------|
+| **X-1** | `100vh` in `.pwa-popup-card` (iOS-Safari Address-Bar-Bug) → ersetzen mit `100dvh` mit fallback | Viewport | ~5 Min |
+| **X-2** | `text-size-adjust: 100%` fehlt (iOS-Safari Landscape-Auto-Zoom-Defense) | CSS-Compat | ~3 Min |
+| **X-3** | site.webmanifest `theme_color`/`background_color` dark-only — Light-Mode-Splash schwarz | PWA-Manifest | ~5 Min |
+
+### 🟢 5 LOW-Findings (optional)
+
+- X-4: Microsoft Tile-Tags fehlen (Win10/11 Start-Menü-Pinning, niche)
+- X-5: 0 @supports Queries (Future-proofing)
+- X-6: forced-colors (Windows-HC) nicht behandelt
+- X-7: manifest `lang: "en"` für multi-lingual app (akzeptable Begrenzung)
+- X-8: Keine `dvh/svh/lvh` (kombiniert mit X-1 Fix)
+
+### ✅ 8 POSITIVE Cross-Compat-Bestätigungen
+
+- ✅ 41× `-webkit-` + 9× `-moz-` Vendor-Prefixes für slider-customization
+- ✅ 8× `env(safe-area-inset-*)` (iPhone Notch + Home-Indicator)
+- ✅ `viewport-fit=cover` (Safe-Area Activation)
+- ✅ 17× `:focus-visible` + 5× `:focus` Fallback (Safari 15.4+ und älter)
+- ✅ 3× `prefers-reduced-motion` Queries (vestibular A11y)
+- ✅ font-smoothing für macOS Safari + Firefox
+- ✅ Inter (OFL) self-hosted byte-identical zur Upstream-Source
+- ✅ `(hover: none)` für Touch-Device sticky-hover-suppression
+
+### Browser-Coverage-Matrix
+
+| Browser | Min-Version | Coverage |
+|---------|-------------|----------|
+| Safari (macOS+iOS) | 15.4+ | ✅ FULL (incl. `:has()`) |
+| Chrome / Edge / Brave / Opera | 105+ | ✅ FULL |
+| Firefox | 121+ | ✅ FULL |
+| Samsung Internet | 21+ | ✅ FULL |
+| iOS Safari | 15.4+ | ✅ FULL |
+| Android Chrome | 105+ | ✅ FULL |
+
+**Coverage:** ~98% globale Browser-Nutzerschaft (caniuse 2024-Q1).
+
+### Sprint-Plan (Empfehlung)
+
+| Sprint | Inhalt | Effort |
+|--------|--------|--------|
+| X1 | iOS-Safari Bug-Fixes (X-1 + X-2: 100dvh + text-size-adjust) | ~10 Min |
+| X2 | PWA-Manifest Polish (X-3: light-mode default colors) | ~5 Min |
+| X3 (optional) | MS-Tiles + forced-colors (X-4 + X-6) | ~25 Min |
+
+**Combined:** Tag `v1.4-cross-compat` (~40 Min total).
+
+### Verdict
+
+**Production-Cross-Compat-Ready** mit ~98% Browser-Coverage. 3 MEDIUM-Polish-Items adressierbar in <15 Min.
+
+Vollständiger Bericht: [`PHASE_X_CROSS_COMPAT_AUDIT.md`](./PHASE_X_CROSS_COMPAT_AUDIT.md)
+
+---
+
+*Ende Phase-X-Doku.*
