@@ -342,7 +342,7 @@ body::before{
   font-size:13px;
   color:var(--l3);
   opacity:1;
-  text-align:left;
+  text-align:center;
   letter-spacing:.1px;
   line-height:1.6;
   max-width:540px;
@@ -1798,8 +1798,8 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
   padding:10px 8px;
   min-height:var(--h-btn-md);
   border:none;
-  background:transparent;
-  color:var(--l3);
+  background:var(--s2);
+  color:var(--l2);
   font-family:inherit;
   font-size:var(--fs-base);
   font-weight:600;
@@ -1810,7 +1810,7 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
   -webkit-tap-highlight-color:transparent;
 }
 .period-btn:hover:not(.period-btn--active){
-  background:var(--s2);
+  background:var(--s3);
   color:var(--l1);
 }
 .period-btn:active{transform:scale(var(--press-scale));}
@@ -1819,9 +1819,12 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
   color:#fff;
   box-shadow:0 1px 2px rgba(37,99,235,.18);
 }
-[data-theme="dark"] .period-btn{color:var(--l3);}
+[data-theme="dark"] .period-btn{
+  background:rgba(255,255,255,.05);
+  color:var(--l2);
+}
 [data-theme="dark"] .period-btn:hover:not(.period-btn--active){
-  background:rgba(255,255,255,.06);
+  background:rgba(255,255,255,.10);
   color:var(--l1);
 }
 [data-theme="dark"] .period-btn--active{
@@ -2159,8 +2162,8 @@ html:not([data-theme="dark"]) .stats-card{border:1px solid rgba(0,0,0,0.04);}
   padding:10px 20px;
   min-height:var(--h-btn-md);
   border:0;
-  background:transparent;
-  color:var(--l3);
+  background:var(--s2);
+  color:var(--l2);
   font-family:inherit;
   font-size:var(--fs-md);
   font-weight:600;
@@ -2172,7 +2175,7 @@ html:not([data-theme="dark"]) .stats-card{border:1px solid rgba(0,0,0,0.04);}
 }
 .mode-btn:hover:not(.mode-btn--active):not(:disabled),
 .type-btn:hover:not(.type-btn--active):not(:disabled){
-  background:var(--s2);
+  background:var(--s3);
   color:var(--l1);
 }
 .mode-btn:active:not(:disabled),
@@ -2185,10 +2188,13 @@ html:not([data-theme="dark"]) .stats-card{border:1px solid rgba(0,0,0,0.04);}
   filter:grayscale(.4);
 }
 [data-theme="dark"] .mode-btn,
-[data-theme="dark"] .type-btn{color:var(--l3);}
+[data-theme="dark"] .type-btn{
+  background:rgba(255,255,255,.05);
+  color:var(--l2);
+}
 [data-theme="dark"] .mode-btn:hover:not(.mode-btn--active):not(:disabled),
 [data-theme="dark"] .type-btn:hover:not(.type-btn--active):not(:disabled){
-  background:rgba(255,255,255,.06);
+  background:rgba(255,255,255,.10);
   color:var(--l1);
 }
 
@@ -3317,44 +3323,87 @@ body[data-result-stale="true"] .stale-hint {
 }
 [data-theme="dark"] .stale-hint { color: var(--l3); }
 
-/* ══ Calculation explanation + disclaimer block ══
-   Phase T1 — Sprint T1.②/T1.③: WCAG-AA Kontrast (≥ 4.5:1).
-   Token-basierte Farben (var(--l3)/var(--l1)) statt hardcoded #555/#222
-   und Opacity-Layer entfernt — Opacity hat 4.44:1 (FAIL) verursacht.
-   Heading semantisch H2 (peer zu "Deine Kosten", nicht subsection). */
-.calc-info {
-  max-width: 420px;
-  margin: 28px auto 0;
-  padding: 16px;
-  border-radius: 14px;
-  font-size: 12px;
-  line-height: 1.5;
-  text-align: center;
-  background: rgba(255,255,255,0.6);
-  color: var(--l3);
-  border: 1px solid rgba(0,0,0,0.05);
+/* ══ Calculation explanation — Phase T5 Sprint T5.2: Akkordeon ══
+   <details>/<summary> Pattern. Default: nur Pill-Summary sichtbar
+   (minimal noise). Click expandiert den Erklär-Body als sanftes
+   Card-Drop. Keyboard-accessible out-of-box (Enter/Space toggle).
+   T1-Kontrastregeln bewahrt: Body-Text --l3, Headings --l1. */
+.calc-info{
+  margin:28px auto 0;
+  max-width:420px;
+  text-align:center;
 }
-.calc-info h2 {
-  font-size: 13px;
-  font-weight: 600;
-  margin: 0 0 6px;
-  color: var(--l1);
-  letter-spacing: -.1px;
+.calc-info details{
+  display:inline-block;
+  text-align:left;
 }
-.calc-info p {
-  margin: 4px 0;
+.calc-info summary{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 16px;
+  cursor:pointer;
+  border-radius:var(--r-pill);
+  background:var(--s2);
+  color:var(--l2);
+  font-size:13px;
+  font-weight:600;
+  letter-spacing:.1px;
+  list-style:none;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+  transition:background var(--t-base) ease,color var(--t-base) ease,transform var(--t-fast) ease;
 }
-.calc-info strong {
-  color: var(--l1);
-  font-weight: 600;
-  font-size: 12.5px;
+.calc-info summary::-webkit-details-marker{display:none;}
+.calc-info summary::after{
+  content:"▾";
+  font-size:11px;
+  margin-left:2px;
+  transition:transform var(--t-base) ease;
 }
-[data-theme="dark"] .calc-info {
-  background: rgba(255,255,255,0.04);
-  color: var(--l3);
-  border-color: rgba(255,255,255,0.06);
+.calc-info summary:hover{
+  background:var(--s3);
+  color:var(--l1);
 }
-[data-theme="dark"] .calc-info h2,
-[data-theme="dark"] .calc-info strong {
-  color: var(--l1);
+.calc-info summary:active{transform:scale(var(--press-scale));}
+.calc-info details[open] summary{
+  background:var(--s3);
+  color:var(--l1);
 }
+.calc-info details[open] summary::after{transform:rotate(180deg);}
+.calc-info-body{
+  margin-top:10px;
+  padding:14px 18px;
+  background:rgba(255,255,255,.6);
+  border:1px solid rgba(0,0,0,.05);
+  border-radius:12px;
+  font-size:12.5px;
+  line-height:1.55;
+  color:var(--l3);
+  animation:calcInfoExpand .25s ease-out;
+}
+.calc-info-body p{margin:6px 0;}
+.calc-info-body p:first-child{margin-top:0;}
+.calc-info-body p:last-child{margin-bottom:0;}
+.calc-info-body strong{color:var(--l1);font-weight:600;}
+@keyframes calcInfoExpand{
+  from{opacity:0;transform:translateY(-4px);}
+  to  {opacity:1;transform:translateY(0);}
+}
+@media (prefers-reduced-motion:reduce){
+  .calc-info-body{animation:none;}
+}
+[data-theme="dark"] .calc-info summary{
+  background:rgba(255,255,255,.06);
+  color:var(--l2);
+}
+[data-theme="dark"] .calc-info summary:hover,
+[data-theme="dark"] .calc-info details[open] summary{
+  background:rgba(255,255,255,.10);
+  color:var(--l1);
+}
+[data-theme="dark"] .calc-info-body{
+  background:rgba(255,255,255,.04);
+  border-color:rgba(255,255,255,.06);
+}
+[data-theme="dark"] .calc-info-body strong{color:var(--l1);}
