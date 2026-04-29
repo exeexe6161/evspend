@@ -2751,7 +2751,7 @@ setTimeout(() => {
       heroSubtitle2: "doğrudan karşılaştırma",
       trustNoSignup: "Kayıt gerekmez",
       trustLocal: "Yerel olarak saklanır",
-      brandTagline: "Girdilerinize dayalı karşılaştırma",
+      brandTagline: "Girdilerine dayalı karşılaştırma",
       modeSingle: "Tekli hesaplama",
       modeCompare: "Karşılaştırma",
       typeEv: "Elektrikli",
@@ -2861,7 +2861,7 @@ setTimeout(() => {
       longtermAmortized: "Dönemde başabaş noktasına ulaşıldı",
       longtermBeHint: "Aylık kilometrenize göre",
       longtermLossHint: "Seçilen dönemdeki işletme maliyetlerinden sonraki fark",
-      longtermDoneHint: "Girdilerinize göre hesaplanmıştır",
+      longtermDoneHint: "Girdilerine göre hesaplanmıştır",
       longtermFootnote: "Sadece işletme maliyetleri. Alış bedeli ek maliyet olarak dikkate alınır.",
       // Feedback
       verlaufHintText: "Maliyetleriniz artık geçmişte",
