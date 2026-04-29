@@ -342,7 +342,7 @@
       verlaufTitle: "Geçmiş",
       verlaufSub: "Kişisel hesaplamalarınız",
       verlaufTrust: "Hesaplanan sürüşlerine göre",
-      verlaufPrivacy: "Tüm hesaplamalar yalnızca cihazınızda yerel olarak saklanır. Sunucularımıza aktarım veya kayıt yapılmaz. Veriler tarayıcı belleğinde kalır ve istediğiniz zaman silinebilir. Tarayıcı verilerini temizlerseniz veya başka bir cihaz kullanırsanız kaybolabileceklerini unutmayın.",
+      verlaufPrivacy: "Tüm hesaplamalar yalnızca cihazında yerel olarak saklanır. Sunucularımıza aktarım veya kayıt yapılmaz. Veriler tarayıcı belleğinde kalır ve istediğin zaman silinebilir. Tarayıcı verilerini temizlersen veya başka bir cihaz kullanırsan kaybolabileceklerini unutma.",
       statsHeader: "İstatistik",
       entriesHeader: "Girdiler",
       searchPlaceholder: "Girdi ara…",
