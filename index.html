@@ -60,7 +60,8 @@
 
 <div class="top-controls" role="toolbar" aria-label="Einstellungen">
   <div class="top-pill-wrap">
-    <button class="top-pill" id="marketSwitch" type="button" aria-label="Markt wählen" aria-haspopup="menu" aria-expanded="false">
+    <button class="top-pill" id="marketSwitch" type="button" aria-haspopup="menu" aria-expanded="false">
+      <span class="sr-only" data-i18n="marketSwitchSr">Markt wechseln, aktuell</span>
       <span class="top-pill-text" id="marketSwitchLabel">DE</span>
       <svg class="top-pill-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
@@ -451,7 +452,7 @@
 </footer>
 
 <!-- ── PWA Install Bottom Bar (stage 1) ───────────────────────────────── -->
-<div id="pwaBar" class="pwa-bar" aria-hidden="true">
+<div id="pwaBar" class="pwa-bar" inert>
   <div class="pwa-bar-card">
     <button class="pwa-bar-x" id="pwaBarClose" type="button" data-i18n-aria="pwaClose" aria-label="Schließen">✕</button>
     <div class="pwa-bar-text" data-i18n="pwaBarText">App installieren für schnelleren Zugriff?</div>
@@ -463,7 +464,7 @@
 </div>
 
 <!-- ── PWA Install Popup (stage 2, unified iOS / Android / Desktop) ───── -->
-<div id="pwaPopup" class="pwa-popup" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="pwaPopupTitle">
+<div id="pwaPopup" class="pwa-popup" inert role="dialog" aria-modal="true" aria-labelledby="pwaPopupTitle">
   <div class="pwa-popup-backdrop" id="pwaPopupBackdrop"></div>
   <div class="pwa-popup-card">
     <button class="pwa-popup-x" id="pwaPopupClose" type="button" data-i18n-aria="pwaClose" aria-label="Schließen">✕</button>

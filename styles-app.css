@@ -3378,7 +3378,11 @@ body[data-result-stale="true"] .stale-hint {
 }
 [data-theme="dark"] .stale-hint { color: var(--l3); }
 
-/* ══ Calculation explanation + disclaimer block ══ */
+/* ══ Calculation explanation + disclaimer block ══
+   Phase T1 — Sprint T1.②/T1.③: WCAG-AA Kontrast (≥ 4.5:1).
+   Token-basierte Farben (var(--l3)/var(--l1)) statt hardcoded #555/#222
+   und Opacity-Layer entfernt — Opacity hat 4.44:1 (FAIL) verursacht.
+   Heading semantisch H2 (peer zu "Deine Kosten", nicht subsection). */
 .calc-info {
   max-width: 420px;
   margin: 28px auto 0;
@@ -3388,23 +3392,21 @@ body[data-result-stale="true"] .stale-hint {
   line-height: 1.5;
   text-align: center;
   background: rgba(255,255,255,0.6);
-  color: #555;
+  color: var(--l3);
   border: 1px solid rgba(0,0,0,0.05);
-  opacity: 0.8;
 }
-.calc-info h3 {
+.calc-info h2 {
   font-size: 13px;
   font-weight: 600;
   margin: 0 0 6px;
-  color: #222;
+  color: var(--l1);
   letter-spacing: -.1px;
-  opacity: 0.9;
 }
 .calc-info p {
   margin: 4px 0;
 }
 .calc-info strong {
-  color: #222;
+  color: var(--l1);
   font-weight: 600;
   font-size: 12.5px;
 }
@@ -3413,7 +3415,7 @@ body[data-result-stale="true"] .stale-hint {
   color: var(--l3);
   border-color: rgba(255,255,255,0.06);
 }
-[data-theme="dark"] .calc-info h3,
+[data-theme="dark"] .calc-info h2,
 [data-theme="dark"] .calc-info strong {
   color: var(--l1);
 }

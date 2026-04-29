@@ -2083,7 +2083,7 @@ function pwaShowBar() {
   const bar = document.getElementById('pwaBar');
   if (!bar) return;
   bar.classList.add('visible');
-  bar.removeAttribute('aria-hidden');
+  bar.removeAttribute('inert');
   _pwaBarShown = true;
 }
 
@@ -2091,7 +2091,7 @@ function pwaHideBar() {
   const bar = document.getElementById('pwaBar');
   if (!bar) return;
   bar.classList.remove('visible');
-  bar.setAttribute('aria-hidden', 'true');
+  bar.setAttribute('inert', '');
   _pwaBarShown = false;
 }
 
@@ -2115,7 +2115,7 @@ function pwaShowPopup() {
   stepsEl.replaceChildren(_pwaBuildSteps(PWA.platform));
 
   el.classList.add('visible');
-  el.removeAttribute('aria-hidden');
+  el.removeAttribute('inert');
   _pwaPopupShown = true;
 }
 
@@ -2123,7 +2123,7 @@ function pwaHidePopup() {
   const el = document.getElementById('pwaPopup');
   if (!el) return;
   el.classList.remove('visible');
-  el.setAttribute('aria-hidden', 'true');
+  el.setAttribute('inert', '');
   _pwaPopupShown = false;
 }
 
@@ -2364,7 +2364,7 @@ setTimeout(() => {
       yourCosts: "Deine Kosten",
       hintCompareFoot: "Basierend auf deinen Eingaben und Durchschnittswerten. Abweichungen sind möglich.",
       hintSingleFoot: "Basierend auf deinen Eingaben und Durchschnittswerten. Abweichungen sind möglich.",
-      calcInfoBlock: "<h3>Hinweis zur Berechnung</h3><p>Die angezeigten Werte basieren auf deinen Eingaben und durchschnittlichen Annahmen. Tatsächliche Kosten können je nach Fahrweise, Fahrzeug, Energiepreisen und Nutzung abweichen.</p><p><strong>So wird berechnet:</strong><br>Kosten = Verbrauch × Preis × Strecke</p><p>Der Rechner dient zur Orientierung und stellt keine Garantie oder Beratung dar.</p>",
+      calcInfoBlock: "<h2>Hinweis zur Berechnung</h2><p>Die angezeigten Werte basieren auf deinen Eingaben und durchschnittlichen Annahmen. Tatsächliche Kosten können je nach Fahrweise, Fahrzeug, Energiepreisen und Nutzung abweichen.</p><p><strong>So wird berechnet:</strong><br>Kosten = Verbrauch × Preis × Strecke</p><p>Der Rechner dient zur Orientierung und stellt keine Garantie oder Beratung dar.</p>",
       footerImpressum: "Impressum",
       footerDatenschutz: "Datenschutz",
       footerTerms: "AGB",
@@ -2383,6 +2383,7 @@ setTimeout(() => {
       marketEu: "Europa",
       marketUs: "USA",
       marketTr: "Türkei",
+      marketSwitchSr: "Markt wechseln, aktuell",
       // Phase 7 — dynamische Ergebnis-/Aktionstexte
       evCheaper: "E-Auto im Vorteil — laut deinen Eingaben",
       vbCheaper: "Verbrenner im Vorteil — laut deinen Eingaben",
@@ -2579,7 +2580,7 @@ setTimeout(() => {
       yourCosts: "Your costs",
       hintCompareFoot: "Results are based on your inputs and average values. Actual results may vary.",
       hintSingleFoot: "Results are based on your inputs and average values. Actual results may vary.",
-      calcInfoBlock: "<h3>Calculation Notice</h3><p>The displayed values are estimates based on your inputs and average assumptions. Actual costs may vary depending on driving style, vehicle, energy prices, and usage.</p><p><strong>How it's calculated:</strong><br>Cost = consumption × price × distance</p><p>This tool is for informational purposes only and does not constitute advice or guarantee.</p>",
+      calcInfoBlock: "<h2>Calculation Notice</h2><p>The displayed values are estimates based on your inputs and average assumptions. Actual costs may vary depending on driving style, vehicle, energy prices, and usage.</p><p><strong>How it's calculated:</strong><br>Cost = consumption × price × distance</p><p>This tool is for informational purposes only and does not constitute advice or guarantee.</p>",
       footerImpressum: "Imprint",
       footerDatenschutz: "Privacy",
       footerTerms: "Terms",
@@ -2598,6 +2599,7 @@ setTimeout(() => {
       marketEu: "Europe",
       marketUs: "USA",
       marketTr: "Türkiye",
+      marketSwitchSr: "Change market, currently",
       // Phase 7 — dynamic result/action texts
       evCheaper: "EV advantage — based on your inputs",
       vbCheaper: "ICE advantage — based on your inputs",
@@ -2794,7 +2796,7 @@ setTimeout(() => {
       yourCosts: "Maliyetleriniz",
       hintCompareFoot: "Sonuçlar girdilerine ve ortalama değerlere dayanır. Farklılık gösterebilir.",
       hintSingleFoot: "Sonuçlar girdilerine ve ortalama değerlere dayanır. Farklılık gösterebilir.",
-      calcInfoBlock: "<h3>Hesaplama Bilgisi</h3><p>Gösterilen değerler, girdilerine ve ortalama varsayımlara dayalı tahminlerdir. Gerçek maliyetler sürüş tarzına, araç tipine, enerji fiyatlarına ve kullanıma göre değişebilir.</p><p><strong>Nasıl hesaplanır:</strong><br>Maliyet = tüketim × fiyat × mesafe</p><p>Bu araç yalnızca bilgilendirme amaçlıdır ve garanti veya danışmanlık sunmaz.</p>",
+      calcInfoBlock: "<h2>Hesaplama Bilgisi</h2><p>Gösterilen değerler, girdilerine ve ortalama varsayımlara dayalı tahminlerdir. Gerçek maliyetler sürüş tarzına, araç tipine, enerji fiyatlarına ve kullanıma göre değişebilir.</p><p><strong>Nasıl hesaplanır:</strong><br>Maliyet = tüketim × fiyat × mesafe</p><p>Bu araç yalnızca bilgilendirme amaçlıdır ve garanti veya danışmanlık sunmaz.</p>",
       footerImpressum: "Künye",
       footerDatenschutz: "Gizlilik",
       footerTerms: "Şartlar",
@@ -2813,6 +2815,7 @@ setTimeout(() => {
       marketEu: "Avrupa",
       marketUs: "ABD",
       marketTr: "Türkiye",
+      marketSwitchSr: "Pazar değiştir, şu an",
       // Phase 7 — dinamik sonuç/aksiyon metinleri
       evCheaper: "Elektrikli avantajı — girdilerine göre",
       vbCheaper: "Benzinli avantajı — girdilerine göre",
