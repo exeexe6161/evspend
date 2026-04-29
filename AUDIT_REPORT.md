@@ -2532,3 +2532,81 @@ Strict respektiert — calc(), MARKET_CONFIG, n() unverändert.
 ---
 
 *Ende Phase-M.6.1-Doku.*
+
+---
+
+## Phase R+ — Deep License Audit (Forensic) — 29. April 2026
+
+**Audit-Modus:** Read-Only Forensic Inspection (kein Code geändert)
+**Auditor:** Claude (Opus 4.7) per Anthropic
+**Tag at Audit:** `v1.0-pill-center-hotfix2` (HEAD: `2a08d98`)
+**Output-Datei:** [`PHASE_R_PLUS_DEEP_LICENSE_AUDIT.md`](./PHASE_R_PLUS_DEEP_LICENSE_AUDIT.md) (1269 Zeilen / ~80 KB)
+
+### Audit-Methodik
+
+R+ erweitert die Standard-Phase-R auf forensische Tiefe:
+- **211 Files** vollständig inventarisiert (HTML + JS + CSS + Assets + Configs)
+- **SHA-256 Hashing** für Asset-Integrity (Inter-Font byte-identisch zur Upstream-Source verifiziert)
+- **49 unique Hex-Farben** gegen 12 Brand-System-Color-DBs cross-referenced (Apple iOS, Material 3, Microsoft Fluent)
+- **Jeder SVG-Pfad** in `index.html` einzeln gegen Lucide v0.511.0 fingerprint-getested
+- **12 vendor-spezifische Font-Keywords** negativ-getestet (`-apple-system`, `BlinkMacSystemFont`, `Helvetica Neue`, …) — alle 0 Treffer
+- **Chart.js Sub-Dependency** (`@kurkle/color v0.3.2`, MIT) identifiziert und attribution-verifiziert
+- **AI-Disclosure-Trail** über git log (Co-Authored-By Claude in allen Phase-T Commits)
+
+### Audit-Ergebnis
+
+| Schweregrad | Phase R | Phase R+ | Δ |
+|---|---|---|---|
+| 🔴 HOCH | 0 | 0 | — |
+| 🟡 MITTEL | 0 | **1** | **+1 (NEUER FUND)** |
+| 🟢 NIEDRIG | 5 | 8 | +3 |
+
+### 🟡 R+1 — NEUER FUND (Phase R hat das übersehen)
+
+`#34C759` Apple iOS Light Mode "System Green" wird in `.qc-btn--switch` verwendet (`styles-app.css:2823`) plus 6 weitere RGBA-Vorkommen `rgba(52,199,89,…)` (RGB-Triple desselben Apple-Greens) in box-shadows und @keyframes switchPulse.
+
+**Lizenz-Bewertung:**
+- Hex-Werte sind nicht copyright-fähig (17 USC § 102(b), § 2 UrhRG) ✓
+- Apple hat KEINEN Trademark auf grüne Hex-Codes ✓
+- ABER: visuelle Brand-Anlehnung — der grüne Pulse-Button könnte den Eindruck einer Apple-affinen Design-Sprache erwecken
+
+**Empfohlene Mitigation (Sprint U1, ~30 Min):**
+```diff
+- background:#34C759;        ← Apple iOS System Green
++ background:var(--ev-color); ← #22c55e Tailwind green-500 (brand-independent, bereits im Token-System)
+```
+Plus alle `rgba(52,199,89,…)` → `rgba(34,197,94,…)`.
+
+### R+ bestätigt aus Phase R
+
+- ✓ Inter Font (OFL 1.1) self-hosted, byte-identisch (sha256: `693b77d4f32ee9b8…`)
+- ✓ Chart.js v4.4.6 (MIT) mit korrekt erhaltenem inline-Header
+- ✓ Lucide-Icons (ISC) — alle 8 unique Icons in `index.html` 1:1 zu Lucide v0.511.0 verifiziert
+- ✓ Brand-Assets AI-generiert via Claude/Anthropic ToS — User retains rights
+- ✓ Keine Apple SF Symbols, Material Icons, Microsoft Fluent
+- ✓ Keine Vendor-Font-Keywords (`-apple-system`, etc. = 0 hits in 3 CSS + script.js + index.html)
+- ✓ CSP `default-src 'none'` enforced (vercel.json)
+
+### R+ Recommendations (priorisiert)
+
+| Sprint | Inhalt | Aufwand | Priorität |
+|---|---|---|---|
+| **U1** | Apple-Color-Removal (`#34C759` → `#22c55e`) | <30 Min | 🟡 HIGH |
+| U2 | Documentation-Polish (`package.json` rebrand, Lucide-Klärung, `<meta author>`) | ~20 Min | 🟢 MED |
+| U3 | Optional Repo-Hygiene (Italic-Font verify, `Inter-4/` move, font-weight 100 dead-code) | ~30 Min | 🟢 LOW |
+
+### R+ Compliance-Statement
+
+EVSpend ist nach Audit-Stand `v1.0-pill-center-hotfix2`:
+- proprietäres Eigentum von Hakan Guer (mit Co-Authoring von Claude)
+- frei von Copyleft / GPL / AGPL Komponenten
+- mit korrekt erhaltenen MIT/OFL/ISC-Attributionen
+- frei von Apple-, Material-, Microsoft-Brand-Marken (außer der nominativen Safari-Erwähnung in PWA-Anleitung — Fair Use)
+
+**Outstanding Issue:** R+1 (Apple-System-Green) — adressierbar in Sprint U1 für 100% Brand-Independence.
+
+Vollständiger Bericht: [`PHASE_R_PLUS_DEEP_LICENSE_AUDIT.md`](./PHASE_R_PLUS_DEEP_LICENSE_AUDIT.md)
+
+---
+
+*Ende Phase-R+-Doku.*
