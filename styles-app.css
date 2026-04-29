@@ -3380,6 +3380,7 @@ body[data-result-stale="true"] .stale-hint {
   font-size:12.5px;
   line-height:1.55;
   color:var(--l3);
+  text-align:center;
   animation:calcInfoExpand .25s ease-out;
 }
 .calc-info-body p{margin:6px 0;}
