@@ -3331,11 +3331,16 @@ body[data-result-stale="true"] .stale-hint {
 .calc-info{
   margin:28px auto 0;
   max-width:420px;
-  text-align:center;
 }
+/* Phase T6 Hotfix2: details als column-flex mit align-items center.
+   Vorher inline-block + text-align:center — funktioniert nicht zuverlässig:
+   summary (inline-flex) klebte links, sobald body offen war und details
+   sich auf body-width streckte. Flex-column + align-items center
+   positioniert summary UND body unabhängig immer mittig, beide States. */
 .calc-info details{
-  display:inline-block;
-  text-align:center;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
 }
 .calc-info summary{
   display:inline-flex;
