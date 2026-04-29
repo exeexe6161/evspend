@@ -1255,7 +1255,7 @@ function renderLongterm({ yrEv, yrVb }) {
   }
 }
 
-// ── Kostenentwicklung Chart (Apple-clean line chart) ─────────────────────────
+// ── Kostenentwicklung Chart (Minimalist line chart) ─────────────────────────
 function _isDark() {
   return document.documentElement.getAttribute("data-theme") === "dark";
 }
