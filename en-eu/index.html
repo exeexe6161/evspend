@@ -46,7 +46,7 @@
 <title>EVSpend – EV vs ICE Cost Calculator</title>
 <script src="/theme-init.js?v=20260428-31"></script>
 <script src="/en-eu/init-eu.js?v=20260428-1"></script>
-<link rel="stylesheet" href="/styles-app.min.css?v=20260430-z2">
+<link rel="stylesheet" href="/styles-app.min.css?v=20260430-z3">
 <link rel="stylesheet" href="/en-eu/styles-en-eu.css?v=20260426-1">
 <!-- Inline <svg> icon-set provenance:
      Path data taken verbatim from Lucide v0.511.0 (https://lucide.dev,
@@ -352,15 +352,8 @@
 <!-- Cost evolution chart (Compare) — above the result -->
 <div id="chartSection" class="mode-compare-only chart-section" hidden>
   <div class="list-card chart-card-v2">
-    <div class="chart-legend">
-      <span class="chart-dot chart-dot--ev" aria-hidden="true"></span><span class="chart-legend-lbl" data-i18n="typeEv">EV</span>
-      <span class="chart-dot chart-dot--vb" aria-hidden="true"></span><span class="chart-legend-lbl" data-i18n="typeVb">ICE</span>
-    </div>
-    <canvas id="costChart" class="cost-chart" aria-label="Cost evolution over kilometres"></canvas>
-    <div class="chart-axes">
-      <span class="chart-axis-x" data-i18n="chartAxisX">Kilometres</span>
-      <span class="chart-axis-y" data-i18n="chartAxisY">Cost (€)</span>
-    </div>
+    <div class="chart-card-hdr" data-i18n="chartHeader">Cost comparison</div>
+    <canvas id="costChart" class="cost-chart" aria-label="Cost comparison EV vs ICE"></canvas>
   </div>
 </div>
 
@@ -479,6 +472,6 @@
   </div>
 </div>
 
-<script src="/script.min.js?v=20260429-1"></script>
+<script src="/script.min.js?v=20260430-z3"></script>
 </body>
 </html>

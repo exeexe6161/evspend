@@ -1280,90 +1280,97 @@ function renderCostChart({ kmMax, ev, verb }) {
   ctx.clearRect(0, 0, cssW, cssH);
 
   const dark   = _isDark();
-  const axisC  = dark ? "rgba(255,255,255,.10)" : "rgba(17,24,39,.08)";
-  const tickC  = dark ? "rgba(235,235,245,.45)" : "rgba(107,114,128,.85)";
-  // Phase E — EV-Linie konsistent mit EV-Theme: Mint-Grün statt Blau.
+  const tickC  = dark ? "rgba(235,235,245,.55)" : "rgba(107,114,128,.85)";
+  const axisC  = dark ? "rgba(255,255,255,.06)" : "rgba(17,24,39,.05)";
+  // Phase Z Sprint Z3 — Volume-Bars (horizontal). Konsistent zur EV/ICE-Theme:
+  // EV = Mint-Grün, ICE = Orange. Track-Bg subtle für Tiefe.
   const evC    = dark ? "#4ade80" : "#22c55e";
   const vbC    = dark ? "#fbbf24" : "#f59e0b";
-  const evFill = dark ? "rgba(74,222,128,.10)" : "rgba(34,197,94,.08)";
-  const vbFill = dark ? "rgba(251,191,36,.08)" : "rgba(245,158,11,.06)";
+  const trackC = dark ? "rgba(255,255,255,.05)" : "rgba(17,24,39,.04)";
+  const lblC   = dark ? "rgba(235,235,245,.85)" : "rgba(31,41,55,.95)";
 
-  const padL = 44, padR = 14, padT = 10, padB = 26;
+  // Total cost at kmMax (€)
+  const evCost = ev   * kmMax / 100;
+  const vbCost = verb * kmMax / 100;
+  const maxC   = Math.max(evCost, vbCost) || 1;
+
+  const sym  = _currencySymbol();
+  const evL  = (typeof _t === "function") ? _t("typeEv") : "E-Auto";
+  const vbL  = (typeof _t === "function") ? _t("typeVb") : "Verbrenner";
+
+  // Layout: 2 rows of horizontal bars. Each row = label-strip + bar-track + value-strip.
+  const rowGap = 28;
+  const labelStripH = 18;
+  const barH = 22;
+  const padL = 12, padR = 12, padT = 18, padB = 10;
   const plotW = cssW - padL - padR;
-  const plotH = cssH - padT - padB;
+  const rowH = labelStripH + barH + 6; // label + bar + bottom margin to value
+  const startY = padT;
 
-  // Costs at kmMax (€, linear from 0)
-  const evMax = ev   * kmMax / 100;
-  const vbMax = verb * kmMax / 100;
-  const yMax  = Math.max(evMax, vbMax) * 1.08 || 1;
+  function drawBar(rowIdx, label, value, color) {
+    const yLabel = startY + rowIdx * (rowH + rowGap);
+    const yBar   = yLabel + labelStripH;
+    const w      = (value / maxC) * plotW;
+    const r      = 6;
 
-  const xOf = km   => padL + (km / kmMax) * plotW;
-  const yOf = cost => padT + plotH - (cost / yMax) * plotH;
+    // Row label (left) + value (right), same baseline
+    ctx.font = "600 12px " + _CF;
+    ctx.textBaseline = "alphabetic";
+    ctx.fillStyle = lblC;
+    ctx.textAlign = "left";
+    ctx.fillText(label, padL, yLabel + 12);
+    ctx.textAlign = "right";
+    ctx.fillStyle = color;
+    const valStr = (value >= 100
+      ? Math.round(value).toLocaleString(_currentLocale())
+      : fmt(value, 2)) + " " + sym;
+    ctx.fillText(valStr, padL + plotW, yLabel + 12);
 
-  // Grid (horizontal, 4 lines)
+    // Track
+    _roundRect(ctx, padL, yBar, plotW, barH, r);
+    ctx.fillStyle = trackC;
+    ctx.fill();
+
+    // Filled volume bar
+    if (w > 0) {
+      // Min-width für sehr kleine Werte (visuell sichtbar bleiben)
+      const fw = Math.max(w, r * 2);
+      _roundRect(ctx, padL, yBar, fw, barH, r);
+      ctx.fillStyle = color;
+      ctx.fill();
+    }
+  }
+
+  drawBar(0, evL, evCost, evC);
+  drawBar(1, vbL, vbCost, vbC);
+
+  // Footer: km-context (X-Axis-style) — single centered line statt Achsen.
+  ctx.font = "500 11px " + _CF;
+  ctx.fillStyle = tickC;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "alphabetic";
+  const distUnit = _distanceUnit();
+  const distLbl  = Math.round(_kmToDist(kmMax)).toLocaleString(_currentLocale()) + " " + distUnit;
+  ctx.fillText(distLbl, cssW / 2, cssH - padB + 2);
+  // dezenter axis-line
   ctx.strokeStyle = axisC;
   ctx.lineWidth = 1;
   ctx.beginPath();
-  for (let i = 0; i <= 4; i++) {
-    const y = padT + (plotH * i) / 4;
-    ctx.moveTo(padL, y); ctx.lineTo(padL + plotW, y);
-  }
+  ctx.moveTo(padL + 20, cssH - padB - 12);
+  ctx.lineTo(padL + plotW - 20, cssH - padB - 12);
   ctx.stroke();
+}
 
-  // Y-ticks (€)
-  ctx.fillStyle = tickC;
-  ctx.font = "500 10.5px " + _CF;
-  ctx.textAlign = "right";
-  ctx.textBaseline = "middle";
-  for (let i = 0; i <= 4; i++) {
-    const v = yMax * (1 - i / 4);
-    const y = padT + (plotH * i) / 4;
-    const lbl = v >= 100 ? Math.round(v).toLocaleString(_currentLocale()) : fmt(v, 1);
-    ctx.fillText(lbl + " " + _currencySymbol(), padL - 6, y);
-  }
-
-  // X-ticks: 0, mid, max — label in current market distance unit.
-  ctx.textAlign = "center";
-  ctx.textBaseline = "top";
-  const xTicks = [0, kmMax / 2, kmMax];
-  const distUnit = _distanceUnit();
-  xTicks.forEach(km => {
-    ctx.fillText(Math.round(_kmToDist(km)).toLocaleString(_currentLocale()) + " " + distUnit, xOf(km), padT + plotH + 6);
-  });
-
-  // Line + area helper (linear: 2 points are enough for a straight line,
-  // but we draw through several to allow for future curve)
-  function drawSeries(costAt, color, fill) {
-    const pts = [];
-    for (let i = 0; i <= 20; i++) {
-      const km = (kmMax * i) / 20;
-      pts.push([xOf(km), yOf(costAt * km / 100)]);
-    }
-    // filled area
-    ctx.beginPath();
-    ctx.moveTo(pts[0][0], padT + plotH);
-    pts.forEach(([x, y]) => ctx.lineTo(x, y));
-    ctx.lineTo(pts[pts.length - 1][0], padT + plotH);
-    ctx.closePath();
-    ctx.fillStyle = fill;
-    ctx.fill();
-    // stroke
-    ctx.beginPath();
-    pts.forEach(([x, y], i) => (i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y)));
-    ctx.strokeStyle = color;
-    ctx.lineWidth = 2;
-    ctx.lineJoin = "round";
-    ctx.lineCap  = "round";
-    ctx.stroke();
-    // end dot
-    const [ex, ey] = pts[pts.length - 1];
-    ctx.beginPath();
-    ctx.arc(ex, ey, 3.5, 0, Math.PI * 2);
-    ctx.fillStyle = color;
-    ctx.fill();
-  }
-  drawSeries(ev,   evC, evFill);
-  drawSeries(verb, vbC, vbFill);
+function _roundRect(ctx, x, y, w, h, r) {
+  if (w <= 0 || h <= 0) return;
+  const rr = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y,     x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x,     y + h, rr);
+  ctx.arcTo(x,     y + h, x,     y,     rr);
+  ctx.arcTo(x,     y,     x + w, y,     rr);
+  ctx.closePath();
 }
 function _redrawChartIfCompare() {
   if (appMode !== "compare") return;
@@ -2450,6 +2457,7 @@ setTimeout(() => {
       pwaStepDesktopMenu:    "Öffne das <strong>Browser-Menü</strong>",
       pwaStepDesktopInstall: "Wähle <strong>„App installieren“</strong>",
       footerCalc: "Rechner",
+      chartHeader: "Kostenvergleich",
       chartAxisX: "Kilometer",
       chartAxisY: "Kosten ({symbol})",
       // Share text templates (mit Platzhaltern)
@@ -2662,6 +2670,7 @@ setTimeout(() => {
       pwaStepDesktopMenu:    "Open the <strong>browser menu</strong>",
       pwaStepDesktopInstall: "Pick <strong>“Install app”</strong>",
       footerCalc: "Calculator",
+      chartHeader: "Cost comparison",
       chartAxisX: "{unit}",
       chartAxisY: "Cost ({symbol})",
       // Share text
@@ -2874,6 +2883,7 @@ setTimeout(() => {
       pwaStepDesktopMenu:    "<strong>Tarayıcı menüsünü</strong> aç",
       pwaStepDesktopInstall: "<strong>„Uygulamayı yükle“</strong> seçeneğini tıkla",
       footerCalc: "Hesaplayıcı",
+      chartHeader: "Maliyet karşılaştırması",
       chartAxisX: "Kilometre",
       chartAxisY: "Maliyet ({symbol})",
       // Share text

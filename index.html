@@ -45,7 +45,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>EVSpend – E Auto vs Verbrenner Kosten Rechner</title>
 <script src="./theme-init.js?v=20260428-31"></script>
-<link rel="stylesheet" href="./styles-app.min.css?v=20260430-z2">
+<link rel="stylesheet" href="./styles-app.min.css?v=20260430-z3">
 <!-- Inline <svg> icon-set provenance:
      Path data taken verbatim from Lucide v0.511.0 (https://lucide.dev,
      ISC License, © Lucide Contributors). Library bundled until Phase P
@@ -350,15 +350,8 @@
 <!-- Kostenentwicklung Chart (Vergleich) — über dem Ergebnis -->
 <div id="chartSection" class="mode-compare-only chart-section" hidden>
   <div class="list-card chart-card-v2">
-    <div class="chart-legend">
-      <span class="chart-dot chart-dot--ev" aria-hidden="true"></span><span class="chart-legend-lbl" data-i18n="typeEv">E-Auto</span>
-      <span class="chart-dot chart-dot--vb" aria-hidden="true"></span><span class="chart-legend-lbl" data-i18n="typeVb">Verbrenner</span>
-    </div>
-    <canvas id="costChart" class="cost-chart" aria-label="Kostenentwicklung über Kilometer"></canvas>
-    <div class="chart-axes">
-      <span class="chart-axis-x" data-i18n="chartAxisX">Kilometer</span>
-      <span class="chart-axis-y" data-i18n="chartAxisY">Kosten (€)</span>
-    </div>
+    <div class="chart-card-hdr" data-i18n="chartHeader">Kostenvergleich</div>
+    <canvas id="costChart" class="cost-chart" aria-label="Kostenvergleich E-Auto und Verbrenner"></canvas>
   </div>
 </div>
 
@@ -477,7 +470,7 @@
   </div>
 </div>
 
-<script src="./script.min.js?v=20260429-1"></script>
+<script src="./script.min.js?v=20260430-z3"></script>
 </body>
 </html>
  

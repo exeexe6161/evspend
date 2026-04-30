@@ -1204,6 +1204,11 @@
     const evBg  = focusGradient("34,197,94");
     const iceBg = focusGradient("245,158,11");
 
+    // Phase Z Sprint Z3 — Dashboard-style grouped bars. Border-radius 4px
+    // (statt 10), kleinere Bar-Thickness, dark tooltip mit Inter font,
+    // legende mit kleinen Squares (boxWidth 10 → square statt point).
+    var _isDarkTheme = (document.documentElement.getAttribute("data-theme") === "dark");
+    var _gridColor   = _isDarkTheme ? "rgba(255,255,255,0.06)" : "rgba(17,24,39,0.06)";
     _chartInstance = new window.Chart(ctx2d, {
       type: "bar",
       data: {
@@ -1214,18 +1219,18 @@
             data: series.evData,
             backgroundColor: evBg,
             hoverBackgroundColor: evBg,
-            borderRadius: 10,
+            borderRadius: 4,
             borderSkipped: false,
-            barThickness: 16
+            barThickness: 14
           },
           {
             label: _tv("typeVb"),
             data: series.iceData,
             backgroundColor: iceBg,
             hoverBackgroundColor: iceBg,
-            borderRadius: 10,
+            borderRadius: 4,
             borderSkipped: false,
-            barThickness: 16
+            barThickness: 14
           }
         ]
       },
@@ -1240,17 +1245,24 @@
         plugins: {
           legend: {
             position: "top",
-            labels: { usePointStyle: true, boxWidth: 8, padding: 16 }
+            labels: {
+              usePointStyle: true,
+              pointStyle: "rect",
+              boxWidth: 10,
+              boxHeight: 10,
+              padding: 16,
+              font: { family: '"Inter", system-ui, sans-serif', size: 12 }
+            }
           },
           tooltip: {
             mode: "nearest",
             intersect: true,
-            backgroundColor: "#111",
+            backgroundColor: "rgba(20,20,20,0.95)",
             padding: 10,
-            cornerRadius: 8,
+            cornerRadius: 6,
             displayColors: false,
-            titleFont: { size: 12, weight: "600" },
-            bodyFont:  { size: 12 },
+            titleFont: { family: '"Inter", system-ui, sans-serif', size: 12, weight: "600" },
+            bodyFont:  { family: '"Inter", system-ui, sans-serif', size: 12 },
             callbacks: {
               title: function () { return ""; },
               label: function (c) {
@@ -1264,14 +1276,14 @@
         scales: {
           x: {
             grid: { display: false },
-            ticks: { maxRotation: 0, autoSkip: true, font: { size: 11 } }
+            ticks: { maxRotation: 0, autoSkip: true, font: { family: '"Inter", system-ui, sans-serif', size: 11 } }
           },
           y: {
-            grid: { color: "rgba(0,0,0,0.05)" },
+            grid: { color: _gridColor },
             beginAtZero: true,
             ticks: {
               precision: 0,
-              font: { size: 11 },
+              font: { family: '"Inter", system-ui, sans-serif', size: 11 },
               callback: function (v) { return v + (currencySym ? " " + currencySym : ""); }
             }
           }
