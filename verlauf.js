@@ -253,6 +253,8 @@
       chartA11ySummary: "Verlaufsdiagramm mit {count} Einträgen vom {start} bis {end}. Durchschnittliche Kosten: {evCost} {currency} pro 100 {unit} beim E-Auto, {vbCost} {currency} pro 100 {unit} beim Verbrenner. Detaillierte Einträge folgen in der Tabelle.",
       chartA11yEmpty: "Keine Einträge im aktuellen Filter.",
       chartA11yFallback: "Verlaufsdiagramm verfügbar, Detaildaten konnten nicht geladen werden.",
+      chartHintSingleTitle: "Nur ein Eintrag",
+      chartHintSingleSub: "Trag noch eine Berechnung ein, dann zeichnen wir einen Verlauf.",
       tableCaption: "Detaillierte Verlaufs-Daten",
       tableHeaderDate: "Datum",
       tableHeaderDistanceMetric: "Kilometer",
@@ -322,6 +324,8 @@
       chartA11ySummary: "Historical chart with {count} entries from {start} to {end}. Average costs: {evCost} {currency} per 100 {unit} for electric vehicle, {vbCost} {currency} per 100 {unit} for combustion. Detailed entries follow in the table.",
       chartA11yEmpty: "No entries in current filter.",
       chartA11yFallback: "Historical chart available, detail data could not be loaded.",
+      chartHintSingleTitle: "Only one entry",
+      chartHintSingleSub: "Add a second entry and we will draw a trend.",
       tableCaption: "Detailed history data",
       tableHeaderDate: "Date",
       tableHeaderDistanceMetric: "Kilometers",
@@ -391,6 +395,8 @@
       chartA11ySummary: "{start} ile {end} arasında {count} kayıtla geçmiş grafiği. Ortalama maliyetler: elektrikli için 100 {unit} başına {evCost} {currency}, benzinli için 100 {unit} başına {vbCost} {currency}. Ayrıntılı kayıtlar tabloda yer alır.",
       chartA11yEmpty: "Geçerli filtrede kayıt yok.",
       chartA11yFallback: "Geçmiş grafiği mevcut, ayrıntılı veriler yüklenemedi.",
+      chartHintSingleTitle: "Tek kayıt",
+      chartHintSingleSub: "Bir grafik için ikinci bir kayıt ekle.",
       tableCaption: "Ayrıntılı geçmiş verileri",
       tableHeaderDate: "Tarih",
       tableHeaderDistanceMetric: "Kilometre",
@@ -1177,6 +1183,20 @@
       return;
     }
 
+    // Phase Z6.4: 1 entry → hint card statt einsamer Bar (kein Trend möglich)
+    const hintEl = document.getElementById("chartHint");
+    if (filtered.length === 1) {
+      if (_chartInstance) { _chartInstance.destroy(); _chartInstance = null; }
+      canvas.hidden = true;
+      if (hintEl) hintEl.hidden = false;
+      wrap.hidden = false;
+      _updateChartTitle(range);
+      _updateChartAccessibility(filtered, range);
+      return;
+    }
+    canvas.hidden = false;
+    if (hintEl) hintEl.hidden = true;
+
     if (_chartInstance) _chartInstance.destroy();
 
     const ctx2d = canvas.getContext("2d");
@@ -1251,7 +1271,12 @@
               boxWidth: 10,
               boxHeight: 10,
               padding: 16,
-              font: { family: '"Inter", system-ui, sans-serif', size: 12 }
+              font: { family: '"Inter", system-ui, sans-serif', size: 12 },
+              // Phase Z6.4: hide legend entry when its dataset has no real data
+              filter: function(item, data){
+                var ds = data.datasets[item.datasetIndex];
+                return ds && ds.data.some(function(v){ return v !== null && v !== undefined; });
+              }
             }
           },
           tooltip: {

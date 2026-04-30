@@ -384,23 +384,39 @@ body::before{
   padding:16px 18px 8px;
   gap:8px;
 }
-/* Phase M.6.1 — Empty-State-Icon: solid Surface statt radial-gradient. */
+/* Empty-State-Icon: Phase M.6.1 solid Surface, Phase Z6.4 neutral grey
+   (was blue) — Empty-States sind Hinweise, nicht Brand-Touch-Points. */
 .cmp-empty-ico{
   display:flex;
   align-items:center;
   justify-content:center;
   width:60px;height:60px;
   border-radius:12px;
-  background:rgba(37,99,235,.08);
-  color:var(--blue);
+  background:rgba(120,120,128,.10);
+  color:var(--l3);
   margin-bottom:10px;
-  box-shadow:0 0 0 1px rgba(37,99,235,.16);
+  box-shadow:0 0 0 1px rgba(120,120,128,.20);
 }
 [data-theme="dark"] .cmp-empty-ico{
-  background:rgba(59,130,246,.14);
-  color:#93c5fd;
-  box-shadow:0 0 0 1px rgba(59,130,246,.28);
+  background:rgba(255,255,255,.06);
+  color:var(--l3);
+  box-shadow:0 0 0 1px rgba(255,255,255,.12);
 }
+
+/* ── Chart-Hint — Phase Z Sprint Z6.4 ──
+   Replaces the chart canvas when only one entry is in scope. A trend
+   needs ≥2 data points; rendering a single bar reads as broken layout. */
+.chart-hint{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  text-align:center;
+  padding:32px 20px;
+  gap:8px;
+}
+.chart-hint-ico{color:var(--l4);opacity:.7;}
+.chart-hint-title{font-size:16px;font-weight:600;color:var(--l2);}
+.chart-hint-sub{font-size:13.5px;color:var(--l3);max-width:280px;line-height:1.45;}
 .cmp-empty-title{
   font-size:18px;
   font-weight:600;

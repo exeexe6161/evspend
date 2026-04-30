@@ -2490,9 +2490,9 @@ setTimeout(() => {
       shareSingle:             "Laut meiner Berechnung betragen meine Kosten {val} für {km}",
       shareSingleCarpool:      "Laut meiner Eingabe betragen die Kosten pro Person {val} für {km}",
       // Phase B — Marketing-Share-Texte (multi-line, mit www.evspend.com CTA)
-      shareTextSingleEv: "Mein E-Auto-Kostenvergleich:\nBei {km} km berechnet www.evspend.com\n{value} € Stromkosten.\nBerechne deinen eigenen Vergleich auf\nwww.evspend.com",
-      shareTextSingleVb: "Meine Verbrenner-Kosten:\nBei {km} km berechnet www.evspend.com\n{value} € Spritkosten.\nBerechne deinen eigenen Vergleich auf\nwww.evspend.com",
-      shareTextCompare:  "Mein Kostenvergleich E-Auto vs. Verbrenner:\nE-Auto: {ev_value} € | Verbrenner: {ice_value} €\nErsparnis: {savings} € auf {km} km\nBerechnet auf www.evspend.com",
+      shareTextSingleEv: "E-Auto: {value} {currency} auf {km} km ⚡\nBerechne deinen: www.evspend.com",
+      shareTextSingleVb: "Verbrenner: {value} {currency} auf {km} km ⛽\nBerechne deinen: www.evspend.com",
+      shareTextCompare:  "E-Auto: {ev_value} {currency} | Verbrenner: {ice_value} {currency}\nDu sparst {savings} {currency} auf {km} km ⚡\n\nwww.evspend.com",
       shareRideshareLine: "Fahrgemeinschaft {n} Personen: {perPerson} € pro Person",
       // Verlauf (für verlauf.html + verlauf.js)
       verlaufTitle: "Verlauf",
@@ -2703,9 +2703,9 @@ setTimeout(() => {
       shareSingle:             "Based on my inputs, my calculated cost is {val} for {km}",
       shareSingleCarpool:      "Based on my inputs, cost per person is {val} for {km}",
       // Phase B — Marketing share text (multi-line, with www.evspend.com CTA)
-      shareTextSingleEv: "My EV cost calculation:\nFor {km} km, www.evspend.com calculates\n{value} {currency} in electricity costs.\nCalculate your own comparison at\nwww.evspend.com",
-      shareTextSingleVb: "My combustion engine costs:\nFor {km} km, www.evspend.com calculates\n{value} {currency} in fuel costs.\nCalculate your own comparison at\nwww.evspend.com",
-      shareTextCompare:  "My EV vs combustion cost comparison:\nEV: {ev_value} | Combustion: {ice_value}\nSavings: {savings} for {km} km\nCalculated on www.evspend.com",
+      shareTextSingleEv: "EV: {value} {currency} for {km} km ⚡\nRun your numbers: www.evspend.com",
+      shareTextSingleVb: "ICE: {value} {currency} for {km} km ⛽\nRun your numbers: www.evspend.com",
+      shareTextCompare:  "EV: {ev_value} {currency} | ICE: {ice_value} {currency}\nYou save {savings} {currency} over {km} km ⚡\n\nwww.evspend.com",
       shareRideshareLine: "Carpool {n} people: {perPerson} {currency} per person",
       // Verlauf
       verlaufTitle: "History",
@@ -2916,9 +2916,9 @@ setTimeout(() => {
       shareSingle:             "{km} için hesaplanan maliyetim: {val}",
       shareSingleCarpool:      "Kişi başı maliyet: {val} ({km} için, girdime göre)",
       // Phase B — Marketing-Share-Metni (çok satır, www.evspend.com CTA ile)
-      shareTextSingleEv: "Elektrikli araç maliyetim:\n{km} km için www.evspend.com\n{value} ₺ elektrik maliyeti hesaplıyor.\nKendi karşılaştırmanı www.evspend.com'da yap",
-      shareTextSingleVb: "Benzinli maliyetim:\n{km} km için www.evspend.com\n{value} ₺ yakıt maliyeti hesaplıyor.\nKendi karşılaştırmanı www.evspend.com'da yap",
-      shareTextCompare:  "E-otomobil ve benzinli maliyet karşılaştırmam:\nElektrikli: {ev_value} ₺ | Benzinli: {ice_value} ₺\nTasarruf: {savings} ₺ / {km} km\nwww.evspend.com'da hesaplandı",
+      shareTextSingleEv: "Elektrikli: {value} {currency} — {km} km ⚡\nSen de hesapla: www.evspend.com",
+      shareTextSingleVb: "Benzinli: {value} {currency} — {km} km ⛽\nSen de hesapla: www.evspend.com",
+      shareTextCompare:  "Elektrikli: {ev_value} {currency} | Benzinli: {ice_value} {currency}\n{savings} {currency} tasarruf — {km} km ⚡\n\nwww.evspend.com",
       shareRideshareLine: "Araç paylaşımı {n} kişi: {perPerson} ₺ kişi başı",
       // Verlauf
       verlaufTitle: "Geçmiş",
