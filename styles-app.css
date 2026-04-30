@@ -66,12 +66,18 @@ html[data-theme="dark"],html[data-theme="dark"] body{background:#0f1115;}
   --shadow-3:0 0 0 1px var(--sep),0 4px 12px rgba(0,0,0,.06);
   --card-shadow:var(--shadow-2);
 
-  /* ── Radius scale ── */
-  --r-sm:12px;
-  --r-md:16px;
-  --r-lg:20px;
+  /* ── Radius scale ──
+     Phase Z Sprint Z1: Dashboard-aesthetic — softer corners with a clear
+     hierarchy. Cards 14px (was 20px), pill-CTAs trade pure-round for a
+     readable 12px, action buttons 10px. Pure-pill kept as escape hatch
+     for the bottom-fixed Calculate button only. */
+  --r-sm:10px;
+  --r-md:12px;
+  --r-lg:14px;
   --r-pill:999px;
-  --rc:var(--r-lg);
+  --r-card:14px;
+  --r-pill-soft:12px;
+  --rc:var(--r-card);
 
   /* ── Spacing scale (4px base) ── */
   --sp-1:4px;
@@ -101,7 +107,8 @@ html[data-theme="dark"],html[data-theme="dark"] body{background:#0f1115;}
   --h-btn-md:44px;
   --h-btn-lg:48px;
   --h-btn-xl:56px;
-  --r-btn:8px;
+  --r-btn:10px;
+  --r-input:10px;
   --press-scale:.97;
   --t-fast:.12s;
   --t-base:.15s;
@@ -451,11 +458,13 @@ body::before{
   box-shadow:var(--card-shadow);
 }
 
-/* ══ Inset list style (grouped) ══ */
+/* ══ Inset list style (grouped) ══
+   Phase Z Sprint Z1: --r-card (14px) replaces fixed 10px so the radius
+   ladder is centrally controlled. Cards stay flush, just a touch softer. */
 .list-card{
   background:var(--s1);
   margin:0 var(--gutter) 12px;
-  border-radius:10px;             /* Phase L.2 — eckiger Tool-Stil */
+  border-radius:var(--r-card);
   text-align:left;
   overflow:hidden;
   box-shadow:var(--card-shadow);
@@ -2064,22 +2073,34 @@ html:not([data-theme="dark"]) .stats-card{border:1px solid rgba(0,0,0,0.04);}
 .ra-back-link:active{opacity:.7;transform:scale(.97);}
 [data-theme="dark"] .ra-back-link{background:var(--s2);}
 
-/* ══ Schnellrechner (compact, secondary) ══ */
+/* ══ Schnellrechner (compact, secondary) ══
+   Phase Z Sprint Z1: Dashboard-Card-Stil. Header-Strip nimmt den
+   Caption auf (UPPERCASE wie eine Section-Bar), Body bleibt unverändert.
+*/
 .quick-compact{
   background:var(--s1);
   margin:14px var(--gutter) 22px;
-  padding:18px 20px 14px;
-  border-radius:var(--r-md);
+  padding:0 20px 14px;
+  border-radius:var(--r-card);
   box-shadow:var(--shadow-2),inset 0 0 0 .5px rgba(17,24,39,.03);
+  overflow:hidden;
 }
 [data-theme="dark"] .quick-compact{box-shadow:var(--shadow-2),inset 0 0 0 .5px rgba(255,255,255,.03);}
 .qc-caption{
+  display:block;
+  margin:0 -20px 12px;
+  padding:11px 18px;
+  background:rgba(17,24,39,.04);
+  border-bottom:1px solid var(--sep);
   font-size:11px;
   font-weight:700;
   letter-spacing:.9px;
   text-transform:uppercase;
   color:var(--l3);
-  padding:2px 2px 10px;
+}
+[data-theme="dark"] .qc-caption{
+  background:rgba(255,255,255,.035);
+  border-bottom-color:rgba(255,255,255,.06);
 }
 .qc-row{
   display:flex;
@@ -2375,6 +2396,118 @@ body[data-app-mode="single"][data-single-type="vb"] .qc-section--ev{
   .single-meta span{white-space:normal;padding:5px 10px;}
 }
 .single-empty{padding:28px 20px 24px;}
+
+/* ══ Dashboard-Style Result Card (Phase Z Sprint Z1) ══
+   Drei Zonen pro Result-Card:
+     1. Header-Strip   (.single-hdr)    — Mood-Tint + Badge-Centerline
+     2. Hero-Section   (.single-hero)   — große Zahl + Label
+     3. Metrics-Grid   (.single-grid / .single-cost100-line)
+   Trennlinien zwischen den Zonen. Existierende Klassen werden
+   layered erweitert, kein Markup-Change.
+*/
+.single-result{ border-radius:var(--r-card); }
+
+.single-hdr{
+  margin:0 -24px 0;
+  padding:11px 18px 11px;
+  border-bottom:1px solid rgba(34,197,94,.18);
+  background:rgba(34,197,94,.06);
+  border-radius:var(--r-card) var(--r-card) 0 0;
+}
+.single-result:has(.mode-badge--vb) .single-hdr{
+  border-bottom-color:rgba(245,158,11,.20);
+  background:rgba(245,158,11,.05);
+}
+[data-theme="dark"] .single-hdr{
+  border-bottom-color:rgba(34,197,94,.22);
+  background:rgba(34,197,94,.07);
+}
+[data-theme="dark"] .single-result:has(.mode-badge--vb) .single-hdr{
+  border-bottom-color:rgba(245,158,11,.28);
+  background:rgba(245,158,11,.07);
+}
+@media(max-width:480px){
+  .single-hdr{ margin:0 -18px 0; padding:10px 16px; }
+}
+
+.single-hero{
+  padding:24px 0 22px;
+  border-bottom:1px solid rgba(255,255,255,0);
+  position:relative;
+}
+.single-hero::after{
+  content:"";
+  position:absolute;
+  left:-24px; right:-24px; bottom:0;
+  height:1px;
+  background:var(--sep);
+  opacity:.7;
+}
+@media(max-width:480px){ .single-hero::after{ left:-18px; right:-18px; } }
+.single-hero-val{
+  font-size:clamp(40px, 6.4vw, 48px);
+  letter-spacing:-1.6px;
+}
+@media(max-width:480px){ .single-hero-val{ font-size:40px; letter-spacing:-1.3px; } }
+
+/* Mood-overlay aus Phase L deaktiviert — Header-Strip übernimmt den Tint */
+.single-result:has(.mode-badge--ev) .single-body::before,
+.single-result:has(.mode-badge--vb) .single-body::before{
+  content:none;
+}
+
+/* Metrics-Grid: Section-Spacing + dezenter Innen-Background */
+.single-grid{
+  margin:18px -24px 0;
+  border-radius:0;
+  background:transparent;
+  box-shadow:none;
+}
+@media(max-width:480px){ .single-grid{ margin:16px -18px 0; } }
+.single-cell{ padding:16px 14px 18px; }
+.single-cell + .single-cell{ border-left:1px solid var(--sep); }
+.single-cell-lbl{
+  font-size:10.5px;
+  letter-spacing:.6px;
+  font-weight:700;
+}
+.single-cell-val{ font-size:clamp(19px, 2.5vw, 22px); font-weight:800; }
+
+/* Cost/100-Line wird zur dritten Zelle (single-mode) */
+.single-cost100-line{
+  margin:0 -24px;
+  padding:14px 14px;
+  width:auto;
+  display:block;
+  border-radius:0 0 var(--r-card) var(--r-card);
+  background:rgba(17,24,39,.025);
+  box-shadow:inset 0 1px 0 var(--sep);
+  border-radius:0;
+}
+@media(max-width:480px){ .single-cost100-line{ margin:0 -18px; padding:13px 14px; } }
+[data-theme="dark"] .single-cost100-line{
+  background:rgba(255,255,255,.03);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+
+/* Single-meta wandert unter die Footer-Linie */
+.single-meta{
+  margin:0 -24px;
+  padding:14px 16px 16px;
+  background:rgba(17,24,39,.018);
+  box-shadow:inset 0 1px 0 var(--sep);
+  border-radius:0 0 var(--r-card) var(--r-card);
+  justify-content:center;
+}
+@media(max-width:480px){ .single-meta{ margin:0 -18px; padding:13px 14px 14px; } }
+[data-theme="dark"] .single-meta{
+  background:rgba(255,255,255,.025);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.06);
+}
+/* Wenn meta direkt nach cost100-line steht, eine Linie statt zwei */
+.single-cost100-line + .single-meta{ box-shadow:none; padding-top:6px; }
+/* Wenn meta direkt nach grid steht (compare-mode), grid bekommt eigene Bottom-Linie */
+.single-grid + .single-meta{ padding-top:14px; }
 
 /* ══ Per-Person Line (Fahrgemeinschaft Result) ══ */
 .per-person-line{
@@ -3105,10 +3238,10 @@ body[data-longterm="on"] .sl-row--km{
    var(--s2) als elevated Surface, var(--sep) Border, kein Gradient. */
 .range-box{
   margin:6px 4px 8px;
-  padding:12px 14px;
+  padding:14px 14px 12px;
   background:var(--s2);
   border:1px solid var(--sep);
-  border-radius:8px;
+  border-radius:var(--r-md);
   text-align:center;
   box-shadow:none;
 }
