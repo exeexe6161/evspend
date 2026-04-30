@@ -34,9 +34,12 @@
   --l4:rgba(60,60,67,.32);
   --sep:rgba(60,60,67,.10);
   --card-shadow:0 1px 2px rgba(0,0,0,.04),0 6px 18px rgba(0,0,0,.06),0 0 0 0.5px rgba(0,0,0,.04);
-  --rc:20px;
-  --r-md:16px;
-  --r-sm:12px;
+  /* Phase Z Sprint Z4 — Dashboard-Aesthetic auch auf Sub-Pages.
+     Karten 14px (statt 20px), kleinere Helper-Radii angeglichen. */
+  --rc:14px;
+  --r-md:12px;
+  --r-sm:10px;
+  --r-card:14px;
   --gutter:16px;
   --safe-top:env(safe-area-inset-top,0px);
   --safe-bot:env(safe-area-inset-bottom,0px);
@@ -136,7 +139,7 @@ body::before{
 .lang-switch{
   display:inline-flex;
   background:var(--s2);
-  border-radius:8px;
+  border-radius:10px;
   padding:2px;
   margin-left:auto;
   gap:0;
@@ -199,10 +202,27 @@ body::before{
 
 .card{
   background:var(--s1);
-  border-radius:var(--rc);
+  border-radius:var(--r-card);
   box-shadow:var(--card-shadow);
-  padding:24px 22px 22px;
+  padding:22px 22px 22px;
   margin-top:14px;
+  position:relative;
+  overflow:hidden;
+}
+/* Phase Z Sprint Z4 — Subtle Dashboard-Header-Strip auf Sub-Page Cards.
+   1px-Trennlinie statt großer Header — die Pages bestehen aus Plain-Text,
+   keine echten Daten-Sections, deshalb minimal. Der Strip macht das
+   Card-Top klar abgesetzt vom Body. */
+.card::before{
+  content:"";
+  position:absolute;
+  top:0; left:0; right:0;
+  height:3px;
+  background:linear-gradient(90deg, rgba(37,99,235,.6), rgba(37,99,235,.2));
+  opacity:.85;
+}
+[data-theme="dark"] .card::before{
+  background:linear-gradient(90deg, rgba(96,165,250,.55), rgba(96,165,250,.18));
 }
 
 .card-icon{
