@@ -197,10 +197,10 @@
   const VERLAUF_TRANSLATIONS = {
     de: {
       // Phase B — Markt-Pill auf Verlauf
-      marketDe: "Deutschland",
-      marketEu: "Europa",
-      marketUs: "USA",
-      marketTr: "Türkei",
+      marketDe: "DE · €",
+      marketEu: "EU · €",
+      marketUs: "US · $",
+      marketTr: "TR · ₺",
       verlaufTitle: "Verlauf",
       verlaufSub: "Deine persönlichen Berechnungen",
       verlaufTrust: "Basierend auf deinen berechneten Fahrten",
@@ -266,10 +266,10 @@
     },
     en: {
       // Phase B — Market pill on Verlauf
-      marketDe: "Germany",
-      marketEu: "Europe",
-      marketUs: "USA",
-      marketTr: "Türkiye",
+      marketDe: "DE · €",
+      marketEu: "EU · €",
+      marketUs: "US · $",
+      marketTr: "TR · ₺",
       verlaufTitle: "History",
       verlaufSub: "Your personal calculations",
       verlaufTrust: "Based on your calculated trips",
@@ -335,10 +335,10 @@
     },
     tr: {
       // Phase B — Verlauf üzerinde Pazar Pill
-      marketDe: "Almanya",
-      marketEu: "Avrupa",
-      marketUs: "ABD",
-      marketTr: "Türkiye",
+      marketDe: "DE · €",
+      marketEu: "EU · €",
+      marketUs: "US · $",
+      marketTr: "TR · ₺",
       verlaufTitle: "Geçmiş",
       verlaufSub: "Kişisel hesaplamalarınız",
       verlaufTrust: "Hesaplanan sürüşlerine göre",
@@ -1391,9 +1391,7 @@
     if (!lbl) return;
     const m   = _currentMarket();
     const cfg = MARKET_CONFIG[m] || MARKET_CONFIG.de;
-    const key = "market" + m.charAt(0).toUpperCase() + m.slice(1);
-    const name = _tv(key) || cfg.label || m.toUpperCase();
-    lbl.textContent = name + " " + (cfg.symbol || "");
+    lbl.textContent = m.toUpperCase() + " · " + (cfg.symbol || "");
   }
   function _updateMarketMenuActive() {
     const cur = _currentMarket();

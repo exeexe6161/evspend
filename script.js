@@ -2382,10 +2382,10 @@ setTimeout(() => {
       footerVerlauf: "Verlauf",
       footerNote: "Herstellerneutraler Kostenvergleich. Keine Werbung. Daten lokal gespeichert.",
       privacyNotice: "Daten werden lokal im Browser gespeichert. Es erfolgt keine Übertragung an Server.",
-      marketDe: "Deutschland",
-      marketEu: "Europa",
-      marketUs: "USA",
-      marketTr: "Türkei",
+      marketDe: "DE · €",
+      marketEu: "EU · €",
+      marketUs: "US · $",
+      marketTr: "TR · ₺",
       marketSwitchSr: "Markt wechseln, aktuell",
       // Phase 7 — dynamische Ergebnis-/Aktionstexte
       evCheaper: "E-Auto im Vorteil — laut deinen Eingaben",
@@ -2595,10 +2595,10 @@ setTimeout(() => {
       footerVerlauf: "History",
       footerNote: "Manufacturer-neutral cost comparison · No advertising",
       privacyNotice: "Data is stored locally in your browser. No data is transmitted to servers.",
-      marketDe: "Germany",
-      marketEu: "Europe",
-      marketUs: "USA",
-      marketTr: "Türkiye",
+      marketDe: "DE · €",
+      marketEu: "EU · €",
+      marketUs: "US · $",
+      marketTr: "TR · ₺",
       marketSwitchSr: "Change market, currently",
       // Phase 7 — dynamic result/action texts
       evCheaper: "EV advantage — based on your inputs",
@@ -2808,10 +2808,10 @@ setTimeout(() => {
       footerVerlauf: "Geçmiş",
       footerNote: "Üreticiden bağımsız maliyet karşılaştırması · Reklam yok",
       privacyNotice: "Veriler yalnızca tarayıcınızda saklanır. Sunuculara aktarılmaz.",
-      marketDe: "Almanya",
-      marketEu: "Avrupa",
-      marketUs: "ABD",
-      marketTr: "Türkiye",
+      marketDe: "DE · €",
+      marketEu: "EU · €",
+      marketUs: "US · $",
+      marketTr: "TR · ₺",
       marketSwitchSr: "Pazar değiştir, şu an",
       // Phase 7 — dinamik sonuç/aksiyon metinleri
       evCheaper: "Elektrikli avantajı — girdilerine göre",
@@ -3285,9 +3285,7 @@ setTimeout(() => {
   // aktualisiert die Pill, wendet Markt-Preis-Defaults inkl. Slider-Range an
   // und dispatcht eaf:marketchange plus abhängige language/currency-Events.
   function _marketLabelText(code, mk) {
-    var key  = "market" + code.charAt(0).toUpperCase() + code.slice(1);
-    var name = _t(key) || (mk.label || code.toUpperCase());
-    return name + " " + (mk.symbol || "");
+    return code.toUpperCase() + " · " + (mk.symbol || "");
   }
   function _refreshMarketPillLabel() {
     var lbl = document.getElementById("marketSwitchLabel");
