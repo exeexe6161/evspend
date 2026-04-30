@@ -1073,10 +1073,10 @@ button .ico,a .ico{margin-right:6px;}
   .lt-line{font-size:13.5px;gap:10px;}
   .longterm-breakeven{font-size:12.5px;}
 
-  /* Phase T2 — Pill-Tabs auf Small-Mobile: kompakteres Padding-X
-     spart Platz auf 320-375px (Pill-Radius bleibt --r-pill). */
+  /* Phase Z Sprint Z2 — Square-tabs on small mobile: Slightly smaller font
+     keeps the uppercase pair readable down to 320px. Radius stays 10px. */
   .mode-btn,
-  .type-btn{padding:10px 14px;font-size:13.5px;}
+  .type-btn{padding:11px 10px;font-size:12px;letter-spacing:.04em;}
 
   .note-input{padding:11px 13px;font-size:14px;}
   .note-label{font-size:12px;}
@@ -1819,10 +1819,11 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
   background:var(--s2);
   color:var(--l2);
   font-family:inherit;
-  font-size:var(--fs-base);
+  font-size:12.5px;
   font-weight:600;
-  letter-spacing:-.1px;
-  border-radius:var(--r-pill);
+  letter-spacing:.04em;
+  text-transform:uppercase;
+  border-radius:10px;
   cursor:pointer;
   transition:background var(--t-base) ease,color var(--t-base) ease,transform var(--t-fast) ease;
   -webkit-tap-highlight-color:transparent;
@@ -2189,16 +2190,17 @@ html:not([data-theme="dark"]) .stats-card{border:1px solid rgba(0,0,0,0.04);}
 .mode-btn,
 .type-btn{
   flex:1;
-  padding:10px 20px;
+  padding:11px 14px;
   min-height:var(--h-btn-md);
   border:0;
   background:var(--s2);
   color:var(--l2);
   font-family:inherit;
-  font-size:var(--fs-md);
+  font-size:13px;
   font-weight:600;
-  letter-spacing:var(--ls-snug);
-  border-radius:var(--r-pill);
+  letter-spacing:.05em;
+  text-transform:uppercase;
+  border-radius:10px;
   cursor:pointer;
   transition:background var(--t-base) ease,color var(--t-base) ease,transform var(--t-fast) ease;
   -webkit-tap-highlight-color:transparent;
@@ -2841,7 +2843,8 @@ body[data-longterm="on"] .sl-row--km{
   display:none;
 }
 
-/* iOS-style Switch */
+/* Toggle-Switch — Phase Z Sprint Z2: Square-shape ersetzt iOS-Pill.
+   Track 6px radius, Thumb 4px radius. Konsistent mit Dashboard-Buttons. */
 .toggle-switch{
   position:relative;
   display:inline-block;
@@ -2853,18 +2856,18 @@ body[data-longterm="on"] .sl-row--km{
 .toggle-switch-slider{
   position:absolute;inset:0;cursor:pointer;
   background:rgba(120,120,128,.24);
-  border-radius:999px;
+  border-radius:6px;
   transition:background .25s ease,box-shadow .25s ease;
   box-shadow:inset 0 0 0 .5px rgba(0,0,0,.04);
 }
 .toggle-switch-slider:before{
   content:"";
   position:absolute;
-  left:2px;top:2px;
-  width:28px;height:28px;
+  left:3px;top:3px;
+  width:26px;height:26px;
   background:#fff;
-  border-radius:50%;
-  box-shadow:0 2px 6px rgba(0,0,0,.22),0 0 0 .5px rgba(0,0,0,.04);
+  border-radius:4px;
+  box-shadow:0 1px 3px rgba(0,0,0,.20),0 0 0 .5px rgba(0,0,0,.04);
   transition:transform .28s cubic-bezier(.34,1.2,.64,1);
 }
 .toggle-switch input:checked + .toggle-switch-slider{background:var(--blue);box-shadow:inset 0 0 0 .5px rgba(37,99,235,.28);}
@@ -3401,10 +3404,10 @@ body[data-longterm="on"] .sl-row--km{
 .chart-figure{margin:0;padding:0;}
 
 /* ══ Manual Calculate CTA (Sticky Action-Bar — fixed bottom) ══
-   Phase T Sprint T3: Pill-Format konsistent zu Tab-Pills aus T2.
-   Auto-width statt 90%-Bar, zentriert, abgerundet. Border-Bottom
-   Tool-Look (eckig) entfernt — passt nicht zu Pills. Tiefe via
-   einer subtilen Lift-Shadow. */
+   Phase Z Sprint Z2: Soft-pill (12px) ersetzt Pure-Pill (999px).
+   Konsistent mit Dashboard-Aesthetic — Soft-Edge statt Floating-Capsule.
+   Padding 13px / letter-spacing 0.08em geben dem Button eine bestimmte
+   Visual-Mass ohne dass er zur Bar wird. */
 .calc-btn {
   position: fixed;
   left: 50%;
@@ -3416,15 +3419,16 @@ body[data-longterm="on"] .sl-row--km{
   min-width: 200px;
   max-width: min(360px, calc(100vw - 32px));
   display: block;
-  padding: 14px 32px;
+  padding: 13px 28px;
   min-height: var(--h-btn-md);
-  border-radius: var(--r-pill);
+  border-radius: 12px;
   border: none;
 
   font-family: inherit;
   font-size: var(--fs-md);
   font-weight: 600;
-  letter-spacing: var(--ls-snug);
+  letter-spacing: .08em;
+  text-transform: uppercase;
 
   background: var(--blue);
   color: #fff;
