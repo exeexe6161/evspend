@@ -2864,4 +2864,82 @@ Vollständiger Bericht: [`PHASE_X_CROSS_COMPAT_AUDIT.md`](./PHASE_X_CROSS_COMPAT
 
 ---
 
-*Ende Phase-X-Doku.*
+## Phase Z (30. April 2026): Visual Style Update — Dashboard Aesthetic
+
+**Audit-Modus:** Stil-Polish (KEINE Math/Calc/Logic-Änderungen — REGEL B intakt)
+**Auditor / Implementer:** Claude (Opus 4.7) per Anthropic
+**Tag at Start:** `v1.4-cross-compat` (HEAD: `9c42e32`)
+**Trigger:** User-Wunsch — Visual-Refresh der Anwendung zu einem konsistenten
+Dashboard-Aesthetic mit klarer Card-Header / Hero / Metrics-Hierarchy.
+
+### Sprint-Übersicht
+
+| Sprint | Inhalt | Tag |
+|--------|--------|-----|
+| Z1 | Variante E Result-Cards: Header-Strip + Hero + Metrics-Layout, neue Radius-Skala | `v1.5-z1-cards` |
+| Z2 | Buttons + Toggles: Square-Style (10–12px), Uppercase-Labels, Switch 6/4px | `v1.5-z2-buttons` |
+| Z3 | Charts Redesign: Volume Bars (index) + dashboard-style grouped bars (verlauf) | `v1.5-z3-charts` |
+| Z4 | Sub-Pages konsistent: AGB / Datenschutz / Impressum / Hinweise / 404 angeglichen | `v1.5-z4-subpages` |
+| Z5 | Global Polish: Akkordeon, Footer-Links, Long-Term-Blocks, Multi-Market-Test | `v1.5-style-update` |
+
+### Scope-Disclosure
+
+Phase Z ist **rein Visual-Layer**:
+- ✅ CSS-Variablen-Skala neu gesetzt (`--r-card 14px`, `--r-md 12px`, `--r-sm 10px`, `--r-btn 10px`, `--r-input 10px`).
+- ✅ Cards bekommen einen Header-Strip mit Mood-Tint (EV grün, ICE orange) plus Hero + Metrics + Footer.
+- ✅ Mode-/Type-/Period-Tabs von Pure-Pill (`999px`) auf Square (`10px`, Uppercase, `letter-spacing .04–.05em`) umgestellt.
+- ✅ Toggle-Switch von iOS-Pill (`999px / 50%`) auf Square (`6px Track / 4px Thumb`) umgestellt.
+- ✅ Cost-Chart auf der Hauptseite von Linien-Plot zu 2 horizontalen Volume-Bars (Mint + Orange, Border-Radius 6px) umgestellt — neuer i18n-Key `chartHeader` (DE/EN/TR).
+- ✅ Verlauf-Chart-Bars: `borderRadius 4` (statt 10), `barThickness 14` (statt 16), Tooltip & Legend mit Inter-Font + Square-Boxen, Grid-Color theme-aware.
+- ✅ Sub-Pages (`styles-pages.css`): `.card` jetzt 14px-Radius mit dezentem Top-Accent-Strip; `lang-switch` 10px (statt 8px).
+- ✅ 404-CTA: Square-Pill (`12px / Uppercase / .06em`) statt Pure-Pill.
+
+### Mathematische Invarianten (REGEL B)
+
+**Verifiziert unverändert:**
+- `script.js` — `calc()`, `calcSingle()`, `calcCompare()`, `renderLongterm()`, `saveQuick()`
+  unangetastet. Diff zeigt ausschließlich `renderCostChart()` und i18n-Keys (Translation-Wert
+  `chartHeader`).
+- `verlauf.js` — Filter-Logic (`isV2`, `_filterChartEntries`, `_buildChartSeries`) unangetastet.
+  Diff betrifft nur Chart.js-Konfiguration (Radius / Thickness / Font / Tooltip-Styling).
+
+### Lizenz-Compliance (Phase R++ erhalten)
+
+Keine neuen Dependencies eingeführt:
+- Inter (OFL) — self-hosted, unverändert
+- Chart.js (MIT) — vendored, unverändert
+- Lucide-Icons (ISC) — inline, unverändert
+
+`LICENSES.md` unverändert. Phase R++ Court-Ready-Status bleibt valid.
+
+### Cache-Bust-Plan
+
+| Asset | Vorher | Nachher |
+|-------|--------|---------|
+| `styles-app.min.css` | `?v=20260429-2` | `?v=20260430-z5` |
+| `styles-pages.min.css` | `?v=20260429-1` | `?v=20260430-z5` |
+| `script.min.js` | `?v=20260429-1` | `?v=20260430-z3` |
+| `verlauf.min.js` | `?v=20260429-1` | `?v=20260430-z3` |
+
+### Smoke-Tests
+
+| Pfad | Status | Notiz |
+|------|--------|-------|
+| `/` (DE) | ✅ 200 | Dashboard-Layout aktiv |
+| `/en-eu/` (EN) | ✅ 200 | i18n-Header übernommen |
+| `/verlauf.html` | ✅ 200 | Grouped bars im neuen Style |
+| `/terms.html`, `/datenschutz.html`, `/impressum.html`, `/hinweise.html`, `/barrierefreiheit.html` | ✅ 200 | Card-Strip aktiv |
+| `/404.html` | ✅ 200 | CTA Square-Pill |
+
+CSS-Brace-Balance: `856 / 856` (`styles-app.min.css`).
+JS-Syntax: `script.js` + `verlauf.js` Function-Constructor ohne Throws.
+
+### Verdict
+
+**Visual-Refresh komplett.** Math/Calc/Logic + Translation-Keys + Schriftart-Wahl (Inter) +
+Chart-Library (Chart.js) sind unverändert. Phase R++ Court-Ready-Status und Phase X
+Cross-Compat-Coverage werden vollständig bewahrt.
+
+---
+
+*Ende Phase-Z-Doku.*
