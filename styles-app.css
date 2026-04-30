@@ -3066,25 +3066,28 @@ body[data-longterm="on"] .sl-row--km{
 [data-theme="dark"] .primary-cta-row .qc-btn--secondary:active,
 [data-theme="dark"] .primary-cta-row .qc-btn--ghost:active{background:rgba(255,255,255,.12);}
 
-/* Save — Im Verlauf speichern (hochwertig, Brand-Green-Accent) */
+/* Save — Im Verlauf speichern. Phase Z Sprint Z6.3: Grün → Blau, damit
+   Save als neutrale UI-Aktion liest und nicht mit dem EV-Brand-Grün
+   konkurriert. calcBtn bleibt solider Blau-Primary, qc-btn--save ist
+   tinted Blau-Secondary — klare Hierarchie. */
 .primary-cta-row .qc-btn--save{
   width:100%;
   height:48px;
   font-size:14.5px;
-  background:rgba(34,197,94,.10);
-  color:#16a34a;
-  box-shadow:inset 0 0 0 1px rgba(34,197,94,.22),0 1px 2px rgba(22,163,74,.08);
+  background:rgba(37,99,235,.10);
+  color:var(--blue);
+  box-shadow:inset 0 0 0 1px rgba(37,99,235,.22),0 1px 2px rgba(37,99,235,.08);
   transition:opacity .15s,transform .12s,background-color .15s,box-shadow .2s;
 }
-.primary-cta-row .qc-btn--save:hover{background:rgba(34,197,94,.14);box-shadow:inset 0 0 0 1px rgba(34,197,94,.28),0 2px 6px rgba(22,163,74,.12);}
-.primary-cta-row .qc-btn--save:active{background:rgba(34,197,94,.18);box-shadow:inset 0 0 0 1px rgba(34,197,94,.35);}
+.primary-cta-row .qc-btn--save:hover{background:rgba(37,99,235,.14);box-shadow:inset 0 0 0 1px rgba(37,99,235,.28),0 2px 6px rgba(37,99,235,.12);}
+.primary-cta-row .qc-btn--save:active{background:rgba(37,99,235,.18);box-shadow:inset 0 0 0 1px rgba(37,99,235,.35);}
 [data-theme="dark"] .primary-cta-row .qc-btn--save{
-  background:rgba(34,197,94,.14);
-  color:#4ade80;
-  box-shadow:inset 0 0 0 1px rgba(34,197,94,.30);
+  background:rgba(59,130,246,.16);
+  color:#93c5fd;
+  box-shadow:inset 0 0 0 1px rgba(59,130,246,.32);
 }
-[data-theme="dark"] .primary-cta-row .qc-btn--save:hover{background:rgba(34,197,94,.18);box-shadow:inset 0 0 0 1px rgba(34,197,94,.38),0 2px 6px rgba(0,0,0,.20);}
-[data-theme="dark"] .primary-cta-row .qc-btn--save:active{background:rgba(34,197,94,.22);}
+[data-theme="dark"] .primary-cta-row .qc-btn--save:hover{background:rgba(59,130,246,.22);box-shadow:inset 0 0 0 1px rgba(59,130,246,.40),0 2px 6px rgba(0,0,0,.20);}
+[data-theme="dark"] .primary-cta-row .qc-btn--save:active{background:rgba(59,130,246,.28);}
 .primary-cta-row .qc-btn--save[disabled]{
   background:var(--s2);
   color:var(--l4);
@@ -3399,18 +3402,31 @@ body[data-longterm="on"] .sl-row--km{
    so the canvas keeps its existing layout. */
 .chart-figure{margin:0;padding:0;}
 
-/* ══ Manual Calculate CTA (Sticky Action-Bar — fixed bottom) ══
-   Phase Z Sprint Z2: Soft-pill (12px) ersetzt Pure-Pill (999px).
-   Konsistent mit Dashboard-Aesthetic — Soft-Edge statt Floating-Capsule.
-   Padding 13px / letter-spacing 0.08em geben dem Button eine bestimmte
-   Visual-Mass ohne dass er zur Bar wird. */
-.calc-btn {
-  position: fixed;
-  left: 50%;
-  bottom: calc(14px + var(--safe-bot));
-  transform: translateX(-50%);
-  z-index: 150;
+/* ══ Sticky CTA wrapper — Phase Z Sprint Z6.3 ══
+   Frosted-glass band für die Calculate-CTA. pointer-events:none auf dem
+   Wrapper + auto auf dem Button — Klicks neben der CTA gehen durch zur
+   Slider-Zone darunter. Dark-Variante schwächt Light-Surface ab. */
+.sticky-cta-wrapper{
+  position:fixed;
+  left:0;right:0;bottom:0;
+  z-index:150;
+  display:flex;justify-content:center;
+  padding:12px 16px calc(12px + var(--safe-bot));
+  background:rgba(255,255,255,0.92);
+  -webkit-backdrop-filter:blur(12px) saturate(160%);
+  backdrop-filter:blur(12px) saturate(160%);
+  border-top:1px solid var(--sep);
+  pointer-events:none;
+}
+.sticky-cta-wrapper > .calc-btn{pointer-events:auto;}
+[data-theme="dark"] .sticky-cta-wrapper{
+  background:rgba(15,17,21,0.92);
+}
 
+/* ══ Manual Calculate CTA — Phase Z Sprint Z6.3 ══
+   Z2 Soft-Pill (12px) bleibt; Z6.3 lagert das Floating-Layout in den
+   Sticky-Wrapper aus, daher hier KEIN position:fixed mehr. */
+.calc-btn {
   width: auto;
   min-width: 200px;
   max-width: min(360px, calc(100vw - 32px));
@@ -3441,7 +3457,7 @@ body[data-longterm="on"] .sl-row--km{
   box-shadow: 0 0 0 3px rgba(59,130,246,.22),0 2px 10px rgba(37,99,235,.30),0 1px 2px rgba(0,0,0,.08);
 }
 .calc-btn:active {
-  transform: translateX(-50%) scale(var(--press-scale));
+  transform: scale(var(--press-scale));
   box-shadow: 0 1px 4px rgba(37,99,235,.20),0 1px 2px rgba(0,0,0,.06);
 }
 
