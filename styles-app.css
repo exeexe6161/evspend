@@ -152,7 +152,7 @@ body{
   background:var(--bg);
   color:var(--l1);
   text-align:center;
-  padding-bottom:calc(96px + var(--safe-bot));
+  padding-bottom:calc(80px + var(--safe-bot));
   padding-left:var(--safe-l);
   padding-right:var(--safe-r);
   background-attachment:fixed;
@@ -3418,25 +3418,34 @@ body[data-longterm="on"] .sl-row--km{
    so the canvas keeps its existing layout. */
 .chart-figure{margin:0;padding:0;}
 
-/* ══ Sticky CTA wrapper — Phase Z Sprint Z6.3 ══
-   Frosted-glass band für die Calculate-CTA. pointer-events:none auf dem
-   Wrapper + auto auf dem Button — Klicks neben der CTA gehen durch zur
-   Slider-Zone darunter. Dark-Variante schwächt Light-Surface ab. */
+/* ══ Sticky CTA wrapper — Phase Z Sprint Z6.5.d ══
+   Z6.3 frosted-glass band rolled back to the original floating pill:
+   keine Background-Fläche, kein Backdrop-Blur, kein Top-Border. Wrapper
+   ist nur Positioner; die Drop-Shadow-Tiefe wandert auf .calc-btn. */
 .sticky-cta-wrapper{
   position:fixed;
-  left:0;right:0;bottom:0;
+  left:50%;
+  bottom:calc(14px + var(--safe-bot));
+  transform:translateX(-50%);
   z-index:150;
   display:flex;justify-content:center;
-  padding:12px 16px calc(12px + var(--safe-bot));
-  background:rgba(255,255,255,0.92);
-  -webkit-backdrop-filter:blur(12px) saturate(160%);
-  backdrop-filter:blur(12px) saturate(160%);
-  border-top:1px solid var(--sep);
+  width:auto;
+  padding:0;
+  background:transparent;
+  -webkit-backdrop-filter:none;
+  backdrop-filter:none;
+  border-top:none;
   pointer-events:none;
 }
-.sticky-cta-wrapper > .calc-btn{pointer-events:auto;}
+.sticky-cta-wrapper > .calc-btn{
+  pointer-events:auto;
+  box-shadow:0 8px 24px rgba(0,0,0,0.18),0 2px 8px rgba(37,99,235,0.20);
+}
 [data-theme="dark"] .sticky-cta-wrapper{
-  background:rgba(15,17,21,0.92);
+  background:transparent;
+}
+[data-theme="dark"] .sticky-cta-wrapper > .calc-btn{
+  box-shadow:0 8px 24px rgba(0,0,0,0.50),0 2px 8px rgba(59,130,246,0.30);
 }
 
 /* ══ Manual Calculate CTA — Phase Z Sprint Z6.3 ══
