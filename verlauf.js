@@ -253,8 +253,8 @@
       chartA11ySummary: "Verlaufsdiagramm mit {count} Einträgen vom {start} bis {end}. Durchschnittliche Kosten: {evCost} {currency} pro 100 {unit} beim E-Auto, {vbCost} {currency} pro 100 {unit} beim Verbrenner. Detaillierte Einträge folgen in der Tabelle.",
       chartA11yEmpty: "Keine Einträge im aktuellen Filter.",
       chartA11yFallback: "Verlaufsdiagramm verfügbar, Detaildaten konnten nicht geladen werden.",
-      chartHintSingleTitle: "Nur ein Eintrag",
-      chartHintSingleSub: "Trag noch eine Berechnung ein, dann zeichnen wir einen Verlauf.",
+      chartHintSingleTitle: "Noch kein Trend",
+      chartHintSingleSub: "Trag Werte aus einem zweiten Zeitraum ein, dann zeichnen wir einen Verlauf.",
       tableCaption: "Detaillierte Verlaufs-Daten",
       tableHeaderDate: "Datum",
       tableHeaderDistanceMetric: "Kilometer",
@@ -324,8 +324,8 @@
       chartA11ySummary: "Historical chart with {count} entries from {start} to {end}. Average costs: {evCost} {currency} per 100 {unit} for electric vehicle, {vbCost} {currency} per 100 {unit} for combustion. Detailed entries follow in the table.",
       chartA11yEmpty: "No entries in current filter.",
       chartA11yFallback: "Historical chart available, detail data could not be loaded.",
-      chartHintSingleTitle: "Only one entry",
-      chartHintSingleSub: "Add a second entry and we will draw a trend.",
+      chartHintSingleTitle: "No trend yet",
+      chartHintSingleSub: "Add entries from a second timeframe and we will draw a trend.",
       tableCaption: "Detailed history data",
       tableHeaderDate: "Date",
       tableHeaderDistanceMetric: "Kilometers",
@@ -395,8 +395,8 @@
       chartA11ySummary: "{start} ile {end} arasında {count} kayıtla geçmiş grafiği. Ortalama maliyetler: elektrikli için 100 {unit} başına {evCost} {currency}, benzinli için 100 {unit} başına {vbCost} {currency}. Ayrıntılı kayıtlar tabloda yer alır.",
       chartA11yEmpty: "Geçerli filtrede kayıt yok.",
       chartA11yFallback: "Geçmiş grafiği mevcut, ayrıntılı veriler yüklenemedi.",
-      chartHintSingleTitle: "Tek kayıt",
-      chartHintSingleSub: "Bir grafik için ikinci bir kayıt ekle.",
+      chartHintSingleTitle: "Henüz trend yok",
+      chartHintSingleSub: "Farklı bir zaman diliminden kayıt ekleyince trend çizilir.",
       tableCaption: "Ayrıntılı geçmiş verileri",
       tableHeaderDate: "Tarih",
       tableHeaderDistanceMetric: "Kilometre",
@@ -1183,9 +1183,14 @@
       return;
     }
 
-    // Phase Z6.4: 1 entry → hint card statt einsamer Bar (kein Trend möglich)
+    // Phase Z6.5.c: hint when chart would render ≤1 unique bucket. Bucket
+    // granularity per period: today=Uhrzeit, week=Wochentag, month=Tag,
+    // year=Monat, yearly=Jahr (siehe _groupByRange). 3 Einträge am gleichen
+    // Tag im MONAT-Tab → 1 Bucket → Hint; 3 Einträge an 3 Tagen → 3 Buckets
+    // → Chart. Defensiv <=1, obwohl der !series.labels.length-Pfad oben
+    // den 0-Fall bereits abfängt.
     const hintEl = document.getElementById("chartHint");
-    if (filtered.length === 1) {
+    if (series.labels.length <= 1) {
       if (_chartInstance) { _chartInstance.destroy(); _chartInstance = null; }
       canvas.hidden = true;
       if (hintEl) hintEl.hidden = false;
