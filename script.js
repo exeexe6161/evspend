@@ -204,8 +204,8 @@ function loadInputs() {
     });
     // Back-compat: old single "km" field → fill kmEv / kmVb / kmShared
     if (saved.km != null && saved.km !== "" && saved.kmEv == null && saved.kmVb == null) {
-      if ($("kmEv")) $("kmEv").value = Math.min(1000, parseFloat(saved.km) || 500);
-      if ($("kmVb")) $("kmVb").value = Math.min(1000, parseFloat(saved.km) || 500);
+      if ($("kmEv")) $("kmEv").value = Math.min(500, parseFloat(saved.km) || 50);
+      if ($("kmVb")) $("kmVb").value = Math.min(500, parseFloat(saved.km) || 50);
       if ($("kmShared")) $("kmShared").value = Math.min(5000, parseFloat(saved.km) || 1000);
     }
   } catch(e) {}
@@ -534,6 +534,13 @@ function setMode(m) {
   appMode = m;
   try { localStorage.setItem(MODE_KEY, m); } catch(_) {}
   applyMode();
+  // Phase Z6.5.a: clamp km values to current max + refresh visual fill
+  ["kmEv","kmVb","kmShared"].forEach(function(id){
+    var el = document.getElementById(id); if (!el) return;
+    var mx = parseFloat(el.max);
+    if (isFinite(mx) && parseFloat(el.value) > mx) el.value = String(mx);
+    try { _updateSliderVal(id); _updateSliderFill(el); } catch(_) {}
+  });
   applyLongterm();
   calc();
 }
@@ -542,6 +549,13 @@ function setType(t) {
   singleType = t;
   try { localStorage.setItem(TYPE_KEY, t); } catch(_) {}
   applyMode();
+  // Phase Z6.5.a: same km-cap + refresh on type switch
+  ["kmEv","kmVb"].forEach(function(id){
+    var el = document.getElementById(id); if (!el) return;
+    var mx = parseFloat(el.max);
+    if (isFinite(mx) && parseFloat(el.value) > mx) el.value = String(mx);
+    try { _updateSliderVal(id); _updateSliderFill(el); } catch(_) {}
+  });
   calc();
 }
 
@@ -893,8 +907,8 @@ function setLongtermActive(v) {
     // Einmalige Strecke auf Defaults zurücksetzen
     const ks = $("kmShared"), ke = $("kmEv"), kv = $("kmVb");
     if (ks) ks.value = "1000";
-    if (ke) ke.value = "500";
-    if (kv) kv.value = "500";
+    if (ke) ke.value = "50";
+    if (kv) kv.value = "50";
   } else {
     // Monatswerte zurücksetzen
     kmMonat = 1000;
@@ -997,8 +1011,8 @@ function reset() {
   $("strompreis").value = 0.35;
   $("benzinpreis").value = 1.85;
   $("verbrauchVerbrenner").value = 7.0;
-  $("kmEv").value = 500;
-  $("kmVb").value = 500;
+  $("kmEv").value = 50;
+  $("kmVb").value = 50;
   if ($("kmShared")) $("kmShared").value = 1000;
   if ($("batteryKwh")) $("batteryKwh").value = 60;
   if ($("kmMonat")) { $("kmMonat").value = 1000; kmMonat = 1000; try { localStorage.setItem(LT_KM_MONAT_KEY, "1000"); } catch(_) {} }
@@ -2990,8 +3004,8 @@ setTimeout(() => {
         // Phase P Sprint 4 (F6.1): km* sliders harmonised at 0-10000 step 1
         // for consistent UX between single (kmEv/kmVb) and compare (kmShared)
         // mode — a "trip distance" means the same thing in both.
-        kmEv:                { value: 500,    min: 0,     max: 10000,   step: 1 },     // km
-        kmVb:                { value: 500,    min: 0,     max: 10000,   step: 1 },     // km
+        kmEv:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a single-mode tight range
+        kmVb:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a single-mode tight range
         kmShared:            { value: 1000,   min: 0,     max: 10000,   step: 1 },     // km
         kmMonat:             { value: 1000,   min: 100,   max: 5000,    step: 50 },    // km
         batteryKwh:          { value: 60,     min: 20,    max: 150,     step: 1 },     // kWh
@@ -3007,8 +3021,8 @@ setTimeout(() => {
         benzinpreis:         { value: 1.70,   min: 1.00,  max: 3.00,    step: 0.01 },  // €/L (EU-Schnitt; DE 1.85, ES 1.50)
         verbrauchVerbrenner: { value: 6.5,    min: 3,     max: 20,      step: 0.1 },   // L/100 km (EU-Schnitt; DE 7.0)
         evVerbrauch:         { value: 17,     min: 8,     max: 35,      step: 0.5 },   // kWh/100 km (wie DE)
-        kmEv:                { value: 500,    min: 0,     max: 10000,   step: 1 },     // km — F6.1
-        kmVb:                { value: 500,    min: 0,     max: 10000,   step: 1 },     // km — F6.1
+        kmEv:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a
+        kmVb:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a
         kmShared:            { value: 1000,   min: 0,     max: 10000,   step: 1 },     // km — F6.1
         kmMonat:             { value: 1000,   min: 100,   max: 5000,    step: 50 },    // km
         batteryKwh:          { value: 60,     min: 20,    max: 150,     step: 1 },     // kWh
@@ -3024,8 +3038,8 @@ setTimeout(() => {
         benzinpreis:         { value: 3.20,   min: 2.00,  max: 6.00,    step: 0.05 },  // $/gallon
         verbrauchVerbrenner: { value: 26,     min: 10,    max: 80,      step: 1 },     // mpg
         evVerbrauch:         { value: 30,     min: 15,    max: 50,      step: 0.5 },   // kWh/100 mi
-        kmEv:                { value: 300,    min: 0,     max: 6000,    step: 1 },     // mi — F6.1 (≈10000 km)
-        kmVb:                { value: 300,    min: 0,     max: 6000,    step: 1 },     // mi — F6.1
+        kmEv:                { value: 30,     min: 1,     max: 300,     step: 1 },     // mi — Phase Z6.5.a (≈ 50/500 km)
+        kmVb:                { value: 30,     min: 1,     max: 300,     step: 1 },     // mi — Phase Z6.5.a
         kmShared:            { value: 600,    min: 0,     max: 6000,    step: 1 },     // mi — F6.1
         kmMonat:             { value: 1000,   min: 60,    max: 3100,    step: 50 },    // mi
         batteryKwh:          { value: 75,     min: 20,    max: 150,     step: 1 },     // kWh
@@ -3041,8 +3055,8 @@ setTimeout(() => {
         benzinpreis:         { value: 48.00,  min: 20.00, max: 80.00,   step: 0.50 },  // ₺/L
         verbrauchVerbrenner: { value: 7.0,    min: 3,     max: 20,      step: 0.1 },   // L/100 km
         evVerbrauch:         { value: 17,     min: 8,     max: 35,      step: 0.5 },   // kWh/100 km
-        kmEv:                { value: 500,    min: 0,     max: 10000,   step: 1 },     // km — F6.1
-        kmVb:                { value: 500,    min: 0,     max: 10000,   step: 1 },     // km — F6.1
+        kmEv:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a
+        kmVb:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a
         kmShared:            { value: 1000,   min: 0,     max: 10000,   step: 1 },     // km — F6.1
         kmMonat:             { value: 1000,   min: 100,   max: 5000,    step: 50 },    // km
         batteryKwh:          { value: 60,     min: 20,    max: 150,     step: 1 },     // kWh
