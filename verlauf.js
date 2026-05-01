@@ -1245,8 +1245,11 @@
             backgroundColor: evBg,
             hoverBackgroundColor: evBg,
             borderRadius: 4,
-            borderSkipped: false,
-            barThickness: 14
+            borderSkipped: "bottom",
+            barThickness: "flex",
+            maxBarThickness: 44,
+            barPercentage: 0.85,
+            categoryPercentage: 0.92
           },
           {
             label: _tv("typeVb"),
@@ -1254,8 +1257,11 @@
             backgroundColor: iceBg,
             hoverBackgroundColor: iceBg,
             borderRadius: 4,
-            borderSkipped: false,
-            barThickness: 14
+            borderSkipped: "bottom",
+            barThickness: "flex",
+            maxBarThickness: 44,
+            barPercentage: 0.85,
+            categoryPercentage: 0.92
           }
         ]
       },
