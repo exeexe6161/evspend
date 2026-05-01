@@ -44,8 +44,8 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"EVSpend","url":"https://www.evspend.com","description":"Kostenvergleich E-Auto und Verbrenner: Betriebskosten und Amortisation.","applicationCategory":"UtilitiesApplication","operatingSystem":"Web, iOS, Android","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"inLanguage":"de","author":{"@type":"Person","name":"Hakan Guer"}}</script>
 <meta name="mobile-web-app-capable" content="yes">
 <title>EVSpend – E Auto vs Verbrenner Kosten Rechner</title>
-<script src="./theme-init.js?v=20260428-31"></script>
-<link rel="stylesheet" href="./styles-app.min.css?v=20260430-z6-5">
+<script src="./theme-init.js?v=20260501-legal2"></script>
+<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal2">
 <!-- Inline <svg> icon-set provenance:
      Path data taken verbatim from Lucide v0.511.0 (https://lucide.dev,
      ISC License, © Lucide Contributors). Library bundled until Phase P
@@ -267,10 +267,11 @@
     </div>
     <div class="sl-row sl-row--lt">
       <div class="sl-head">
-        <label for="longtermPremium" class="sl-lbl" data-i18n="longtermPremiumLabel">Kaufpreis E-Auto (Mehrkosten)</label>
+        <label for="longtermPremium" class="sl-lbl" data-i18n="longtermPremiumLabel">Mehrpreis E-Auto gegenüber Verbrenner</label>
         <span class="sl-val" id="longtermPremiumV">5.000 €</span>
       </div>
-      <input id="longtermPremium" class="sl sl--ev" type="range" min="0" max="40000" step="100" value="5000" data-i18n-aria="longtermPremiumLabel" aria-label="Kaufpreis E-Auto Mehrkosten">
+      <input id="longtermPremium" class="sl sl--ev" type="range" min="0" max="40000" step="100" value="5000" data-i18n-aria="longtermPremiumLabel" aria-label="Mehrpreis E-Auto gegenüber Verbrenner">
+      <div class="lt-km-hint lt-premium-excl" data-i18n="longtermPremiumExclHint">Hinweis: Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.</div>
     </div>
     <div class="longterm-result">
       <div class="longterm-totals">
@@ -286,19 +287,19 @@
         </div>
       </div>
       <div class="lt-block lt-block--loss" id="ltBlockLoss" hidden>
-        <div class="lt-block-lbl" data-i18n="longtermRemainingPremium">Verbleibender Mehrpreis</div>
+        <div class="lt-block-lbl" data-i18n="longtermRemainingPremium">Geschätzter verbleibender Mehrpreis</div>
         <div class="lt-block-val" id="ltLossVal">— €</div>
-        <div class="lt-block-hint" data-i18n="longtermLossHint">Differenz nach Betriebskosten im gewählten Zeitraum</div>
+        <div class="lt-block-hint" data-i18n="longtermLossHint">Geschätzte Differenz nach Betriebskosten im gewählten Zeitraum</div>
       </div>
       <div class="lt-block lt-block--done" id="ltBlockDone" hidden>
-        <div class="lt-block-lbl" data-i18n="longtermAmortized">E-Auto hat sich amortisiert</div>
-        <div class="lt-block-val" id="ltDoneVal">Gesamtersparnis: — €</div>
-        <div class="lt-block-hint" data-i18n="longtermDoneHint">Berechnet auf Basis deiner Eingaben</div>
+        <div class="lt-block-lbl" data-i18n="longtermAmortized">Break-Even im Zeitraum geschätzt erreicht</div>
+        <div class="lt-block-val" id="ltDoneVal">Geschätzte Differenz nach Break-Even: — €</div>
+        <div class="lt-block-hint" data-i18n="longtermDoneHint">Beispielrechnung auf Basis deiner Eingaben</div>
       </div>
       <div class="longterm-breakeven" id="ltBreakeven">Break-Even nach ca. — Jahren</div>
       <div class="longterm-be-hint" data-i18n="longtermBeHint">Basierend auf deiner monatlichen Fahrleistung</div>
     </div>
-    <div class="longterm-hint" data-i18n="longtermFootnote">Nur Betriebskosten. Anschaffung als Mehrpreis berücksichtigt.</div>
+    <div class="longterm-hint" data-i18n="longtermFootnote">Beispielrechnung – nur Betriebskosten. Anschaffung als Mehrpreis berücksichtigt; tatsächliche Gesamtkosten können stark abweichen.</div>
   </div>
 </div>
 
@@ -371,7 +372,7 @@
       <span id="compareBadge" class="mode-badge mode-badge--ev">E-Auto günstiger</span>
     </div>
     <div class="single-hero">
-      <div class="single-hero-lbl" id="compareHeroLbl">Ersparnis pro Jahr</div>
+      <div class="single-hero-lbl" id="compareHeroLbl">Geschätzte Ersparnis pro Jahr</div>
       <div class="single-hero-val" id="compareHeroVal">— €</div>
       <div class="per-person-line" id="comparePerPerson" hidden>— € pro Person</div>
     </div>
@@ -387,7 +388,7 @@
     </div>
     <div class="single-meta" id="compareMeta"></div>
   </div>
-  <div class="hint hint--foot" data-i18n="hintCompareFoot">Die Ergebnisse basieren auf deinen Eingaben und Durchschnittswerten. Tatsächliche Kosten können variieren.</div>
+  <div class="hint hint--foot" data-i18n="hintCompareFoot">Basierend auf deinen Eingaben und voreingestellten Beispielwerten. Reale Kosten können abweichen.</div>
 </div>
 
 <!-- Ergebnis (Einzelberechnung) -->
@@ -406,13 +407,13 @@
     </div>
     <div class="single-hero">
       <div class="single-hero-val" id="singleHeroVal">— €</div>
-      <div class="single-hero-lbl" id="singleHeroLbl">Kosten für — km</div>
+      <div class="single-hero-lbl" id="singleHeroLbl">Geschätzte Kosten für — km</div>
       <div class="per-person-line" id="singlePerPerson" hidden></div>
     </div>
     <div class="single-cost100-line" id="singleCost100">Ø — € / 100 km</div>
     <div class="single-meta" id="singleMeta"></div>
   </div>
-  <div class="hint hint--foot" data-i18n="hintSingleFoot">Die Ergebnisse basieren auf deinen Eingaben und Durchschnittswerten. Tatsächliche Kosten können variieren.</div>
+  <div class="hint hint--foot" data-i18n="hintSingleFoot">Basierend auf deinen Eingaben und voreingestellten Beispielwerten. Reale Kosten können abweichen.</div>
 </div>
 
 <!-- Stale-result hint (shown only while data-result-stale is set on body) -->
@@ -431,7 +432,7 @@
     <span>·</span>
     <a href="./datenschutz" data-i18n="footerDatenschutz">Datenschutz</a>
     <span>·</span>
-    <a href="./terms" data-i18n="footerTerms">AGB</a>
+    <a href="./terms" data-i18n="footerTerms">Nutzungsbedingungen</a>
     <span>·</span>
     <a href="./hinweise" data-i18n="footerHinweise">Hinweise zur Nutzung</a>
     <span>·</span>
@@ -439,7 +440,7 @@
     <span>·</span>
     <a href="./verlauf" data-i18n="footerVerlauf">Verlauf</a>
   </div>
-  <p class="footer-note" data-i18n="footerNote">Herstellerneutraler Kostenvergleich · Keine Werbung</p>
+  <p class="footer-note" data-i18n="footerNote">Herstellerneutraler Kostenvergleich · Aktuell keine Werbung und keine Affiliate-Links</p>
   <p class="footer-privacy" data-i18n="privacyNotice">Daten werden lokal im Browser gespeichert. Es erfolgt keine Übertragung an Server.</p>
   <p class="footer-copy">© 2026 EVSpend – www.evspend.com</p>
 </footer>
@@ -472,7 +473,7 @@
   </div>
 </div>
 
-<script src="./script.min.js?v=20260430-z6-5"></script>
+<script src="./script.min.js?v=20260501-legal2"></script>
 </body>
 </html>
  

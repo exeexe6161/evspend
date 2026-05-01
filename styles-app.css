@@ -152,7 +152,10 @@ body{
   background:var(--bg);
   color:var(--l1);
   text-align:center;
-  padding-bottom:calc(80px + var(--safe-bot));
+  /* Reserve space for the floating Calc-CTA pill (≈70px height + 14px gap)
+     PLUS the iOS home-indicator safe area, so footer/content never sit
+     under the fixed button or behind the Safari toolbar. */
+  padding-bottom:calc(120px + var(--safe-bot));
   padding-left:var(--safe-l);
   padding-right:var(--safe-r);
   background-attachment:fixed;
@@ -2828,6 +2831,20 @@ body[data-longterm="on"] .longterm-wrap .toggle-switch-slider{
   color:var(--l3);
   letter-spacing:.03px;
   line-height:1.55;
+}
+.lt-premium-excl{
+  margin-top:8px;
+  padding:8px 10px;
+  border-radius:8px;
+  background:rgba(120,120,128,.08);
+  border:1px solid var(--sep);
+  color:var(--l3);
+  font-size:11.5px;
+  line-height:1.5;
+  text-align:left;
+}
+[data-theme="dark"] .lt-premium-excl{
+  background:rgba(255,255,255,.04);
 }
 .lt-km-warn{
   margin-top:12px;

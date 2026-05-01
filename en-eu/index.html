@@ -44,9 +44,9 @@
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"EVSpend","url":"https://www.evspend.com/en-eu/","description":"EV vs ICE cost comparison: operating costs and payback.","applicationCategory":"UtilitiesApplication","operatingSystem":"Web, iOS, Android","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"inLanguage":"en","author":{"@type":"Person","name":"Hakan Guer"}}</script>
 <meta name="mobile-web-app-capable" content="yes">
 <title>EVSpend – EV vs ICE Cost Calculator</title>
-<script src="/theme-init.js?v=20260428-31"></script>
-<script src="/en-eu/init-eu.js?v=20260428-1"></script>
-<link rel="stylesheet" href="/styles-app.min.css?v=20260430-z6-5">
+<script src="/theme-init.js?v=20260501-legal2"></script>
+<script src="/en-eu/init-eu.js?v=20260501-legal2"></script>
+<link rel="stylesheet" href="/styles-app.min.css?v=20260501-legal2">
 <link rel="stylesheet" href="/en-eu/styles-en-eu.css?v=20260426-1">
 <!-- Inline <svg> icon-set provenance:
      Path data taken verbatim from Lucide v0.511.0 (https://lucide.dev,
@@ -269,10 +269,11 @@
     </div>
     <div class="sl-row sl-row--lt">
       <div class="sl-head">
-        <label for="longtermPremium" class="sl-lbl" data-i18n="longtermPremiumLabel">EV price premium</label>
+        <label for="longtermPremium" class="sl-lbl" data-i18n="longtermPremiumLabel">EV price premium vs. combustion</label>
         <span class="sl-val" id="longtermPremiumV">5,000 €</span>
       </div>
-      <input id="longtermPremium" class="sl sl--ev" type="range" min="0" max="40000" step="100" value="5000" data-i18n-aria="longtermPremiumLabel" aria-label="EV price premium">
+      <input id="longtermPremium" class="sl sl--ev" type="range" min="0" max="40000" step="100" value="5000" data-i18n-aria="longtermPremiumLabel" aria-label="EV price premium vs. combustion">
+      <div class="lt-km-hint lt-premium-excl" data-i18n="longtermPremiumExclHint">Note: Maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.</div>
     </div>
     <div class="longterm-result">
       <div class="longterm-totals">
@@ -288,19 +289,19 @@
         </div>
       </div>
       <div class="lt-block lt-block--loss" id="ltBlockLoss" hidden>
-        <div class="lt-block-lbl" data-i18n="longtermRemainingPremium">Remaining premium</div>
+        <div class="lt-block-lbl" data-i18n="longtermRemainingPremium">Estimated remaining premium</div>
         <div class="lt-block-val" id="ltLossVal">— €</div>
-        <div class="lt-block-hint" data-i18n="longtermLossHint">Difference after operating costs over period</div>
+        <div class="lt-block-hint" data-i18n="longtermLossHint">Estimated difference after operating costs over the selected period</div>
       </div>
       <div class="lt-block lt-block--done" id="ltBlockDone" hidden>
-        <div class="lt-block-lbl" data-i18n="longtermAmortized">EV has paid off</div>
-        <div class="lt-block-val" id="ltDoneVal">Total savings: — €</div>
-        <div class="lt-block-hint" data-i18n="longtermDoneHint">Calculated from your input</div>
+        <div class="lt-block-lbl" data-i18n="longtermAmortized">Break-even reached within period (estimated)</div>
+        <div class="lt-block-val" id="ltDoneVal">Estimated difference after break-even: — €</div>
+        <div class="lt-block-hint" data-i18n="longtermDoneHint">Example calculation based on your inputs</div>
       </div>
       <div class="longterm-breakeven" id="ltBreakeven">Break-even after approx. — years</div>
       <div class="longterm-be-hint" data-i18n="longtermBeHint">Based on your monthly mileage</div>
     </div>
-    <div class="longterm-hint" data-i18n="longtermFootnote">Operating costs only. Purchase modelled as premium.</div>
+    <div class="longterm-hint" data-i18n="longtermFootnote">Example calculation – operating costs only. Purchase modelled as premium; actual total cost of ownership may differ significantly.</div>
   </div>
 </div>
 
@@ -373,7 +374,7 @@
       <span id="compareBadge" class="mode-badge mode-badge--ev">EV cheaper</span>
     </div>
     <div class="single-hero">
-      <div class="single-hero-lbl" id="compareHeroLbl">Savings per year</div>
+      <div class="single-hero-lbl" id="compareHeroLbl">Estimated savings per year</div>
       <div class="single-hero-val" id="compareHeroVal">— €</div>
       <div class="per-person-line" id="comparePerPerson" hidden>— € per person</div>
     </div>
@@ -389,7 +390,7 @@
     </div>
     <div class="single-meta" id="compareMeta"></div>
   </div>
-  <div class="hint hint--foot" data-i18n="hintCompareFoot">Results are based on your input and average values. Actual costs may vary.</div>
+  <div class="hint hint--foot" data-i18n="hintCompareFoot">Based on your inputs and pre-set example values. Real costs may differ.</div>
 </div>
 
 <!-- Result (Single calculation) -->
@@ -408,13 +409,13 @@
     </div>
     <div class="single-hero">
       <div class="single-hero-val" id="singleHeroVal">— €</div>
-      <div class="single-hero-lbl" id="singleHeroLbl">Cost for — km</div>
+      <div class="single-hero-lbl" id="singleHeroLbl">Estimated cost for — km</div>
       <div class="per-person-line" id="singlePerPerson" hidden></div>
     </div>
     <div class="single-cost100-line" id="singleCost100">Avg — € / 100 km</div>
     <div class="single-meta" id="singleMeta"></div>
   </div>
-  <div class="hint hint--foot" data-i18n="hintSingleFoot">Results are based on your input and average values. Actual costs may vary.</div>
+  <div class="hint hint--foot" data-i18n="hintSingleFoot">Based on your inputs and pre-set example values. Real costs may differ.</div>
 </div>
 
 <!-- Stale-result hint (shown only while data-result-stale is set on body) -->
@@ -433,7 +434,7 @@
     <span>·</span>
     <a href="/en-eu/datenschutz" data-i18n="footerDatenschutz">Privacy</a>
     <span>·</span>
-    <a href="/en-eu/terms" data-i18n="footerTerms">Terms</a>
+    <a href="/en-eu/terms" data-i18n="footerTerms">Terms of Use</a>
     <span>·</span>
     <a href="/en-eu/hinweise" data-i18n="footerHinweise">Usage Notes</a>
     <span>·</span>
@@ -441,7 +442,7 @@
     <span>·</span>
     <a href="/en-eu/verlauf" data-i18n="footerVerlauf">History</a>
   </div>
-  <p class="footer-note" data-i18n="footerNote">Manufacturer-neutral cost comparison · No advertising</p>
+  <p class="footer-note" data-i18n="footerNote">Manufacturer-neutral cost comparison · Currently no advertising and no affiliate links</p>
   <p class="footer-privacy" data-i18n="privacyNotice">Data is stored locally in the browser. No transmission to servers.</p>
   <p class="footer-copy">© 2026 EVSpend – www.evspend.com</p>
 </footer>
@@ -474,6 +475,6 @@
   </div>
 </div>
 
-<script src="/script.min.js?v=20260430-z6-5"></script>
+<script src="/script.min.js?v=20260501-legal2"></script>
 </body>
 </html>

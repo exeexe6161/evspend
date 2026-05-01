@@ -6,3 +6,10 @@ dist/
 Inter-4/
 *.zip
 *.tar.gz
+
+# Editor / OS auto-backups (keep stale copies out of the repo)
+*.backup
+*.save
+*.bak
+*.orig
+*~
