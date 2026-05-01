@@ -534,13 +534,17 @@ function setMode(m) {
   appMode = m;
   try { localStorage.setItem(MODE_KEY, m); } catch(_) {}
   applyMode();
-  // Phase Z6.5.a: clamp km values to current max + refresh visual fill
+  // Phase Z6.5.a: clamp km values to current max
   ["kmEv","kmVb","kmShared"].forEach(function(id){
     var el = document.getElementById(id); if (!el) return;
     var mx = parseFloat(el.max);
     if (isFinite(mx) && parseFloat(el.value) > mx) el.value = String(mx);
-    try { _updateSliderVal(id); _updateSliderFill(el); } catch(_) {}
   });
+  // Phase Z6.5.b: full slider visual resync — display text + fill bar for
+  // every registered slider must match DOM .value after a mode change,
+  // since hidden sliders never receive input events that would refresh them.
+  try { refreshSliderValues(); } catch(_) {}
+  try { refreshSliderFills();  } catch(_) {}
   applyLongterm();
   calc();
 }
@@ -549,13 +553,15 @@ function setType(t) {
   singleType = t;
   try { localStorage.setItem(TYPE_KEY, t); } catch(_) {}
   applyMode();
-  // Phase Z6.5.a: same km-cap + refresh on type switch
+  // Phase Z6.5.a: km cap on type switch
   ["kmEv","kmVb"].forEach(function(id){
     var el = document.getElementById(id); if (!el) return;
     var mx = parseFloat(el.max);
     if (isFinite(mx) && parseFloat(el.value) > mx) el.value = String(mx);
-    try { _updateSliderVal(id); _updateSliderFill(el); } catch(_) {}
   });
+  // Phase Z6.5.b: full slider visual resync (same reasoning as setMode)
+  try { refreshSliderValues(); } catch(_) {}
+  try { refreshSliderFills();  } catch(_) {}
   calc();
 }
 
