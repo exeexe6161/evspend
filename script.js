@@ -2173,6 +2173,9 @@ function pwaShowBar() {
   bar.classList.add('visible');
   bar.removeAttribute('inert');
   _pwaBarShown = true;
+  // Body state lets CSS dodge the floating Calc-CTA out from underneath
+  // the install bar (both occupy the bottom strip, bar has higher z-index).
+  document.body.setAttribute('data-pwa-bar', 'visible');
 }
 
 function pwaHideBar() {
@@ -2181,6 +2184,7 @@ function pwaHideBar() {
   bar.classList.remove('visible');
   bar.setAttribute('inert', '');
   _pwaBarShown = false;
+  document.body.removeAttribute('data-pwa-bar');
 }
 
 function pwaBarLater() { _pwaSnooze(); pwaHideBar(); }
@@ -2448,6 +2452,8 @@ setTimeout(() => {
       yourCosts: "Deine Kosten",
       hintCompareFoot: "Basierend auf deinen Eingaben und voreingestellten Beispielwerten. Reale Kosten können abweichen.",
       hintSingleFoot: "Basierend auf deinen Eingaben und voreingestellten Beispielwerten. Reale Kosten können abweichen.",
+      hintCompareExclusions: "Nur Energie-/Kraftstoffkosten — Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.",
+      hintSingleExclusions:  "Nur Energie-/Kraftstoffkosten — Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.",
       calcInfoBlock: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Hinweis zur Berechnung</span></summary><div class=\"calc-info-body\"><p>Die angezeigten Werte basieren auf deinen Eingaben sowie voreingestellten Beispielwerten (Slider-Defaults). Tatsächliche Kosten können je nach Fahrweise, Fahrzeug, Energiepreisen, Wartung, Versicherung, Steuern, Wertverlust, Ladeverlusten und Grundgebühren abweichen.</p><p><strong>So wird berechnet:</strong><br>Kosten = Verbrauch × Preis × Strecke</p><p>Der Rechner ist eine Beispielrechnung zur Orientierung und stellt keine Garantie oder Beratung dar.</p></div></details>",
       footerImpressum: "Impressum",
       footerDatenschutz: "Datenschutz",
@@ -2506,19 +2512,21 @@ setTimeout(() => {
       toastImageError: "Fehler beim Erstellen des Bildes",
       confirmReset: "Möchtest du wirklich alles zurücksetzen?",
       // Longterm-Sektion (Main-Page)
-      longtermInfoHint: "Langzeitanalyse aktiv – Fokus auf Gesamtkosten über Zeit",
+      longtermInfoHint: "Langzeitanalyse aktiv – Schätzung über Zeit",
       labelKmPerMonth: "Monatliche Fahrleistung",
       longtermKmMonthHint: "Durchschnittliche Nutzung pro Monat",
       longtermKmWarn: "Sehr hohe monatliche Fahrleistung – Ergebnisse können stark von typischer Nutzung abweichen.",
       longtermPeriod: "Zeitraum",
       longtermPremiumLabel: "Mehrpreis E-Auto gegenüber Verbrenner",
       longtermPremiumExclHint: "Hinweis: Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.",
+      longtermLblEv: "E-Auto Energiekosten",
+      longtermLblVb: "Verbrenner Kraftstoffkosten",
       longtermRemainingPremium: "Geschätzter verbleibender Mehrpreis",
       longtermAmortized: "Break-Even im Zeitraum geschätzt erreicht",
       longtermBeHint: "Basierend auf deiner monatlichen Fahrleistung",
       longtermLossHint: "Geschätzte Differenz nach Betriebskosten im gewählten Zeitraum",
       longtermDoneHint: "Beispielrechnung auf Basis deiner Eingaben",
-      longtermFootnote: "Beispielrechnung – nur Betriebskosten. Anschaffung als Mehrpreis berücksichtigt; tatsächliche Gesamtkosten können stark abweichen.",
+      longtermFootnote: "Beispielrechnung – nur Energie-/Kraftstoffkosten. Anschaffung nur als Mehrpreis berücksichtigt; Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten. Tatsächliche Gesamtkosten können stark abweichen.",
       // Feedback-Toast-Hints (Inline-Divs unter CTAs)
       verlaufHintText: "Deine Kosten sind jetzt im Verlauf",
       shareHintText: "Teile dein Ergebnis als Bild",
@@ -2663,6 +2671,8 @@ setTimeout(() => {
       yourCosts: "Your costs",
       hintCompareFoot: "Based on your inputs and pre-set example values. Real costs may differ.",
       hintSingleFoot: "Based on your inputs and pre-set example values. Real costs may differ.",
+      hintCompareExclusions: "Energy/fuel costs only — maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.",
+      hintSingleExclusions:  "Energy/fuel costs only — maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.",
       calcInfoBlock: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Calculation Notice</span></summary><div class=\"calc-info-body\"><p>The displayed values are estimates based on your inputs and on pre-set example values (slider defaults). Actual costs may vary depending on driving style, vehicle, energy prices, maintenance, insurance, taxes, depreciation, charging losses and base fees.</p><p><strong>How it's calculated:</strong><br>Cost = consumption × price × distance</p><p>This tool is an example calculation for orientation only and does not constitute advice or guarantee.</p></div></details>",
       footerImpressum: "Imprint",
       footerDatenschutz: "Privacy",
@@ -2721,19 +2731,21 @@ setTimeout(() => {
       toastImageError: "Error creating image",
       confirmReset: "Do you really want to reset everything?",
       // Longterm section
-      longtermInfoHint: "Long-term analysis active – focus on total cost over time",
+      longtermInfoHint: "Long-term analysis active — estimate over time",
       labelKmPerMonth: "Monthly mileage",
       longtermKmMonthHint: "Average usage per month",
       longtermKmWarn: "Very high monthly mileage – results may deviate significantly from typical usage.",
       longtermPeriod: "Period",
       longtermPremiumLabel: "EV price premium vs. combustion",
       longtermPremiumExclHint: "Note: Maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.",
+      longtermLblEv: "EV energy costs",
+      longtermLblVb: "Combustion fuel costs",
       longtermRemainingPremium: "Estimated remaining premium",
       longtermAmortized: "Break-even reached within period (estimated)",
       longtermBeHint: "Based on your monthly mileage",
       longtermLossHint: "Estimated difference after operating costs over the selected period",
       longtermDoneHint: "Example calculation based on your inputs",
-      longtermFootnote: "Example calculation – operating costs only. Purchase modelled as premium; actual total cost of ownership may differ significantly.",
+      longtermFootnote: "Example calculation — energy/fuel costs only. Purchase price is considered only as a price premium; maintenance, insurance, taxes, depreciation, charging losses and base fees are not included. Actual total costs may differ significantly.",
       // Feedback hints
       verlaufHintText: "Your costs are now in history",
       shareHintText: "Share your result as an image",
@@ -2878,6 +2890,8 @@ setTimeout(() => {
       yourCosts: "Maliyetleriniz",
       hintCompareFoot: "Girdilerine ve önceden tanımlanmış örnek değerlere dayanır. Gerçek maliyetler değişebilir.",
       hintSingleFoot: "Girdilerine ve önceden tanımlanmış örnek değerlere dayanır. Gerçek maliyetler değişebilir.",
+      hintCompareExclusions: "Yalnızca enerji/yakıt maliyetleri — bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
+      hintSingleExclusions:  "Yalnızca enerji/yakıt maliyetleri — bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
       calcInfoBlock: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Hesaplama Bilgisi</span></summary><div class=\"calc-info-body\"><p>Gösterilen değerler, girdilerine ve önceden tanımlanmış örnek değerlere (sürgü varsayılanları) dayalı tahminlerdir. Gerçek maliyetler sürüş tarzına, araç tipine, enerji fiyatlarına, bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretlere göre değişebilir.</p><p><strong>Nasıl hesaplanır:</strong><br>Maliyet = tüketim × fiyat × mesafe</p><p>Bu araç yalnızca yönlendirme amaçlı bir örnek hesaplamadır ve garanti veya danışmanlık sunmaz.</p></div></details>",
       footerImpressum: "Künye",
       footerDatenschutz: "Gizlilik",
@@ -2936,19 +2950,21 @@ setTimeout(() => {
       toastImageError: "Resim oluşturulamadı",
       confirmReset: "Tüm değerleri sıfırlamak istediğinize emin misiniz?",
       // Uzun vadeli bölüm
-      longtermInfoHint: "Uzun vadeli analiz aktif – zaman içindeki toplam maliyete odaklanır",
+      longtermInfoHint: "Uzun vadeli analiz aktif — zamana göre tahmin",
       labelKmPerMonth: "Aylık kilometre",
       longtermKmMonthHint: "Aylık ortalama kullanım",
       longtermKmWarn: "Çok yüksek aylık kilometre – sonuçlar tipik kullanımdan önemli ölçüde sapabilir.",
       longtermPeriod: "Süre",
       longtermPremiumLabel: "Elektrikli aracın benzinliye göre fark fiyatı",
       longtermPremiumExclHint: "Not: Bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
+      longtermLblEv: "Elektrikli enerji maliyeti",
+      longtermLblVb: "İçten yanmalı yakıt maliyeti",
       longtermRemainingPremium: "Tahmini kalan ek maliyet",
       longtermAmortized: "Dönem içinde başabaş tahmini olarak ulaşıldı",
       longtermBeHint: "Aylık kilometrenize göre",
       longtermLossHint: "Seçilen dönemdeki işletme maliyetlerinden sonra tahmini fark",
       longtermDoneHint: "Girdilerine göre örnek hesaplama",
-      longtermFootnote: "Örnek hesaplama – yalnızca işletme maliyetleri. Alış bedeli ek maliyet olarak dikkate alınır; gerçek toplam maliyet önemli ölçüde farklı olabilir.",
+      longtermFootnote: "Örnek hesaplama — yalnızca enerji/yakıt maliyetleri. Satın alma bedeli yalnızca fiyat farkı olarak dikkate alınır; bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir. Gerçek toplam maliyetler önemli ölçüde farklı olabilir.",
       // Feedback
       verlaufHintText: "Maliyetleriniz artık geçmişte",
       shareHintText: "Sonucunuzu resim olarak paylaşın",

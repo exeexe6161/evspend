@@ -1408,6 +1408,18 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
 .hint strong{color:var(--l2);font-weight:600;}
 .hint--foot{background:linear-gradient(180deg,transparent,rgba(17,24,39,.015));}
 [data-theme="dark"] .hint--foot{background:linear-gradient(180deg,transparent,rgba(255,255,255,.015));}
+/* Sub-hint directly under .hint--foot — explicit cost-scope disclosure.
+   Slightly tighter, no top-border, no background — reads as continuation. */
+.hint--foot-sub{
+  padding:0 22px 14px;
+  font-size:11.5px;
+  color:var(--l4);
+  line-height:1.5;
+  text-align:left;
+  letter-spacing:.02px;
+}
+#compareResult:has(#compareBody[hidden]) .hint--foot-sub,
+#singleResult:has(#singleBody[hidden]) .hint--foot-sub{display:none;}
 
 /* ══ Toggle switch ══ */
 .toggle-sw{position:relative;display:inline-block;width:51px;height:31px;flex-shrink:0;}
@@ -3453,6 +3465,14 @@ body[data-longterm="on"] .sl-row--km{
   backdrop-filter:none;
   border-top:none;
   pointer-events:none;
+  transition:bottom .3s cubic-bezier(.4,0,.2,1);
+}
+/* When the PWA install bar is visible (z-index 650) it overlays the same
+   bottom strip as the floating Calc-CTA (z-index 150). Lift the CTA above
+   the bar so it stays reachable. ~110px clears the bar card incl. its
+   own safe-area padding. */
+body[data-pwa-bar="visible"] .sticky-cta-wrapper{
+  bottom:calc(110px + var(--safe-bot));
 }
 .sticky-cta-wrapper > .calc-btn{
   pointer-events:auto;

@@ -45,7 +45,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>EVSpend – E Auto vs Verbrenner Kosten Rechner</title>
 <script src="./theme-init.js?v=20260501-legal3"></script>
-<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal3">
+<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal4">
 <!-- Inline <svg> icon-set provenance:
      Path data taken verbatim from Lucide v0.511.0 (https://lucide.dev,
      ISC License, © Lucide Contributors). Library bundled until Phase P
@@ -247,7 +247,7 @@
     </label>
   </div>
   <div class="longterm-body" id="longtermBody" hidden>
-    <div class="lt-info-hint" data-i18n="longtermInfoHint">Langzeitanalyse aktiv – Fokus auf Gesamtkosten über Zeit</div>
+    <div class="lt-info-hint" data-i18n="longtermInfoHint">Langzeitanalyse aktiv – Schätzung über Zeit</div>
     <div class="sl-row sl-row--lt">
       <div class="sl-head">
         <label for="kmMonat" class="sl-lbl" data-i18n="labelKmPerMonth">Monatliche Fahrleistung</label>
@@ -277,12 +277,12 @@
       <div class="longterm-totals">
         <div class="lt-line">
           <span class="lt-dot lt-dot--ev" aria-hidden="true"></span>
-          <span class="lt-lbl" data-i18n="typeEv">E-Auto</span>
+          <span class="lt-lbl" data-i18n="longtermLblEv">E-Auto Energiekosten</span>
           <span class="lt-val" id="ltEvTotal">— €</span>
         </div>
         <div class="lt-line">
           <span class="lt-dot lt-dot--vb" aria-hidden="true"></span>
-          <span class="lt-lbl" data-i18n="typeVb">Verbrenner</span>
+          <span class="lt-lbl" data-i18n="longtermLblVb">Verbrenner Kraftstoffkosten</span>
           <span class="lt-val" id="ltVbTotal">— €</span>
         </div>
       </div>
@@ -299,7 +299,7 @@
       <div class="longterm-breakeven" id="ltBreakeven">Break-Even nach ca. — Jahren</div>
       <div class="longterm-be-hint" data-i18n="longtermBeHint">Basierend auf deiner monatlichen Fahrleistung</div>
     </div>
-    <div class="longterm-hint" data-i18n="longtermFootnote">Beispielrechnung – nur Betriebskosten. Anschaffung als Mehrpreis berücksichtigt; tatsächliche Gesamtkosten können stark abweichen.</div>
+    <div class="longterm-hint" data-i18n="longtermFootnote">Beispielrechnung – nur Energie-/Kraftstoffkosten. Anschaffung nur als Mehrpreis berücksichtigt; Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten. Tatsächliche Gesamtkosten können stark abweichen.</div>
   </div>
 </div>
 
@@ -389,6 +389,7 @@
     <div class="single-meta" id="compareMeta"></div>
   </div>
   <div class="hint hint--foot" data-i18n="hintCompareFoot">Basierend auf deinen Eingaben und voreingestellten Beispielwerten. Reale Kosten können abweichen.</div>
+  <div class="hint hint--foot-sub" data-i18n="hintCompareExclusions">Nur Energie-/Kraftstoffkosten — Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.</div>
 </div>
 
 <!-- Ergebnis (Einzelberechnung) -->
@@ -414,6 +415,7 @@
     <div class="single-meta" id="singleMeta"></div>
   </div>
   <div class="hint hint--foot" data-i18n="hintSingleFoot">Basierend auf deinen Eingaben und voreingestellten Beispielwerten. Reale Kosten können abweichen.</div>
+  <div class="hint hint--foot-sub" data-i18n="hintSingleExclusions">Nur Energie-/Kraftstoffkosten — Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.</div>
 </div>
 
 <!-- Stale-result hint (shown only while data-result-stale is set on body) -->
@@ -473,7 +475,7 @@
   </div>
 </div>
 
-<script src="./script.min.js?v=20260501-legal3"></script>
+<script src="./script.min.js?v=20260501-legal5"></script>
 </body>
 </html>
  

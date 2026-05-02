@@ -46,7 +46,7 @@
 <title>EVSpend – EV vs ICE Cost Calculator</title>
 <script src="/theme-init.js?v=20260501-legal3"></script>
 <script src="/en-eu/init-eu.js?v=20260501-legal3"></script>
-<link rel="stylesheet" href="/styles-app.min.css?v=20260501-legal3">
+<link rel="stylesheet" href="/styles-app.min.css?v=20260501-legal4">
 <link rel="stylesheet" href="/en-eu/styles-en-eu.css?v=20260501-legal3">
 <!-- Inline <svg> icon-set provenance:
      Path data taken verbatim from Lucide v0.511.0 (https://lucide.dev,
@@ -249,7 +249,7 @@
     </label>
   </div>
   <div class="longterm-body" id="longtermBody" hidden>
-    <div class="lt-info-hint" data-i18n="longtermInfoHint">Long-term analysis active – focus on total cost over time</div>
+    <div class="lt-info-hint" data-i18n="longtermInfoHint">Long-term analysis active — estimate over time</div>
     <div class="sl-row sl-row--lt">
       <div class="sl-head">
         <label for="kmMonat" class="sl-lbl" data-i18n="labelKmPerMonth">Monthly mileage</label>
@@ -279,12 +279,12 @@
       <div class="longterm-totals">
         <div class="lt-line">
           <span class="lt-dot lt-dot--ev" aria-hidden="true"></span>
-          <span class="lt-lbl" data-i18n="typeEv">EV</span>
+          <span class="lt-lbl" data-i18n="longtermLblEv">EV energy costs</span>
           <span class="lt-val" id="ltEvTotal">— €</span>
         </div>
         <div class="lt-line">
           <span class="lt-dot lt-dot--vb" aria-hidden="true"></span>
-          <span class="lt-lbl" data-i18n="typeVb">ICE</span>
+          <span class="lt-lbl" data-i18n="longtermLblVb">Combustion fuel costs</span>
           <span class="lt-val" id="ltVbTotal">— €</span>
         </div>
       </div>
@@ -301,7 +301,7 @@
       <div class="longterm-breakeven" id="ltBreakeven">Break-even after approx. — years</div>
       <div class="longterm-be-hint" data-i18n="longtermBeHint">Based on your monthly mileage</div>
     </div>
-    <div class="longterm-hint" data-i18n="longtermFootnote">Example calculation – operating costs only. Purchase modelled as premium; actual total cost of ownership may differ significantly.</div>
+    <div class="longterm-hint" data-i18n="longtermFootnote">Example calculation — energy/fuel costs only. Purchase price is considered only as a price premium; maintenance, insurance, taxes, depreciation, charging losses and base fees are not included. Actual total costs may differ significantly.</div>
   </div>
 </div>
 
@@ -391,6 +391,7 @@
     <div class="single-meta" id="compareMeta"></div>
   </div>
   <div class="hint hint--foot" data-i18n="hintCompareFoot">Based on your inputs and pre-set example values. Real costs may differ.</div>
+  <div class="hint hint--foot-sub" data-i18n="hintCompareExclusions">Energy/fuel costs only — maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.</div>
 </div>
 
 <!-- Result (Single calculation) -->
@@ -416,6 +417,7 @@
     <div class="single-meta" id="singleMeta"></div>
   </div>
   <div class="hint hint--foot" data-i18n="hintSingleFoot">Based on your inputs and pre-set example values. Real costs may differ.</div>
+  <div class="hint hint--foot-sub" data-i18n="hintSingleExclusions">Energy/fuel costs only — maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.</div>
 </div>
 
 <!-- Stale-result hint (shown only while data-result-stale is set on body) -->
@@ -475,6 +477,6 @@
   </div>
 </div>
 
-<script src="/script.min.js?v=20260501-legal3"></script>
+<script src="/script.min.js?v=20260501-legal5"></script>
 </body>
 </html>
