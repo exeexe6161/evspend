@@ -45,7 +45,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>EVSpend – E Auto vs Verbrenner Kosten Rechner</title>
 <script src="./theme-init.js?v=20260501-legal3"></script>
-<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal8">
+<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal9">
 <!-- Inline <svg> icon-set provenance:
      Path data taken verbatim from Lucide v0.511.0 (https://lucide.dev,
      ISC License, © Lucide Contributors). Library bundled until Phase P
@@ -54,6 +54,22 @@
 </head>
 <body data-app-mode="compare" data-single-type="ev">
 <noscript><div class="noscript-overlay"><p data-i18n="noscriptText">Diese App benötigt JavaScript. Bitte aktiviere JavaScript in deinem Browser.</p></div></noscript>
+
+<!-- App-Splash overlay — purely decorative, lives on top of the calculator
+     for ~1.3 s on the first session view, then fades out and removes
+     itself. Calculator markup beneath is fully present and usable as
+     soon as the overlay drops out. Honoured `prefers-reduced-motion`
+     hides it almost immediately. JS-driven; if the splash JS does not
+     run for any reason, a CSS animation fallback fades the overlay out
+     after 2 s so the app is never blocked. -->
+<div id="appSplash" class="app-splash" role="presentation" aria-hidden="true">
+  <div class="app-splash-stage">
+    <svg class="app-splash-logo" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
+      <polyline class="app-splash-chev app-splash-chev--outer" points="110,370 256,170 402,370" fill="none" stroke="#3DDB94" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+      <polyline class="app-splash-chev app-splash-chev--inner" points="190,295 256,205 322,295" fill="none" stroke="#3DDB94" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </div>
+</div>
 
 <!-- Screen-reader live region for slider change announcements (BFSG / WCAG 2.1) -->
 <div id="sliderAnnouncer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
@@ -475,7 +491,7 @@
   </div>
 </div>
 
-<script src="./script.min.js?v=20260501-legal8"></script>
+<script src="./script.min.js?v=20260501-legal9"></script>
 </body>
 </html>
  

@@ -1,5 +1,74 @@
 const $ = id => document.getElementById(id);
 
+// ── App-Splash lifecycle ─────────────────────────────────────────────────────
+// First-paint chevron splash. Decorative only, never blocks the app:
+//   • shown once per browser session (sessionStorage flag)
+//   • hidden almost immediately if `prefers-reduced-motion` is set
+//   • normal session view: 1.3 s display, then opacity fade-out (0.35 s)
+//   • hard safety timeout: 2.5 s, the overlay is force-removed regardless
+//     of whether the fade callbacks fired
+// The HTML overlay is wrapped in try/catch so any failure here cannot
+// prevent the rest of the app from initialising.
+(function initAppSplash() {
+  try {
+    var el = document.getElementById("appSplash");
+    if (!el) return;
+    var SEEN_KEY = "evspendSplashSeen";
+    var alreadySeen = false;
+    try { alreadySeen = sessionStorage.getItem(SEEN_KEY) === "1"; } catch (_) {}
+    var prefersReduced = false;
+    try {
+      prefersReduced = window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (_) {}
+
+    function removeSplash() {
+      if (!el || el._removed) return;
+      el._removed = true;
+      el.classList.add("is-hidden");
+      el.setAttribute("aria-hidden", "true");
+      // After the CSS opacity transition finishes, drop it from layout entirely
+      // so the calc-section can't be tap-blocked by an invisible layer.
+      setTimeout(function () {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      }, 450);
+    }
+
+    if (alreadySeen || prefersReduced) {
+      // Skip the show — drop the overlay on the next frame so it never paints
+      // a flash of the chevron.
+      requestAnimationFrame ? requestAnimationFrame(removeSplash) : removeSplash();
+      return;
+    }
+
+    // Mark seen up-front so a quick reload during the splash still suppresses
+    // the next session view.
+    try { sessionStorage.setItem(SEEN_KEY, "1"); } catch (_) {}
+
+    // Normal lifecycle: ~1.3 s on screen, then fade out.
+    var hideTimer  = setTimeout(removeSplash, 1300);
+    // Hard safety: even if hideTimer is throttled by background tabs, this
+    // wins after 2.5 s so the calculator is never blocked.
+    var killTimer  = setTimeout(function () {
+      clearTimeout(hideTimer);
+      removeSplash();
+    }, 2500);
+    // Tap to dismiss — power users skip the wait.
+    el.addEventListener("click", function () {
+      clearTimeout(hideTimer);
+      clearTimeout(killTimer);
+      removeSplash();
+    }, { once: true });
+  } catch (_) {
+    // Belt-and-braces: if anything throws, hide the overlay so the app stays
+    // usable. The CSS fallback animation will also drop it within 2 s.
+    try {
+      var fallback = document.getElementById("appSplash");
+      if (fallback) fallback.style.display = "none";
+    } catch (__) {}
+  }
+})();
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 function debounce(fn, ms) {
   let t;
