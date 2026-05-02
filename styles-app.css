@@ -1418,7 +1418,7 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
   font-size:11px;
   color:var(--l3);
   line-height:1.55;
-  text-align:left;
+  text-align:center;
   letter-spacing:.02px;
   opacity:.92;
 }
