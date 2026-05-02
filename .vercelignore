@@ -3,3 +3,22 @@
 # remain reachable on the live site for font / library attribution.
 AUDIT_REPORT.md
 PHASE_*_AUDIT*.md
+
+# Project + ignore configuration. Vercel reads these at deploy time;
+# they don't need to be served as static content.
+vercel.json
+.vercelignore
+.gitignore
+
+# Unminified source files. The HTML loads only the minified bundles
+# (script.min.js / verlauf.min.js / styles-app.min.css /
+# styles-pages.min.css), so the raw .js / .css originals just waste
+# bandwidth and expose source structure if reachable. NEVER add the
+# .min.* counterparts here — they ARE the production bundles.
+# middleware.js is intentionally NOT listed; Vercel both runs it as
+# edge middleware AND serves it as a static file, and excluding it
+# would break the geo-IP redirect.
+script.js
+verlauf.js
+styles-app.css
+styles-pages.css
