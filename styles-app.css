@@ -1409,15 +1409,20 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
 .hint--foot{background:linear-gradient(180deg,transparent,rgba(17,24,39,.015));}
 [data-theme="dark"] .hint--foot{background:linear-gradient(180deg,transparent,rgba(255,255,255,.015));}
 /* Sub-hint directly under .hint--foot — explicit cost-scope disclosure.
-   Slightly tighter, no top-border, no background — reads as continuation. */
+   Continuation of the main hint: same horizontal padding, no top-border,
+   no background, slightly smaller, color matches the parent so the
+   hierarchy comes purely from font-size. */
 .hint--foot-sub{
-  padding:0 22px 14px;
-  font-size:11.5px;
-  color:var(--l4);
-  line-height:1.5;
+  margin:0;
+  padding:2px 22px 14px;
+  font-size:11px;
+  color:var(--l3);
+  line-height:1.55;
   text-align:left;
   letter-spacing:.02px;
+  opacity:.92;
 }
+[data-theme="dark"] .hint--foot-sub{opacity:.85;}
 #compareResult:has(#compareBody[hidden]) .hint--foot-sub,
 #singleResult:has(#singleBody[hidden]) .hint--foot-sub{display:none;}
 
@@ -1580,17 +1585,22 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
 .hist-stats-section,
 .hist-entries-section{display:block;}
 
-/* Result-section headers: confident anchor look (main page only) */
+/* Result-section headers: confident anchor look (main page only).
+   Centered to the result card so the heading reads as a label of
+   the card directly underneath, not a left-flush list-section title. */
 .result-section .sh{
+  display:flex;
+  justify-content:center;
+  text-align:center;
   font-size:12.5px;
   font-weight:700;
   color:var(--l2);
   letter-spacing:1.2px;
-  margin-top:40px;
-  padding-top:14px;
-  border-top:1px solid var(--sep);
+  margin-top:24px;
+  padding-top:0;
+  border-top:none;
 }
-.result-section > .sh:first-of-type{border-top:none;padding-top:0;margin-top:32px;}
+.result-section > .sh:first-of-type{border-top:none;padding-top:0;margin-top:20px;}
 
 /* Compare-Mode: compareResult ist jetzt das erste Ergebniselement (h2 entfernt) — kompakter Abstand zum CTA */
 #compareResult{margin-top:20px;}
@@ -3349,7 +3359,15 @@ body[data-longterm="on"] .sl-row--km{
   cursor:pointer;
   --fill:var(--slider-neutral);
   --track:var(--s2);
-  --p:50%;
+  /* --p is now a unitless 0..100 number set by JS (_updateSliderFill).
+     The fill gradient stop is computed so it lands exactly on the thumb
+     centre (thumb is 18px wide; track is 100% wide). Without the
+     thumb-half-width compensation the colored fill would over-shoot at
+     pct=100 and under-shoot at pct=0 — the visible "Versatz" between
+     thumb and colored track. */
+  --p:50;
+  --thumb-half:9px;
+  --fill-stop:calc(var(--thumb-half) + var(--p) * (100% - 18px) / 100);
 }
 .sl--ev{--fill:var(--slider-ev);}
 .sl--vb{--fill:var(--slider-ice);}
@@ -3358,11 +3376,11 @@ body[data-longterm="on"] .sl-row--km{
 #kmEv.sl--ev,#kmVb.sl--vb{--fill:var(--slider-neutral);}
 [data-theme="dark"] .sl{--track:rgba(255,255,255,.10);}
 
-/* WebKit Track */
+/* WebKit Track — fill stop matches thumb centre exactly. */
 .sl::-webkit-slider-runnable-track{
   height:6px;
   border-radius:3px;
-  background:linear-gradient(to right,var(--fill) 0%,var(--fill) var(--p),var(--track) var(--p),var(--track) 100%);
+  background:linear-gradient(to right,var(--fill) 0,var(--fill) var(--fill-stop),var(--track) var(--fill-stop),var(--track) 100%);
 }
 /* WebKit Thumb — Square mit subtle Radius */
 .sl::-webkit-slider-thumb{

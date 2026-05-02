@@ -2077,7 +2077,9 @@ function _updateSliderFill(el) {
   const val = parseFloat(el.value);
   if (!isFinite(val) || max === min) return;
   const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
-  el.style.setProperty("--p", pct + "%");
+  // Unitless number — CSS computes the actual pixel-flush stop via calc()
+  // so the colored fill ends exactly under the thumb centre at every value.
+  el.style.setProperty("--p", String(pct));
 }
 function refreshSliderValues() { Object.keys(SLIDER_FMT).forEach(_updateSliderVal); }
 function refreshSliderFills()  { Object.keys(SLIDER_FMT).forEach(id => _updateSliderFill($(id))); }
@@ -2653,10 +2655,11 @@ setTimeout(() => {
       legacyBadge: "Vergleich (alt)",
       legacyDiffSuffix: "/ Jahr",
       verlaufFooterNote: "Gespeicherte Einträge bleiben nur lokal auf diesem Gerät.",
-      chartToday: "Kosten heute",
-      chartWeek:  "Kosten diese Woche",
-      chartMonth: "Kosten diesen Monat",
-      chartYear:  "Kosten dieses Jahr",
+      chartToday: "Energie-/Kraftstoffkosten heute",
+      chartWeek:  "Energie-/Kraftstoffkosten diese Woche",
+      chartMonth: "Energie-/Kraftstoffkosten diesen Monat",
+      chartYear:  "Energie-/Kraftstoffkosten dieses Jahr",
+      chartYearly:"Energie-/Kraftstoffkosten nach Jahren",
       chartAll:   "Gesamt Energie-/Kraftstoffkosten",
     },
     en: {
@@ -2873,10 +2876,11 @@ setTimeout(() => {
       legacyBadge: "Compare (legacy)",
       legacyDiffSuffix: "/ year",
       verlaufFooterNote: "Saved entries stay on this device only.",
-      chartToday: "Costs today",
-      chartWeek:  "Costs this week",
-      chartMonth: "Costs this month",
-      chartYear:  "Costs this year",
+      chartToday: "Energy/fuel costs today",
+      chartWeek:  "Energy/fuel costs this week",
+      chartMonth: "Energy/fuel costs this month",
+      chartYear:  "Energy/fuel costs this year",
+      chartYearly:"Energy/fuel costs by year",
       chartAll:   "Total energy/fuel costs",
     },
     tr: {
@@ -3093,10 +3097,11 @@ setTimeout(() => {
       legacyBadge: "Karşılaştırma (eski)",
       legacyDiffSuffix: "/ yıl",
       verlaufFooterNote: "Kayıtlı girdiler yalnızca bu cihazda kalır.",
-      chartToday: "Bugün maliyet",
-      chartWeek:  "Bu hafta",
-      chartMonth: "Bu ay",
-      chartYear:  "Bu yıl",
+      chartToday: "Bugün enerji/yakıt maliyeti",
+      chartWeek:  "Bu hafta enerji/yakıt maliyeti",
+      chartMonth: "Bu ay enerji/yakıt maliyeti",
+      chartYear:  "Bu yıl enerji/yakıt maliyeti",
+      chartYearly:"Yıllara göre enerji/yakıt maliyeti",
       chartAll:   "Toplam enerji/yakıt maliyeti",
     }
   };

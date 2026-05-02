@@ -239,10 +239,11 @@
       legacyDiffSuffix: "/ Jahr",
       rideshareLine: "Fahrgemeinschaft · {n} Personen",
       verlaufFooterNote: "Gespeicherte Einträge bleiben nur lokal auf diesem Gerät.",
-      chartToday: "Kosten heute",
-      chartWeek:  "Kosten diese Woche",
-      chartMonth: "Kosten diesen Monat",
-      chartYear:  "Kosten dieses Jahr",
+      chartToday: "Energie-/Kraftstoffkosten heute",
+      chartWeek:  "Energie-/Kraftstoffkosten diese Woche",
+      chartMonth: "Energie-/Kraftstoffkosten diesen Monat",
+      chartYear:  "Energie-/Kraftstoffkosten dieses Jahr",
+      chartYearly:"Energie-/Kraftstoffkosten nach Jahren",
       chartAll:   "Gesamt Energie-/Kraftstoffkosten",
       chartAvgCost: "Durchschnittskosten",
       footerCalc: "Rechner",
@@ -253,8 +254,8 @@
       chartA11ySummary: "Verlaufsdiagramm mit {count} Einträgen vom {start} bis {end}. Durchschnittliche Kosten: {evCost} {currency} pro 100 {unit} beim E-Auto, {vbCost} {currency} pro 100 {unit} beim Verbrenner. Detaillierte Einträge folgen in der Tabelle.",
       chartA11yEmpty: "Keine Einträge im aktuellen Filter.",
       chartA11yFallback: "Verlaufsdiagramm verfügbar, Detaildaten konnten nicht geladen werden.",
-      chartHintSingleTitle: "Noch kein Trend",
-      chartHintSingleSub: "Trag Werte aus einem zweiten Zeitraum ein, dann zeichnen wir einen Verlauf.",
+      chartHintSingleTitle: "Noch keine Einträge im Zeitraum",
+      chartHintSingleSub: "Berechne und speichere zuerst Werte, um sie hier zu sehen.",
       tableCaption: "Detaillierte Verlaufs-Daten",
       tableHeaderDate: "Datum",
       tableHeaderDistanceMetric: "Kilometer",
@@ -310,10 +311,11 @@
       legacyDiffSuffix: "/ year",
       rideshareLine: "Carpool · {n} people",
       verlaufFooterNote: "Saved entries stay on this device only.",
-      chartToday: "Costs today",
-      chartWeek:  "Costs this week",
-      chartMonth: "Costs this month",
-      chartYear:  "Costs this year",
+      chartToday: "Energy/fuel costs today",
+      chartWeek:  "Energy/fuel costs this week",
+      chartMonth: "Energy/fuel costs this month",
+      chartYear:  "Energy/fuel costs this year",
+      chartYearly:"Energy/fuel costs by year",
       chartAll:   "Total energy/fuel costs",
       chartAvgCost: "Average cost",
       footerCalc: "Calculator",
@@ -324,8 +326,8 @@
       chartA11ySummary: "Historical chart with {count} entries from {start} to {end}. Average costs: {evCost} {currency} per 100 {unit} for electric vehicle, {vbCost} {currency} per 100 {unit} for combustion. Detailed entries follow in the table.",
       chartA11yEmpty: "No entries in current filter.",
       chartA11yFallback: "Historical chart available, detail data could not be loaded.",
-      chartHintSingleTitle: "No trend yet",
-      chartHintSingleSub: "Add entries from a second timeframe and we will draw a trend.",
+      chartHintSingleTitle: "No entries in this period",
+      chartHintSingleSub: "Save some calculations first to see them here.",
       tableCaption: "Detailed history data",
       tableHeaderDate: "Date",
       tableHeaderDistanceMetric: "Kilometers",
@@ -381,10 +383,11 @@
       legacyDiffSuffix: "/ yıl",
       rideshareLine: "Ortak yolculuk · {n} kişi",
       verlaufFooterNote: "Kayıtlı girdiler yalnızca bu cihazda kalır.",
-      chartToday: "Bugün maliyet",
-      chartWeek:  "Bu hafta",
-      chartMonth: "Bu ay",
-      chartYear:  "Bu yıl",
+      chartToday: "Bugün enerji/yakıt maliyeti",
+      chartWeek:  "Bu hafta enerji/yakıt maliyeti",
+      chartMonth: "Bu ay enerji/yakıt maliyeti",
+      chartYear:  "Bu yıl enerji/yakıt maliyeti",
+      chartYearly:"Yıllara göre enerji/yakıt maliyeti",
       chartAll:   "Toplam enerji/yakıt maliyeti",
       chartAvgCost: "Ortalama maliyet",
       footerCalc: "Hesaplayıcı",
@@ -395,8 +398,8 @@
       chartA11ySummary: "{start} ile {end} arasında {count} kayıtla geçmiş grafiği. Ortalama maliyetler: elektrikli için 100 {unit} başına {evCost} {currency}, benzinli için 100 {unit} başına {vbCost} {currency}. Ayrıntılı kayıtlar tabloda yer alır.",
       chartA11yEmpty: "Geçerli filtrede kayıt yok.",
       chartA11yFallback: "Geçmiş grafiği mevcut, ayrıntılı veriler yüklenemedi.",
-      chartHintSingleTitle: "Henüz trend yok",
-      chartHintSingleSub: "Farklı bir zaman diliminden kayıt ekleyince trend çizilir.",
+      chartHintSingleTitle: "Bu zaman diliminde kayıt yok",
+      chartHintSingleSub: "Önce hesaplamaları kaydet, burada görünsünler.",
       tableCaption: "Ayrıntılı geçmiş verileri",
       tableHeaderDate: "Tarih",
       tableHeaderDistanceMetric: "Kilometre",
@@ -1005,7 +1008,7 @@
   function _updateChartTitle(range) {
     const el = document.getElementById("chartTitle");
     if (!el) return;
-    const keyMap = { today:"chartToday", week:"chartWeek", month:"chartMonth", year:"chartYear", yearly:"yearly", all:"chartAll" };
+    const keyMap = { today:"chartToday", week:"chartWeek", month:"chartMonth", year:"chartYear", yearly:"chartYearly", all:"chartAll" };
     el.textContent = _tv(keyMap[range] || "chartAll");
   }
 
@@ -1165,40 +1168,27 @@
   function renderHistoryCostChart(entries, range) {
     const wrap   = document.getElementById("chartWrap");
     const canvas = document.getElementById("costChart");
+    const hintEl = document.getElementById("chartHint");
     if (!wrap || !canvas || typeof window.Chart !== "function") return;
 
     const filtered = _filterChartEntries(entries || [], range);
-    if (!filtered.length) {
-      if (_chartInstance) { _chartInstance.destroy(); _chartInstance = null; }
-      wrap.hidden = true;
-      _updateChartAccessibility([], range);
-      return;
-    }
+    const series   = filtered.length ? _buildChartSeries(filtered, range) : { labels: [], evData: [], iceData: [] };
 
-    const series = _buildChartSeries(filtered, range);
-    if (!series.labels.length) {
-      if (_chartInstance) { _chartInstance.destroy(); _chartInstance = null; }
-      wrap.hidden = true;
-      _updateChartAccessibility([], range);
-      return;
-    }
-
-    // Phase Z6.5.c: hint when chart would render ≤1 unique bucket. Bucket
-    // granularity per period: today=Uhrzeit, week=Wochentag, month=Tag,
-    // year=Monat, yearly=Jahr (siehe _groupByRange). 3 Einträge am gleichen
-    // Tag im MONAT-Tab → 1 Bucket → Hint; 3 Einträge an 3 Tagen → 3 Buckets
-    // → Chart. Defensiv <=1, obwohl der !series.labels.length-Pfad oben
-    // den 0-Fall bereits abfängt.
-    const hintEl = document.getElementById("chartHint");
-    if (series.labels.length <= 1) {
+    // ── EMPTY-STATE: no entries in this period ─────────────────────────────
+    // (Bisheriges Verhalten zeigte hier "Noch kein Trend" auch bei genau einem
+    // Bucket — das war irreführend, weil 1 Eintrag = legitimer Datenpunkt ist.
+    // Neu: Empty-State NUR wenn wirklich 0 Einträge im Zeitraum liegen.)
+    if (!filtered.length || !series.labels.length) {
       if (_chartInstance) { _chartInstance.destroy(); _chartInstance = null; }
       canvas.hidden = true;
       if (hintEl) hintEl.hidden = false;
       wrap.hidden = false;
       _updateChartTitle(range);
-      _updateChartAccessibility(filtered, range);
+      _updateChartAccessibility([], range);
       return;
     }
+
+    // Mindestens 1 Eintrag → Chart anzeigen (auch bei 1 Bucket = 1 Balken).
     canvas.hidden = false;
     if (hintEl) hintEl.hidden = true;
 
