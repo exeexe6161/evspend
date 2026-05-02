@@ -2196,14 +2196,31 @@ function _updateSliderFill(el) {
   const min = parseFloat(el.min) || 0;
   const max = parseFloat(el.max) || 100;
   const val = parseFloat(el.value);
-  if (!isFinite(val) || max === min) return;
-  const pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
+  // Defensive: on an invalid value or degenerate range, snap the fill to 0
+  // rather than leaving --p at its previous (now stale) value. toFixed(4)
+  // strips floating-point noise so CSS calc() lands on a deterministic stop.
+  let pct;
+  if (!isFinite(val) || max === min) {
+    pct = 0;
+  } else {
+    pct = Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
+  }
   // Unitless number — CSS computes the actual pixel-flush stop via calc()
   // so the colored fill ends exactly under the thumb centre at every value.
-  el.style.setProperty("--p", String(pct));
+  el.style.setProperty("--p", pct.toFixed(4));
 }
 function refreshSliderValues() { Object.keys(SLIDER_FMT).forEach(_updateSliderVal); }
 function refreshSliderFills()  { Object.keys(SLIDER_FMT).forEach(id => _updateSliderFill($(id))); }
+// Re-syncs slider value labels + fills + range/full-charge display from the
+// CURRENT DOM values. Read-only — never overwrites user input. Intended for
+// browser/layout restore moments where the CSS --p fill can fall out of sync
+// with the thumb position (bfcache `pageshow`, `resize`, `orientationchange`,
+// tab returning to foreground, post-init layout settle).
+function syncSliderVisuals(reason) {
+  try { refreshSliderValues(); } catch (_) {}
+  try { refreshSliderFills();  } catch (_) {}
+  try { updateRangeDisplay();  } catch (_) {}
+}
 Object.keys(SLIDER_FMT).forEach(id => {
   const el = $(id); if (!el) return;
   const handler = () => {
@@ -2220,6 +2237,17 @@ Object.keys(SLIDER_FMT).forEach(id => {
   _updateSliderFill(el);
 });
 
+// Re-sync slider visuals after browser/layout state changes that can leave
+// the CSS --p fill out of step with the thumb (bfcache restore, mobile
+// rotation, viewport resize, returning to a backgrounded tab). Read-only —
+// no calc(), no value overwrites.
+window.addEventListener("pageshow",          function () { syncSliderVisuals("pageshow"); });
+window.addEventListener("resize",            function () { syncSliderVisuals("resize"); });
+window.addEventListener("orientationchange", function () { syncSliderVisuals("orientationchange"); });
+document.addEventListener("visibilitychange", function () {
+  if (document.visibilityState === "visible") syncSliderVisuals("visibilitychange");
+});
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 // initApp() is called from the i18n IIFE's init() once applyTranslations()
 // has run — guarantees all _t() calls resolve on first paint.
@@ -2230,6 +2258,17 @@ function initApp() {
   // Skip initial calc(): empty-state stays visible until first user interaction.
   // First input/slider event will trigger calc() and render the result.
   try { updateRangeDisplay(); } catch (_) {}
+  // Layout-settle pass: catch the case where slider tracks paint with the
+  // wrong width on first frame (custom fonts loading, late style insertion,
+  // bfcache restore). Read-only re-sync at three moments: now, next frame,
+  // and frame-after-next.
+  try { syncSliderVisuals("init"); } catch (_) {}
+  try { requestAnimationFrame(function () { syncSliderVisuals("init-raf1"); }); } catch (_) {}
+  try {
+    requestAnimationFrame(function () {
+      requestAnimationFrame(function () { syncSliderVisuals("init-raf2"); });
+    });
+  } catch (_) {}
 }
 
 // ── PWA: Device detection ───────────────────────────────────────────────────
