@@ -1175,13 +1175,18 @@
     const series   = filtered.length ? _buildChartSeries(filtered, range) : { labels: [], evData: [], iceData: [] };
 
     // ── EMPTY-STATE: no entries in this period ─────────────────────────────
-    // (Bisheriges Verhalten zeigte hier "Noch kein Trend" auch bei genau einem
-    // Bucket — das war irreführend, weil 1 Eintrag = legitimer Datenpunkt ist.
-    // Neu: Empty-State NUR wenn wirklich 0 Einträge im Zeitraum liegen.)
+    // Empty-State NUR wenn wirklich 0 Einträge im Zeitraum liegen — 1 Eintrag
+    // ist ein legitimer Datenpunkt. Sichtbarkeit doppelt setzen (property +
+    // attribute), damit das CSS-`display:flex` auf .chart-hint nicht erneut
+    // versehentlich über dem hidden-Attribut sitzt.
     if (!filtered.length || !series.labels.length) {
       if (_chartInstance) { _chartInstance.destroy(); _chartInstance = null; }
       canvas.hidden = true;
-      if (hintEl) hintEl.hidden = false;
+      canvas.setAttribute("hidden", "");
+      if (hintEl) {
+        hintEl.hidden = false;
+        hintEl.removeAttribute("hidden");
+      }
       wrap.hidden = false;
       _updateChartTitle(range);
       _updateChartAccessibility([], range);
@@ -1190,7 +1195,11 @@
 
     // Mindestens 1 Eintrag → Chart anzeigen (auch bei 1 Bucket = 1 Balken).
     canvas.hidden = false;
-    if (hintEl) hintEl.hidden = true;
+    canvas.removeAttribute("hidden");
+    if (hintEl) {
+      hintEl.hidden = true;
+      hintEl.setAttribute("hidden", "");
+    }
 
     if (_chartInstance) _chartInstance.destroy();
 

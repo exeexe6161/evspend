@@ -407,8 +407,12 @@ body::before{
 }
 
 /* ── Chart-Hint — Phase Z Sprint Z6.4 ──
-   Replaces the chart canvas when only one entry is in scope. A trend
-   needs ≥2 data points; rendering a single bar reads as broken layout. */
+   Sit-in for the chart canvas when no entries fall into the active period.
+   Empty-State triggers ONLY at 0 entries in scope, not at 1 entry — a
+   single bar is a legitimate data point. The `[hidden]` override below
+   beats the `display:flex` so toggling the `hidden` attribute actually
+   hides the element (otherwise the flex container stays visible under
+   the chart bars). */
 .chart-hint{
   display:flex;
   flex-direction:column;
@@ -417,6 +421,7 @@ body::before{
   padding:32px 20px;
   gap:8px;
 }
+.chart-hint[hidden]{display:none!important;}
 .chart-hint-ico{color:var(--l4);opacity:.7;}
 .chart-hint-title{font-size:16px;font-weight:600;color:var(--l2);}
 .chart-hint-sub{font-size:13.5px;color:var(--l3);max-width:280px;line-height:1.45;}
@@ -2025,9 +2030,15 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
 .chart-wrap.swiping{transform:scale(.98);opacity:.9;transition:transform .1s ease, opacity .1s ease;}
 .chart-wrap.impact{transform:scale(.97);transition:transform .08s ease-out;}
 .chart-wrap.impact::after{content:"";position:absolute;inset:0;background:rgba(255,255,255,.06);border-radius:inherit;pointer-events:none;}
-.chart-card{padding:14px 16px 16px;display:flex;flex-direction:column;gap:10px;}
-.chart-header h3{margin:0;font-size:13.5px;font-weight:600;color:var(--l2);letter-spacing:.1px;}
-.chart-canvas{display:block;width:100%;height:220px;max-height:220px;}
+.chart-card{padding:18px 18px 20px;display:flex;flex-direction:column;gap:12px;}
+.chart-header h3{margin:0;font-size:14px;font-weight:700;color:var(--l1);letter-spacing:-.05px;}
+.chart-canvas{display:block;width:100%;height:280px;max-height:280px;}
+@media (max-width:480px){
+  .chart-canvas{height:240px;max-height:240px;}
+}
+@media (max-width:375px){
+  .chart-canvas{height:220px;max-height:220px;}
+}
 
 /* ══ Signature style — chart + stats cards ══ */
 /* Scoped overrides: soften shadow, unify radius, subtle hairline border in
