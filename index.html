@@ -45,7 +45,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>EVSpend – E Auto vs Verbrenner Kosten Rechner</title>
 <script src="./theme-init.js?v=20260501-legal3"></script>
-<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal10">
+<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal11">
 <!-- Inline <svg> icon-set provenance:
      Path data taken verbatim from Lucide v0.511.0 (https://lucide.dev,
      ISC License, © Lucide Contributors). Library bundled until Phase P
@@ -184,6 +184,8 @@
     </div>
     <div class="range-box" id="rangeBox" hidden>
       <div class="range-display" id="rangeDisplay" aria-live="polite" data-i18n="rangeEmpty">Ca. — km Reichweite</div>
+      <div class="full-charge-display" id="fullChargeDisplay" aria-live="polite" hidden></div>
+      <div class="full-charge-hint" id="fullChargeHint" hidden data-i18n="fullChargeHint">Ohne Ladeverluste und Grundgebühren.</div>
     </div>
     <div class="range-hint" data-i18n="rangeHintText">Schätzung. Kann je nach Fahrweise variieren.</div>
   </div>
@@ -495,7 +497,7 @@
   </div>
 </div>
 
-<script src="./script.min.js?v=20260501-legal10"></script>
+<script src="./script.min.js?v=20260501-legal11"></script>
 </body>
 </html>
  

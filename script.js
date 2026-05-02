@@ -909,6 +909,13 @@ function computeRange(batteryKwh, consumptionKwhPer100) {
                (batteryKwh / consumptionKwhPer100) * 100, range);
   return range;
 }
+// Geschätzte Vollladung (Marktwährung) = Batterie kWh × Strompreis pro kWh.
+// Decorative — ohne Ladeverluste / Grundgebühren. NaN bei ungültigen Werten.
+function computeFullChargeCost(batteryKwh, electricityPrice) {
+  if (!isFinite(batteryKwh) || batteryKwh <= 0) return NaN;
+  if (!isFinite(electricityPrice) || electricityPrice <= 0) return NaN;
+  return batteryKwh * electricityPrice;
+}
 function updateRangeDisplay() {
   const dispEl = $("rangeDisplay");
   const boxEl  = $("rangeBox");
@@ -927,6 +934,25 @@ function updateRangeDisplay() {
     if (boxEl) boxEl.hidden = true;
     dispEl.hidden = true;
     if (hintEl) hintEl.hidden = false;
+  }
+
+  // Decorative full-charge cost line under the range. Hidden if any input
+  // is invalid or non-positive — never replaces the main calculation.
+  const fcDisp = $("fullChargeDisplay");
+  const fcHint = $("fullChargeHint");
+  if (fcDisp || fcHint) {
+    const price  = n("strompreis");
+    const fcCost = computeFullChargeCost(battery, price);
+    if (isFinite(fcCost) && fcCost > 0) {
+      if (fcDisp) {
+        fcDisp.textContent = _t("fullChargeText", { cost: _fmtMoney(fcCost, 2) });
+        fcDisp.hidden = false;
+      }
+      if (fcHint) fcHint.hidden = false;
+    } else {
+      if (fcDisp) fcDisp.hidden = true;
+      if (fcHint) fcHint.hidden = true;
+    }
   }
 }
 
@@ -2183,7 +2209,7 @@ Object.keys(SLIDER_FMT).forEach(id => {
   const handler = () => {
     _updateSliderVal(id);
     _updateSliderFill(el);
-    if (id === "batteryKwh" || id === "evVerbrauch") updateRangeDisplay();
+    if (id === "batteryKwh" || id === "evVerbrauch" || id === "strompreis") updateRangeDisplay();
   };
   el.addEventListener("input", handler);
   // a11y: announce final value on `change` (drag-end / keyboard-step / commit).
@@ -2619,6 +2645,8 @@ setTimeout(() => {
       per100km: "/ 100 {unit}",
       rangeText: "Ca. {km} {unit} Reichweite",
       rangeEmpty: "Ca. — {unit} Reichweite",
+      fullChargeText: "Geschätzte Vollladung: {cost}",
+      fullChargeHint: "Ohne Ladeverluste und Grundgebühren.",
       rideshareLine: "Fahrgemeinschaft · {n} Personen",
       // Longterm
       breakevenAfter: "Geschätzter Break-Even nach ca. {years}",
@@ -2840,6 +2868,8 @@ setTimeout(() => {
       per100km: "/ 100 {unit}",
       rangeText: "Estimated range: {km} {unit}",
       rangeEmpty: "Estimated range: {km} {unit}",
+      fullChargeText: "Estimated full charge: {cost}",
+      fullChargeHint: "Charging losses and base fees not included.",
       rideshareLine: "Carpool · {n} people",
       // Longterm
       breakevenAfter: "Estimated break-even after approx. {years}",
@@ -3061,6 +3091,8 @@ setTimeout(() => {
       per100km: "/ 100 {unit}",
       rangeText: "Tahmini menzil: {km} {unit}",
       rangeEmpty: "Yaklaşık — {unit} menzil",
+      fullChargeText: "Tahmini tam şarj: {cost}",
+      fullChargeHint: "Şarj kayıpları ve sabit ücretler dahil değildir.",
       rideshareLine: "Ortak yolculuk · {n} kişi",
       // Longterm
       breakevenAfter: "Tahmini break-even yaklaşık {years} sonra",
