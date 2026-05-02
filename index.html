@@ -45,7 +45,7 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>EVSpend – E Auto vs Verbrenner Kosten Rechner</title>
 <script src="./theme-init.js?v=20260501-legal3"></script>
-<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal9">
+<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal10">
 <!-- Inline <svg> icon-set provenance:
      Path data taken verbatim from Lucide v0.511.0 (https://lucide.dev,
      ISC License, © Lucide Contributors). Library bundled until Phase P
@@ -62,11 +62,15 @@
      hides it almost immediately. JS-driven; if the splash JS does not
      run for any reason, a CSS animation fallback fades the overlay out
      after 2 s so the app is never blocked. -->
-<div id="appSplash" class="app-splash" role="presentation" aria-hidden="true">
-  <div class="app-splash-stage">
-    <svg class="app-splash-logo" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false">
-      <polyline class="app-splash-chev app-splash-chev--outer" points="110,370 256,170 402,370" fill="none" stroke="#3DDB94" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
-      <polyline class="app-splash-chev app-splash-chev--inner" points="190,295 256,205 322,295" fill="none" stroke="#3DDB94" stroke-width="36" stroke-linecap="round" stroke-linejoin="round"/>
+<div id="evspend-splash" class="evspend-splash" role="presentation" aria-hidden="true">
+  <div class="evspend-splash__mark">
+    <svg class="evspend-splash__svg" viewBox="0 0 512 512" aria-hidden="true" focusable="false">
+      <circle class="evs-glow" cx="256" cy="220" r="90"/>
+      <path class="evs-leg evs-leg-left-top" d="M 202.24 225.33 L 256 180" pathLength="100"/>
+      <path class="evs-leg evs-leg-left-bottom" d="M 128 287.92 L 181.76 242.59" pathLength="100"/>
+      <path class="evs-leg evs-leg-right" d="M 384 287.92 L 256 180" pathLength="100"/>
+      <path class="evs-spark" d="M 192.00 221.36 L 204.60 233.96 L 192.00 246.56 L 179.40 233.96 Z"/>
+      <circle class="evs-impulse" cx="192" cy="233.96" r="22"/>
     </svg>
   </div>
 </div>
@@ -491,7 +495,7 @@
   </div>
 </div>
 
-<script src="./script.min.js?v=20260501-legal9"></script>
+<script src="./script.min.js?v=20260501-legal10"></script>
 </body>
 </html>
  

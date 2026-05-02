@@ -1,21 +1,27 @@
 const $ = id => document.getElementById(id);
 
-// ── App-Splash lifecycle ─────────────────────────────────────────────────────
-// First-paint chevron splash. Decorative only, never blocks the app:
+// ── EVSpend Splash lifecycle ─────────────────────────────────────────────────
+// First-paint Variant-B (notch) splash. Decorative only, never blocks the app:
 //   • shown once per browser session (sessionStorage flag)
 //   • hidden almost immediately if `prefers-reduced-motion` is set
-//   • normal session view: 1.3 s display, then opacity fade-out (0.35 s)
-//   • hard safety timeout: 2.5 s, the overlay is force-removed regardless
+//   • normal session view: ~1.3 s on screen, then opacity fade-out (~0.32 s)
+//   • hard safety timeout: ~2.4 s, the overlay is force-removed regardless
 //     of whether the fade callbacks fired
-// The HTML overlay is wrapped in try/catch so any failure here cannot
-// prevent the rest of the app from initialising.
-(function initAppSplash() {
+//   • exact path lengths are measured via getTotalLength() so the
+//     stroke-dashoffset reveal lands cleanly on the apex
+// All DOM access is wrapped in try/catch so any failure here cannot prevent
+// the rest of the app from initialising.
+(function initEvspendSplash() {
   try {
-    var el = document.getElementById("appSplash");
+    var el = document.getElementById("evspend-splash");
     if (!el) return;
+
     var SEEN_KEY = "evspendSplashSeen";
+    var raf = window.requestAnimationFrame || function (cb) { return setTimeout(cb, 16); };
+
     var alreadySeen = false;
     try { alreadySeen = sessionStorage.getItem(SEEN_KEY) === "1"; } catch (_) {}
+
     var prefersReduced = false;
     try {
       prefersReduced = window.matchMedia &&
@@ -27,17 +33,15 @@ const $ = id => document.getElementById(id);
       el._removed = true;
       el.classList.add("is-hidden");
       el.setAttribute("aria-hidden", "true");
-      // After the CSS opacity transition finishes, drop it from layout entirely
-      // so the calc-section can't be tap-blocked by an invisible layer.
+      // After the CSS opacity transition (~320 ms) finishes, detach so the
+      // calculator can't be tap-blocked by an invisible layer.
       setTimeout(function () {
         if (el && el.parentNode) el.parentNode.removeChild(el);
-      }, 450);
+      }, 360);
     }
 
-    if (alreadySeen || prefersReduced) {
-      // Skip the show — drop the overlay on the next frame so it never paints
-      // a flash of the chevron.
-      requestAnimationFrame ? requestAnimationFrame(removeSplash) : removeSplash();
+    if (alreadySeen) {
+      raf(removeSplash);
       return;
     }
 
@@ -45,25 +49,47 @@ const $ = id => document.getElementById(id);
     // the next session view.
     try { sessionStorage.setItem(SEEN_KEY, "1"); } catch (_) {}
 
+    if (prefersReduced) {
+      raf(removeSplash);
+      return;
+    }
+
+    // Set exact path lengths on each leg so stroke-dashoffset:0 lands clean.
+    try {
+      var legs = el.querySelectorAll(".evs-leg");
+      for (var i = 0; i < legs.length; i++) {
+        var L = legs[i].getTotalLength();
+        legs[i].style.setProperty("--L", (L + 2).toFixed(2));
+      }
+    } catch (_) {}
+
+    // Kick off the draw-in on the next frame so initial styles paint first.
+    raf(function () { el.classList.add("run"); });
+
     // Normal lifecycle: ~1.3 s on screen, then fade out.
-    var hideTimer  = setTimeout(removeSplash, 1300);
+    var hideTimer = setTimeout(removeSplash, 1300);
     // Hard safety: even if hideTimer is throttled by background tabs, this
-    // wins after 2.5 s so the calculator is never blocked.
-    var killTimer  = setTimeout(function () {
+    // wins after ~2.4 s so the calculator is never blocked.
+    var killTimer = setTimeout(function () {
       clearTimeout(hideTimer);
       removeSplash();
-    }, 2500);
-    // Tap to dismiss — power users skip the wait.
-    el.addEventListener("click", function () {
+    }, 2400);
+    // Tap to dismiss — power users skip the wait. NEVER replays.
+    // Both listeners share the same idempotent dismiss; whichever fires
+    // first wins and the other is harmless because removeSplash() guards
+    // against double-runs via el._removed.
+    function dismiss() {
       clearTimeout(hideTimer);
       clearTimeout(killTimer);
       removeSplash();
-    }, { once: true });
+    }
+    el.addEventListener("click", dismiss, { once: true });
+    el.addEventListener("touchstart", dismiss, { once: true, passive: true });
   } catch (_) {
     // Belt-and-braces: if anything throws, hide the overlay so the app stays
     // usable. The CSS fallback animation will also drop it within 2 s.
     try {
-      var fallback = document.getElementById("appSplash");
+      var fallback = document.getElementById("evspend-splash");
       if (fallback) fallback.style.display = "none";
     } catch (__) {}
   }
