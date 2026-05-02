@@ -1,0 +1,5 @@
+# Internal audit / phase reports — kept in the repo for history but
+# never deployed. LICENSES.md is intentionally NOT listed; it must
+# remain reachable on the live site for font / library attribution.
+AUDIT_REPORT.md
+PHASE_*_AUDIT*.md

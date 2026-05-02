@@ -2,12 +2,6 @@
   "buildCommand": "echo skip",
   "outputDirectory": ".",
   "cleanUrls": true,
-  "rewrites": [
-    {
-      "source": "/(AUDIT_REPORT|PHASE_.+)\\.md",
-      "destination": "/__internal_audit_blocked"
-    }
-  ],
   "headers": [
     {
       "source": "/(.*)",
