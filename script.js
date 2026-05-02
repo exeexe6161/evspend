@@ -2580,7 +2580,7 @@ setTimeout(() => {
       // Verlauf (für verlauf.html + verlauf.js)
       verlaufTitle: "Verlauf",
       verlaufSub: "Deine persönlichen Berechnungen",
-      verlaufTrust: "Basierend auf deinen berechneten Fahrten",
+      verlaufTrust: "Basierend auf deinen gespeicherten Eingaben",
       verlaufPrivacy: "Alle Berechnungen werden ausschließlich lokal auf deinem Gerät gespeichert. Es erfolgt keine Übertragung oder Speicherung auf unseren Servern. Die Daten bleiben im Speicher deines Browsers und können jederzeit gelöscht werden. Bitte beachte, dass sie verloren gehen können, wenn du Browserdaten löschst oder ein anderes Gerät verwendest.",
       statsHeader: "Statistik",
       entriesHeader: "Einträge",
@@ -2795,7 +2795,7 @@ setTimeout(() => {
       // Verlauf
       verlaufTitle: "History",
       verlaufSub: "Your personal calculations",
-      verlaufTrust: "Based on your calculated trips",
+      verlaufTrust: "Based on your saved inputs",
       verlaufPrivacy: "All calculations are stored exclusively on your device. Nothing is transmitted or saved on our servers. Data remains in your browser storage and can be deleted at any time. Note that data may be lost if you clear browser data or switch devices.",
       statsHeader: "Statistics",
       entriesHeader: "Entries",
@@ -3010,7 +3010,7 @@ setTimeout(() => {
       // Verlauf
       verlaufTitle: "Geçmiş",
       verlaufSub: "Kişisel hesaplamalarınız",
-      verlaufTrust: "Hesaplanan sürüşlerine göre",
+      verlaufTrust: "Kaydedilen girdilerine göre",
       verlaufPrivacy: "Tüm hesaplamalar yalnızca cihazında yerel olarak saklanır. Sunucularımıza aktarım veya kayıt yapılmaz. Veriler tarayıcı belleğinde kalır ve istediğin zaman silinebilir. Tarayıcı verilerini temizlersen veya başka bir cihaz kullanırsan kaybolabileceklerini unutma.",
       statsHeader: "İstatistik",
       entriesHeader: "Girdiler",

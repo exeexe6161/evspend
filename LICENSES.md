@@ -2,7 +2,7 @@
 
 EVSpend (`evspend.com`) is a static web app. The application code itself is proprietary, but it bundles a small number of third-party assets — each one is licensed permissively for commercial use. This document lists every third-party asset, its source, its license, and the attribution required (if any).
 
-Last updated: 28 April 2026.
+Last updated: 1 May 2026.
 
 ---
 

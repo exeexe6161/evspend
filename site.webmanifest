@@ -1,7 +1,7 @@
 {
   "name": "EVSpend – EV vs Combustion Cost Calculator",
   "short_name": "EVSpend",
-  "description": "Compare operating costs of electric vs combustion vehicles. Free, no signup.",
+  "description": "Estimate EV and combustion vehicle operating costs based on your inputs. Free, no signup.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -10,7 +10,7 @@
   "dir": "ltr",
   "background_color": "#f5f7fa",
   "theme_color": "#2563eb",
-  "categories": ["utilities", "finance"],
+  "categories": ["utilities"],
   "icons": [
     {
       "src": "/android-chrome-192x192.png",

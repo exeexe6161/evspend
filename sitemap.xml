@@ -45,7 +45,7 @@
   <!-- ── Impressum / Legal Notice / Künye (DE/EN/TR/EU) ────────────────────────────── -->
   <url>
     <loc>https://www.evspend.com/impressum</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/impressum"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/impressum.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/impressum.tr"/>
@@ -56,7 +56,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/impressum.en</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/impressum"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/impressum.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/impressum.tr"/>
@@ -67,7 +67,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/impressum.tr</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/impressum"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/impressum.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/impressum.tr"/>
@@ -78,7 +78,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/en-eu/impressum</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/impressum"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/impressum.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/impressum.tr"/>
@@ -91,7 +91,7 @@
   <!-- ── Datenschutz / Privacy / Gizlilik (DE/EN/TR/EU) ────────────────────────────── -->
   <url>
     <loc>https://www.evspend.com/datenschutz</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/datenschutz"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/datenschutz.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/datenschutz.tr"/>
@@ -102,7 +102,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/datenschutz.en</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/datenschutz"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/datenschutz.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/datenschutz.tr"/>
@@ -113,7 +113,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/datenschutz.tr</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/datenschutz"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/datenschutz.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/datenschutz.tr"/>
@@ -124,7 +124,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/en-eu/datenschutz</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/datenschutz"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/datenschutz.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/datenschutz.tr"/>
@@ -134,10 +134,10 @@
     <priority>0.3</priority>
   </url>
 
-  <!-- ── AGB / Terms / Kullanım Koşulları (DE/EN/TR/EU) ────────────────────────────── -->
+  <!-- ── Nutzungsbedingungen / Terms of Use / Kullanım Koşulları (DE/EN/TR/EU) ────────────────────────────── -->
   <url>
     <loc>https://www.evspend.com/terms</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/terms"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/terms.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/terms.tr"/>
@@ -148,7 +148,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/terms.en</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/terms"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/terms.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/terms.tr"/>
@@ -159,7 +159,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/terms.tr</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/terms"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/terms.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/terms.tr"/>
@@ -170,7 +170,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/en-eu/terms</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/terms"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/terms.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/terms.tr"/>
@@ -183,7 +183,7 @@
   <!-- ── Hinweise / Usage Notes / Kullanım Notları (DE/EN/TR/EU) ────────────────────────────── -->
   <url>
     <loc>https://www.evspend.com/hinweise</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/hinweise"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/hinweise.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/hinweise.tr"/>
@@ -194,7 +194,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/hinweise.en</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/hinweise"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/hinweise.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/hinweise.tr"/>
@@ -205,7 +205,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/hinweise.tr</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/hinweise"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/hinweise.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/hinweise.tr"/>
@@ -216,7 +216,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/en-eu/hinweise</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/hinweise"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/hinweise.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/hinweise.tr"/>
@@ -229,7 +229,7 @@
   <!-- ── Barrierefreiheit / Accessibility / Erişilebilirlik (DE/EN/TR/EU) ────────────────────────────── -->
   <url>
     <loc>https://www.evspend.com/barrierefreiheit</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/barrierefreiheit"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/barrierefreiheit.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/barrierefreiheit.tr"/>
@@ -240,7 +240,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/barrierefreiheit.en</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/barrierefreiheit"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/barrierefreiheit.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/barrierefreiheit.tr"/>
@@ -251,7 +251,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/barrierefreiheit.tr</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/barrierefreiheit"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/barrierefreiheit.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/barrierefreiheit.tr"/>
@@ -262,7 +262,7 @@
   </url>
   <url>
     <loc>https://www.evspend.com/en-eu/barrierefreiheit</loc>
-    <lastmod>2026-04-26</lastmod>
+    <lastmod>2026-05-01</lastmod>
     <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/barrierefreiheit"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/barrierefreiheit.en"/>
     <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/barrierefreiheit.tr"/>
