@@ -1,7 +1,7 @@
 {
-  "name": "EVSpend – EV vs Combustion Cost Calculator",
+  "name": "EVSpend – Energy/Fuel Cost Estimator",
   "short_name": "EVSpend",
-  "description": "Estimate EV and combustion vehicle operating costs based on your inputs. Free, no signup.",
+  "description": "Estimate EV and combustion energy/fuel costs based on your inputs. Example calculation, no signup.",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
