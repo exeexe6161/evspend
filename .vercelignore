@@ -4,6 +4,11 @@
 AUDIT_REPORT.md
 PHASE_*_AUDIT*.md
 
+# Internal brand-source archive (master SVGs, comparison preview).
+# Kept in the repo for designers, but not served publicly — the
+# production icons / banner already live at the repo root.
+brand/
+
 # Project + ignore configuration. Vercel reads these at deploy time;
 # they don't need to be served as static content.
 vercel.json

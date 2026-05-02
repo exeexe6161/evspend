@@ -14,7 +14,7 @@
  * downloads or fresh-fetch semantics.
  */
 
-const CACHE_VERSION  = 'v20260501-legal9';
+const CACHE_VERSION  = 'v20260502-brand1';
 const STATIC_CACHE   = 'evspend-static-' + CACHE_VERSION;
 const RUNTIME_CACHE  = 'evspend-runtime-' + CACHE_VERSION;
 
@@ -23,8 +23,8 @@ const RUNTIME_CACHE  = 'evspend-runtime-' + CACHE_VERSION;
 const PRECACHE_URLS = [
   '/',
   '/site.webmanifest',
-  '/banner.webp',
-  '/banner.png',
+  '/banner.webp?v=20260502-brand1',
+  '/banner.png?v=20260502-brand1',
   '/favicon-32x32.png',
   '/apple-touch-icon.png',
 ];
