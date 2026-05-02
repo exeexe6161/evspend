@@ -85,7 +85,7 @@
 
   <div class="hdr">
     <h1 data-i18n="heroTitle">EV vs. ICE</h1>
-    <p><span data-i18n="heroSubtitle1">Costs</span> <span class="hdr-accent" data-i18n="heroSubtitle2">side by side</span></p>
+    <p><span data-i18n="heroSubtitle1">Energy and fuel costs</span> <span class="hdr-accent" data-i18n="heroSubtitle2">compared</span></p>
   </div>
 
   <ul class="trust-list" aria-label="Benefits">
@@ -95,7 +95,7 @@
     </li>
     <li class="trust-chip">
       <svg class="trust-chip-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"/></svg>
-      <span data-i18n="trustLocal">Stored locally</span>
+      <span data-i18n="trustLocal">Inputs saved locally</span>
     </li>
   </ul>
   <p class="disclaimer" data-i18n="brandTagline">Comparison based on your input</p>
@@ -342,7 +342,7 @@
 
   <div class="cta-group cta-group--feedback" role="status" aria-live="polite">
     <div id="saveHint" class="save-hint" hidden></div>
-    <div id="verlaufHint" class="verlauf-hint" hidden data-i18n="verlaufHintText">Your costs are now in history</div>
+    <div id="verlaufHint" class="verlauf-hint" hidden data-i18n="verlaufHintText">Your inputs are now in history</div>
     <div id="shareHint" class="share-hint" hidden data-i18n="shareHintText">Share your result as image</div>
   </div>
 
@@ -355,8 +355,8 @@
 <!-- Cost evolution chart (Compare) — above the result -->
 <div id="chartSection" class="mode-compare-only chart-section" hidden>
   <div class="list-card chart-card-v2">
-    <div class="chart-card-hdr" data-i18n="chartHeader">Cost comparison</div>
-    <canvas id="costChart" class="cost-chart" aria-label="Cost comparison EV vs ICE"></canvas>
+    <div class="chart-card-hdr" data-i18n="chartHeader">Energy/fuel cost comparison</div>
+    <canvas id="costChart" class="cost-chart" aria-label="Energy/fuel cost comparison EV vs ICE"></canvas>
   </div>
 </div>
 
@@ -395,7 +395,7 @@
 </div>
 
 <!-- Result (Single calculation) -->
-<h2 class="sh mode-single-only" data-i18n="yourCosts">Your costs</h2>
+<h2 class="sh mode-single-only" data-i18n="yourCosts">Estimated energy/fuel costs</h2>
 <div id="singleResult" class="list-card single-result mode-single-only">
   <div class="single-empty" id="singleEmpty">
     <div class="cmp-empty-wrap">
@@ -410,7 +410,7 @@
     </div>
     <div class="single-hero">
       <div class="single-hero-val" id="singleHeroVal">— €</div>
-      <div class="single-hero-lbl" id="singleHeroLbl">Estimated cost for — km</div>
+      <div class="single-hero-lbl" id="singleHeroLbl">Estimated energy/fuel costs for — km</div>
       <div class="per-person-line" id="singlePerPerson" hidden></div>
     </div>
     <div class="single-cost100-line" id="singleCost100">Avg — € / 100 km</div>
@@ -477,6 +477,6 @@
   </div>
 </div>
 
-<script src="/script.min.js?v=20260501-legal5"></script>
+<script src="/script.min.js?v=20260501-legal6"></script>
 </body>
 </html>

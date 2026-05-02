@@ -31,17 +31,17 @@
 <meta property="og:url" content="https://www.evspend.com/">
 <meta property="og:site_name" content="EVSpend">
 <meta property="og:locale" content="de_DE">
-<meta property="og:title" content="E Auto vs Verbrenner – Kostenvergleich">
+<meta property="og:title" content="E-Auto vs. Verbrenner – Energie-/Kraftstoffkosten-Vergleich">
 <meta property="og:description" content="Schätze E-Auto- und Verbrennerkosten anhand deiner Eingaben.">
 <meta property="og:image" content="https://www.evspend.com/og-image-de.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="EVSpend – E-Auto vs. Verbrenner Kostenvergleich">
+<meta property="og:image:alt" content="EVSpend – E-Auto vs. Verbrenner Energie-/Kraftstoffkosten-Vergleich">
 <meta name="twitter:card" content="summary_large_image">
-<meta name="twitter:title" content="E Auto vs Verbrenner – Kostenvergleich">
+<meta name="twitter:title" content="E-Auto vs. Verbrenner – Energie-/Kraftstoffkosten-Vergleich">
 <meta name="twitter:description" content="Schätze E-Auto- und Verbrennerkosten anhand deiner Eingaben.">
 <meta name="twitter:image" content="https://www.evspend.com/og-image-de.png">
-<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"EVSpend","url":"https://www.evspend.com","description":"Kostenvergleich E-Auto und Verbrenner: Betriebskosten und Amortisation.","applicationCategory":"UtilitiesApplication","operatingSystem":"Web, iOS, Android","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"inLanguage":"de","author":{"@type":"Person","name":"Hakan Guer"}}</script>
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"SoftwareApplication","name":"EVSpend","url":"https://www.evspend.com","description":"Schätzung der Energie- und Kraftstoffkosten von E-Auto und Verbrenner auf Basis eigener Eingaben. Beispielrechnung, keine vollständige Gesamtkostenermittlung.","applicationCategory":"UtilitiesApplication","operatingSystem":"Web, iOS, Android","offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"},"inLanguage":"de","author":{"@type":"Person","name":"Hakan Guer"}}</script>
 <meta name="mobile-web-app-capable" content="yes">
 <title>EVSpend – E Auto vs Verbrenner Kosten Rechner</title>
 <script src="./theme-init.js?v=20260501-legal3"></script>
@@ -83,7 +83,7 @@
 
   <div class="hdr">
     <h1 data-i18n="heroTitle">E-Auto vs. Verbrenner</h1>
-    <p><span data-i18n="heroSubtitle1">Kosten</span> <span class="hdr-accent" data-i18n="heroSubtitle2">im direkten Vergleich</span></p>
+    <p><span data-i18n="heroSubtitle1">Energie- und Kraftstoffkosten</span> <span class="hdr-accent" data-i18n="heroSubtitle2">im Vergleich</span></p>
   </div>
 
   <ul class="trust-list" aria-label="Vorteile">
@@ -93,7 +93,7 @@
     </li>
     <li class="trust-chip">
       <svg class="trust-chip-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"/></svg>
-      <span data-i18n="trustLocal">Lokal gespeichert</span>
+      <span data-i18n="trustLocal">Eingaben lokal gespeichert</span>
     </li>
   </ul>
   <p class="disclaimer" data-i18n="brandTagline">Vergleich basierend auf deinen Eingaben</p>
@@ -340,7 +340,7 @@
 
   <div class="cta-group cta-group--feedback" role="status" aria-live="polite">
     <div id="saveHint" class="save-hint" hidden></div>
-    <div id="verlaufHint" class="verlauf-hint" hidden data-i18n="verlaufHintText">Deine Kosten sind jetzt im Verlauf</div>
+    <div id="verlaufHint" class="verlauf-hint" hidden data-i18n="verlaufHintText">Deine Eingaben sind jetzt im Verlauf</div>
     <div id="shareHint" class="share-hint" hidden data-i18n="shareHintText">Teile dein Ergebnis als Bild</div>
   </div>
 
@@ -353,8 +353,8 @@
 <!-- Kostenentwicklung Chart (Vergleich) — über dem Ergebnis -->
 <div id="chartSection" class="mode-compare-only chart-section" hidden>
   <div class="list-card chart-card-v2">
-    <div class="chart-card-hdr" data-i18n="chartHeader">Kostenvergleich</div>
-    <canvas id="costChart" class="cost-chart" aria-label="Kostenvergleich E-Auto und Verbrenner"></canvas>
+    <div class="chart-card-hdr" data-i18n="chartHeader">Energie-/Kraftstoffkosten-Vergleich</div>
+    <canvas id="costChart" class="cost-chart" aria-label="Energie-/Kraftstoffkosten-Vergleich E-Auto und Verbrenner"></canvas>
   </div>
 </div>
 
@@ -393,7 +393,7 @@
 </div>
 
 <!-- Ergebnis (Einzelberechnung) -->
-<h2 class="sh mode-single-only" data-i18n="yourCosts">Deine Kosten</h2>
+<h2 class="sh mode-single-only" data-i18n="yourCosts">Geschätzte Energie-/Kraftstoffkosten</h2>
 <div id="singleResult" class="list-card single-result mode-single-only">
   <div class="single-empty" id="singleEmpty">
     <div class="cmp-empty-wrap">
@@ -408,7 +408,7 @@
     </div>
     <div class="single-hero">
       <div class="single-hero-val" id="singleHeroVal">— €</div>
-      <div class="single-hero-lbl" id="singleHeroLbl">Geschätzte Kosten für — km</div>
+      <div class="single-hero-lbl" id="singleHeroLbl">Geschätzte Energie-/Kraftstoffkosten für — km</div>
       <div class="per-person-line" id="singlePerPerson" hidden></div>
     </div>
     <div class="single-cost100-line" id="singleCost100">Ø — € / 100 km</div>
@@ -442,7 +442,7 @@
     <span>·</span>
     <a href="./verlauf" data-i18n="footerVerlauf">Verlauf</a>
   </div>
-  <p class="footer-note" data-i18n="footerNote">Herstellerneutraler Kostenvergleich · Aktuell keine Werbung und keine Affiliate-Links</p>
+  <p class="footer-note" data-i18n="footerNote">Herstellerneutraler Energie-/Kraftstoffkosten-Vergleich · Aktuell keine Werbung und keine Affiliate-Links</p>
   <p class="footer-privacy" data-i18n="privacyNotice">Daten werden lokal im Browser gespeichert. Es erfolgt keine Übertragung an Server.</p>
   <p class="footer-copy">© 2026 EVSpend – www.evspend.com</p>
 </footer>
@@ -475,7 +475,7 @@
   </div>
 </div>
 
-<script src="./script.min.js?v=20260501-legal5"></script>
+<script src="./script.min.js?v=20260501-legal6"></script>
 </body>
 </html>
  
