@@ -14,25 +14,42 @@
  * downloads or fresh-fetch semantics.
  */
 
-const CACHE_VERSION  = 'v20260503-history-clarity1';
+const CACHE_VERSION  = 'v20260503-offline-core1';
 const STATIC_CACHE   = 'evspend-static-' + CACHE_VERSION;
 const RUNTIME_CACHE  = 'evspend-runtime-' + CACHE_VERSION;
 
-// Minimal offline shell. Kept short so first install is fast; the rest
+// Offline shell. Covers calculator + history shell for both locales so
+// the installed PWA opens cold without a network round-trip; the rest
 // is filled by the runtime cache as the user navigates.
 const PRECACHE_URLS = [
   '/',
+  '/en-eu/',
+  '/verlauf.html',
+  '/en-eu/verlauf.html',
   '/site.webmanifest',
+  '/styles-app.min.css?v=20260501-legal18',
+  '/theme-init.js?v=20260501-legal3',
+  '/script.min.js?v=20260501-legal17',
+  '/verlauf.min.js?v=20260501-legal19',
+  '/vendor/chart-4.4.6.umd.js',
+  '/fonts/InterVariable.woff2',
   '/banner.webp?v=20260502-brand1',
   '/banner.png?v=20260502-brand1',
   '/favicon-32x32.png',
   '/apple-touch-icon.png',
+  '/android-chrome-192x192.png',
+  '/android-chrome-512x512.png',
 ];
 
 self.addEventListener('install', (event) => {
+  // Use individual cache.add() calls under Promise.allSettled so a single
+  // missing or failing entry can't abort the whole install (cache.addAll
+  // is all-or-nothing).
   event.waitUntil(
     caches.open(STATIC_CACHE)
-      .then((cache) => cache.addAll(PRECACHE_URLS))
+      .then((cache) => Promise.allSettled(
+        PRECACHE_URLS.map((url) => cache.add(url))
+      ))
       .then(() => self.skipWaiting())
       .catch(() => self.skipWaiting())
   );
