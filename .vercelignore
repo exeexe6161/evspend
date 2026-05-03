@@ -1,8 +1,10 @@
-# Internal audit / phase reports — kept in the repo for history but
-# never deployed. LICENSES.md is intentionally NOT listed; it must
-# remain reachable on the live site for font / library attribution.
+# Internal audit / phase reports + release-day checklist — kept in
+# the repo for history but never deployed. LICENSES.md is intentionally
+# NOT listed; it must remain reachable on the live site for
+# font / library attribution.
 AUDIT_REPORT.md
 PHASE_*_AUDIT*.md
+RELEASE_CHECKLIST.md
 
 # Internal brand-source archive (master SVGs, comparison preview).
 # Kept in the repo for designers, but not served publicly — the
