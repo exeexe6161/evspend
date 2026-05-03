@@ -206,7 +206,7 @@
       verlaufTrust: "Basierend auf deinen gespeicherten Eingaben",
       verlaufPrivacy: "Alle Berechnungen werden ausschließlich lokal auf deinem Gerät gespeichert. Beim Laden der Website können technische Verbindungsdaten durch den Hosting-Anbieter verarbeitet werden. Die Daten bleiben im Speicher deines Browsers und können jederzeit gelöscht werden. Bitte beachte, dass sie verloren gehen können, wenn du Browserdaten löschst oder ein anderes Gerät verwendest.",
       statsHeader: "Statistik",
-      entriesHeader: "Einträge",
+      entriesHeader: "Alle Einträge",
       searchPlaceholder: "Eintrag suchen…",
       pagerPrev: "← Zurück",
       pagerNext: "Weiter →",
@@ -276,6 +276,8 @@
       chartA11yFallback: "Verlaufsdiagramm verfügbar, Detaildaten konnten nicht geladen werden.",
       chartHintSingleTitle: "Noch keine Einträge im Zeitraum",
       chartHintSingleSub: "Berechne und speichere zuerst Werte, um sie hier zu sehen.",
+      chartHintPeriodTitle: "Keine Einträge in diesem Zeitraum",
+      chartHintPeriodSub: "Ältere gespeicherte Einträge findest du unten. Wechsle den Zeitraum, um sie in der Statistik zu sehen.",
       tableCaption: "Detaillierte Verlaufs-Daten",
       tableHeaderDate: "Datum",
       tableHeaderDistanceMetric: "Kilometer",
@@ -298,7 +300,7 @@
       verlaufTrust: "Based on your saved inputs",
       verlaufPrivacy: "All calculations are stored exclusively on your device. When the website is loaded, technical connection data may be processed by the hosting provider. Data remains in your browser storage and can be deleted at any time. Note that data may be lost if you clear browser data or switch devices.",
       statsHeader: "Statistics",
-      entriesHeader: "Entries",
+      entriesHeader: "All entries",
       searchPlaceholder: "Search entry…",
       pagerPrev: "← Previous",
       pagerNext: "Next →",
@@ -368,6 +370,8 @@
       chartA11yFallback: "Historical chart available, detail data could not be loaded.",
       chartHintSingleTitle: "No entries in this period",
       chartHintSingleSub: "Save some calculations first to see them here.",
+      chartHintPeriodTitle: "No entries in this period",
+      chartHintPeriodSub: "Older saved entries are listed below. Change the period to include them in the statistics.",
       tableCaption: "Detailed history data",
       tableHeaderDate: "Date",
       tableHeaderDistanceMetric: "Kilometers",
@@ -390,7 +394,7 @@
       verlaufTrust: "Kaydedilen girdilerine göre",
       verlaufPrivacy: "Tüm hesaplamalar yalnızca cihazında yerel olarak saklanır. Web sitesi yüklenirken teknik bağlantı verileri barındırma sağlayıcısı tarafından işlenebilir. Veriler tarayıcı belleğinde kalır ve istediğin zaman silinebilir. Tarayıcı verilerini temizlersen veya başka bir cihaz kullanırsan kaybolabileceklerini unutma.",
       statsHeader: "İstatistik",
-      entriesHeader: "Girdiler",
+      entriesHeader: "Tüm girdiler",
       searchPlaceholder: "Girdi ara…",
       pagerPrev: "← Geri",
       pagerNext: "İleri →",
@@ -460,6 +464,8 @@
       chartA11yFallback: "Geçmiş grafiği mevcut, ayrıntılı veriler yüklenemedi.",
       chartHintSingleTitle: "Bu zaman diliminde kayıt yok",
       chartHintSingleSub: "Önce hesaplamaları kaydet, burada görünsünler.",
+      chartHintPeriodTitle: "Bu dönemde kayıt yok",
+      chartHintPeriodSub: "Daha eski girdiler aşağıda listelenir. İstatistiklerde görmek için dönemi değiştir.",
       tableCaption: "Ayrıntılı geçmiş verileri",
       tableHeaderDate: "Tarih",
       tableHeaderDistanceMetric: "Kilometre",
@@ -983,7 +989,13 @@
     if (!n) {
       statBlockEv.hidden = true;
       statBlockVb.hidden = true;
-      if (statsEmpty) statsEmpty.hidden = false;
+      if (statsEmpty) {
+        // Globally-empty keeps the original copy; period-empty (entries exist
+        // but none in this range) reuses the chart hint's period title so the
+        // stats card stops claiming "nothing saved" when there clearly is.
+        statsEmpty.textContent = _tv(v2Entries.length ? "chartHintPeriodTitle" : "statsEmpty");
+        statsEmpty.hidden = false;
+      }
       if (statsCaveat) statsCaveat.hidden = true;
       return;
     }
@@ -1609,6 +1621,14 @@
       canvas.hidden = true;
       canvas.setAttribute("hidden", "");
       if (hintEl) {
+        // Period-empty vs. globally-empty: when the user has saved entries but
+        // none in the active range, point them at the list below — the original
+        // "save first" copy implied nothing was stored at all.
+        const hasAnyEntries = (entries || []).length > 0;
+        const titleEl = hintEl.querySelector(".chart-hint-title");
+        const subEl   = hintEl.querySelector(".chart-hint-sub");
+        if (titleEl) titleEl.textContent = _tv(hasAnyEntries ? "chartHintPeriodTitle" : "chartHintSingleTitle");
+        if (subEl)   subEl.textContent   = _tv(hasAnyEntries ? "chartHintPeriodSub"   : "chartHintSingleSub");
         hintEl.hidden = false;
         hintEl.removeAttribute("hidden");
       }
