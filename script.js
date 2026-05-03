@@ -1593,7 +1593,7 @@ const _getCompareData = () => {
   const evCost = _money(v * p), vbCost = _money(b * vbV); // Kosten / 100 km
   const eAutoTotal      = _money(evCost * kmEv / 100);    // Kosten für Strecke (E-Auto)
   const verbrennerTotal = _money(vbCost * kmVb / 100);    // Kosten für Strecke (Verbrenner)
-  const diffSig         = _money(verbrennerTotal - eAutoTotal);   // +: E-Auto günstiger
+  const diffSig         = _money(verbrennerTotal - eAutoTotal);   // +: E-Auto-Wert liegt niedriger
   const savingsTotal    = _money(Math.abs(diffSig));
 
   // Jahreswerte: nur im Langzeit-Modus sinnvoll (kmMonat × 12). Sonst = 0.
@@ -1895,7 +1895,7 @@ function _downloadBlob(blob, name) {
 // ── Text share ───────────────────────────────────────────────────────────────
 // Central, legally qualified result sentence. Used by share text + share image.
 // Reads only fields already on the unified data object — no new math.
-// perspective: "user" (default) → "Geschätzte Ersparnis…" / "Geschätzte Kosten…"
+// perspective: "user" (default) → "Geschätzte Differenz…" / "Geschätzte Kosten…"
 //              "share"          → "(laut meinen Eingaben)" framing for share text
 function _resultSentence(d, mode, perspective) {
   const isShare = perspective === "share";

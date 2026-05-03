@@ -27,3 +27,9 @@ script.js
 verlauf.js
 styles-app.css
 styles-pages.css
+
+# Source maps. Useful locally for debugging the minified bundles, but
+# we don't want them publicly served — they reveal the full unminified
+# source. The .min.* bundles themselves stay reachable; only the
+# accompanying .map files are excluded.
+*.map

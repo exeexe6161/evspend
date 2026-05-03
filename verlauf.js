@@ -824,7 +824,7 @@
   // Adds `history-print-mode` to <html> so a scoped @media print block shows
   // only the verlauf content (chart, stats, list) and hides chrome (toolbar,
   // export bar, footer, search, pager). The class + document.title are
-  // restored on `afterprint` (preferred) or via a 5 s safety timeout for
+  // restored on `afterprint` (preferred) or via a 60 s safety timeout for
   // browsers where afterprint is unreliable (mobile Safari).
   function exportHistoryPdf() {
     if (typeof window.print !== "function") {
