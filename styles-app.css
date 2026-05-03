@@ -2099,6 +2099,18 @@ html:not([data-theme="dark"]) .stats-card{border:1px solid rgba(0,0,0,0.04);}
 .hist-empty-cta:active{transform:scale(.97);}
 .hist-actions{margin:18px var(--gutter) 0;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
 .hist-actions[hidden]{display:none!important;}
+/* Compact disclosure under the action bar — explains JSON-vs-CSV roles and
+   that import is a local-only operation. Uses var(--l4) so it sits visually
+   below the button row without competing for attention. */
+.hist-export-help{
+  max-width:680px;
+  margin:10px auto 0;
+  padding:0 var(--gutter);
+  color:var(--l4);
+  font-size:12.5px;
+  line-height:1.5;
+  text-align:center;
+}
 /* Neutral history action (export / import). Distinct from .hist-clear which
    stays red/destructive — colour alone signals consequence. */
 .hist-action-btn{

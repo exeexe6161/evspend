@@ -42,7 +42,7 @@
 <title>EVSpend History – Saved Calculations</title>
 <script src="/theme-init.js?v=20260501-legal3"></script>
 <script src="/en-eu/init-eu.js?v=20260501-legal3"></script>
-<link rel="stylesheet" href="/styles-app.min.css?v=20260501-legal14">
+<link rel="stylesheet" href="/styles-app.min.css?v=20260501-legal15">
 <link rel="stylesheet" href="/en-eu/styles-en-eu.css?v=20260501-legal3">
 </head>
 <body>
@@ -219,11 +219,16 @@
 </details>
 
 <div id="histActions" class="hist-actions" hidden>
-  <button id="histExportBtn" class="hist-action-btn" type="button" data-i18n="historyExport">Export history</button>
-  <button id="histImportBtn" class="hist-action-btn" type="button" data-i18n="historyImport">Import history</button>
+  <button id="histExportBtn" class="hist-action-btn" type="button" data-i18n="historyBackupExport">Export backup</button>
+  <button id="histImportBtn" class="hist-action-btn" type="button" data-i18n="historyBackupImport">Import backup</button>
+  <button id="histCsvExportBtn" class="hist-action-btn" type="button" data-i18n="historyCsvExport">Export CSV</button>
   <input id="histImportInput" type="file" accept="application/json,.json" hidden>
   <button id="histClearBtn" class="hist-clear" type="button" data-i18n="clearAll">Delete all</button>
 </div>
+
+<p id="histExportHelp" class="hist-export-help" data-i18n="historyExportHelp">
+  Backup files are used to restore data in EVSpend. CSV is a readable table for Excel, Numbers, or Google Sheets. Imported files are processed locally in your browser and are not uploaded.
+</p>
 
 <div class="result-actions">
   <a href="/en-eu/" class="ra-back-link" data-i18n="backToCalc">Back to calculator</a>
@@ -250,6 +255,6 @@
 </footer>
 
 <script src="/vendor/chart-4.4.6.umd.js" defer></script>
-<script src="/verlauf.min.js?v=20260501-legal14" defer></script>
+<script src="/verlauf.min.js?v=20260501-legal15" defer></script>
 </body>
 </html>

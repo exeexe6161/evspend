@@ -41,7 +41,7 @@
 <link rel="manifest" href="/site.webmanifest">
 <title>Verlauf – Deine E-Auto- und Verbrenner-Berechnungen | EVSpend</title>
 <script src="./theme-init.js?v=20260501-legal3"></script>
-<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal14">
+<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal15">
 </head>
 <body>
 <div class="top-controls" role="toolbar" aria-label="Einstellungen">
@@ -218,11 +218,16 @@
 </details>
 
 <div id="histActions" class="hist-actions" hidden>
-  <button id="histExportBtn" class="hist-action-btn" type="button" data-i18n="historyExport">Verlauf exportieren</button>
-  <button id="histImportBtn" class="hist-action-btn" type="button" data-i18n="historyImport">Verlauf importieren</button>
+  <button id="histExportBtn" class="hist-action-btn" type="button" data-i18n="historyBackupExport">Backup exportieren</button>
+  <button id="histImportBtn" class="hist-action-btn" type="button" data-i18n="historyBackupImport">Backup importieren</button>
+  <button id="histCsvExportBtn" class="hist-action-btn" type="button" data-i18n="historyCsvExport">CSV exportieren</button>
   <input id="histImportInput" type="file" accept="application/json,.json" hidden>
   <button id="histClearBtn" class="hist-clear" type="button" data-i18n="clearAll">Alle löschen</button>
 </div>
+
+<p id="histExportHelp" class="hist-export-help" data-i18n="historyExportHelp">
+  Backup-Dateien dienen zur Wiederherstellung in EVSpend. CSV ist eine lesbare Tabelle für Excel, Numbers oder Google Sheets. Importierte Dateien werden nur lokal in deinem Browser verarbeitet und nicht hochgeladen.
+</p>
 
 <div class="result-actions">
   <a href="./" class="ra-back-link" data-i18n="backToCalc">Zurück zum Rechner</a>
@@ -249,6 +254,6 @@
 </footer>
 
 <script src="/vendor/chart-4.4.6.umd.js" defer></script>
-<script src="./verlauf.min.js?v=20260501-legal14" defer></script>
+<script src="./verlauf.min.js?v=20260501-legal15" defer></script>
 </body>
 </html>

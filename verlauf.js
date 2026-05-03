@@ -226,9 +226,12 @@
       clearAll: "Alle löschen",
       confirmClearAll: "Alle gespeicherten Einzelberechnungen löschen?",
       confirmClearLegacy: "Alle alten Vergleichs-Einträge löschen?",
-      historyExport: "Verlauf exportieren",
-      historyImport: "Verlauf importieren",
+      historyBackupExport: "Backup exportieren",
+      historyBackupImport: "Backup importieren",
+      historyCsvExport: "CSV exportieren",
       historyExportFilename: "evspend-verlauf-{date}.json",
+      historyCsvFilename: "evspend-verlauf-{date}.csv",
+      historyExportHelp: "Backup-Dateien dienen zur Wiederherstellung in EVSpend. CSV ist eine lesbare Tabelle für Excel, Numbers oder Google Sheets. Importierte Dateien werden nur lokal in deinem Browser verarbeitet und nicht hochgeladen.",
       importInvalid: "Ungültige oder beschädigte Datei. Import abgebrochen.",
       importTooLarge: "Datei zu groß (max. 2 MB).",
       importVersionMismatch: "Datei stammt aus einer anderen Version und ist nicht kompatibel.",
@@ -306,9 +309,12 @@
       clearAll: "Clear all",
       confirmClearAll: "Delete all saved single calculations?",
       confirmClearLegacy: "Delete all legacy compare entries?",
-      historyExport: "Export history",
-      historyImport: "Import history",
+      historyBackupExport: "Export backup",
+      historyBackupImport: "Import backup",
+      historyCsvExport: "Export CSV",
       historyExportFilename: "evspend-history-{date}.json",
+      historyCsvFilename: "evspend-history-{date}.csv",
+      historyExportHelp: "Backup files are used to restore data in EVSpend. CSV is a readable table for Excel, Numbers, or Google Sheets. Imported files are processed locally in your browser and are not uploaded.",
       importInvalid: "Invalid or corrupted file. Import cancelled.",
       importTooLarge: "File too large (max 2 MB).",
       importVersionMismatch: "File is from a different version and not compatible.",
@@ -386,9 +392,12 @@
       clearAll: "Tümünü sil",
       confirmClearAll: "Tüm kayıtlı tekli hesaplamaları silmek istiyor musunuz?",
       confirmClearLegacy: "Tüm eski karşılaştırma girdilerini silmek istiyor musunuz?",
-      historyExport: "Geçmişi dışa aktar",
-      historyImport: "Geçmişi içe aktar",
+      historyBackupExport: "Yedeği dışa aktar",
+      historyBackupImport: "Yedeği içe aktar",
+      historyCsvExport: "CSV dışa aktar",
       historyExportFilename: "evspend-gecmis-{date}.json",
+      historyCsvFilename: "evspend-gecmis-{date}.csv",
+      historyExportHelp: "Yedek dosyaları EVSpend içinde verileri geri yüklemek için kullanılır. CSV; Excel, Numbers veya Google Sheets için okunabilir bir tablodur. İçe aktarılan dosyalar yalnızca tarayıcında yerel olarak işlenir ve yüklenmez.",
       importInvalid: "Geçersiz veya bozuk dosya. İçe aktarma iptal edildi.",
       importTooLarge: "Dosya çok büyük (en fazla 2 MB).",
       importVersionMismatch: "Dosya farklı bir sürümden ve uyumlu değil.",
@@ -701,6 +710,78 @@
       var url  = URL.createObjectURL(blob);
       var a    = document.createElement("a");
       var pat  = _tv("historyExportFilename") || "evspend-verlauf-{date}.json";
+      a.href     = url;
+      a.download = pat.replace("{date}", _todayIsoDate());
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { try { URL.revokeObjectURL(url); } catch (_) {} }, 1000);
+    } catch (_) {
+      alert(_tv("importInvalid"));
+    }
+  }
+  // Human-readable CSV export (Excel/Numbers-friendly).
+  // - UTF-8 BOM so spreadsheets detect encoding
+  // - `;` delimiter (German-Excel default)
+  // - CRLF line endings
+  // - Standard CSV quoting: any value containing `;` `"` or newline is wrapped
+  //   in `"..."` and inner `"` is doubled
+  // - v2 entries only; legacy/unknown entries are silently dropped
+  function _csvEscape(v) {
+    if (v == null) return "";
+    var s = String(v);
+    if (/[;\r\n"]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
+    return s;
+  }
+  function _csvFormatDate(ms) {
+    var d = new Date(Number(ms));
+    if (!isFinite(d.getTime())) return "";
+    var pad = function (n) { return n < 10 ? "0" + n : String(n); };
+    return d.getFullYear() + "-" + pad(d.getMonth() + 1) + "-" + pad(d.getDate())
+         + " " + pad(d.getHours()) + ":" + pad(d.getMinutes()) + ":" + pad(d.getSeconds());
+  }
+  function _numCell(v, decimals) {
+    var n = Number(v);
+    if (!Number.isFinite(n)) return "";
+    return decimals == null ? String(n) : n.toFixed(decimals);
+  }
+  function exportHistoryCsv() {
+    var v2 = loadAll().filter(function (e) {
+      return e && e.schema === "v2" && (e.type === "ev" || e.type === "vb");
+    });
+    if (!v2.length) {
+      alert(_tv("exportEmpty"));
+      return;
+    }
+    var COL = ["Datum", "Typ", "Kilometer", "Verbrauch", "Preis",
+               "Kosten pro 100 km", "Monat", "Jahr", "Notiz",
+               "Währung", "Markt", "Sprache"];
+    var lines = [COL.map(_csvEscape).join(";")];
+    for (var i = 0; i < v2.length; i++) {
+      var e = v2[i];
+      var row = [
+        _csvFormatDate(e.date),
+        e.type || "",
+        _numCell(e.km),
+        _numCell(e.consumption),
+        _numCell(e.price, 4),
+        _numCell(e.costPer100, 2),
+        _numCell(e.monthlyCost, 2),
+        _numCell(e.yearlyCost, 2),
+        e.note || "",
+        (e.currencyMetadata && e.currencyMetadata.code) || "",
+        e.marketCode || "",
+        e.language || ""
+      ];
+      lines.push(row.map(_csvEscape).join(";"));
+    }
+    var BOM = "\uFEFF";
+    var csv = BOM + lines.join("\r\n") + "\r\n";
+    try {
+      var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      var url  = URL.createObjectURL(blob);
+      var a    = document.createElement("a");
+      var pat  = _tv("historyCsvFilename") || "evspend-verlauf-{date}.csv";
       a.href     = url;
       a.download = pat.replace("{date}", _todayIsoDate());
       document.body.appendChild(a);
@@ -1655,9 +1736,12 @@
   }
 
   // Export / Import (v1) — neutral buttons next to "Alle löschen".
-  const exportBtn   = document.getElementById("histExportBtn");
-  const importBtn   = document.getElementById("histImportBtn");
-  const importInput = document.getElementById("histImportInput");
+  // Backup buttons handle full JSON envelope (round-trip safe).
+  // CSV button is human-friendly read-only export, no import counterpart.
+  const exportBtn    = document.getElementById("histExportBtn");
+  const importBtn    = document.getElementById("histImportBtn");
+  const importInput  = document.getElementById("histImportInput");
+  const csvExportBtn = document.getElementById("histCsvExportBtn");
   if (exportBtn) {
     exportBtn.addEventListener("click", exportHistory);
   }
@@ -1668,6 +1752,9 @@
       if (f) importHistory(f);
       importInput.value = "";   // reset so re-selecting the same file still fires change
     });
+  }
+  if (csvExportBtn) {
+    csvExportBtn.addEventListener("click", exportHistoryCsv);
   }
 
   // ── Phase B/C: Markt-Pill init (konsistente Top-Bar Hauptseite + Verlauf) ──
