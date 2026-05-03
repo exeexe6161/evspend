@@ -148,26 +148,9 @@
     </div>
     <h2>No Cookies</h2>
     <p>EVSpend does <strong>not set any cookies</strong>. Functional state — your selected market, theme, saved calculations and similar preferences — is held purely in your browser's <code>localStorage</code>. No identifier is transmitted to our servers and no value crosses an HTTP request.</p>
-    <p>Your initial market is determined once based on the IP-geolocation provided by our hosting provider (Vercel) for the page request. If that result does not match your preference, you can switch markets via the in-app market selector at any time; the selection is then remembered locally.</p>
-    <p>You can clear localStorage at any time via your browser's site settings; doing so resets the app to its initial geo-derived state on the next visit.</p>
-  </div>
-
-  <div class="card">
-    <div class="card-icon">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/></svg>
-    </div>
-    <h2>Your Rights Under GDPR (EU 2016/679)</h2>
-    <p>As a data subject in the European Union, you have the following rights regarding your personal data:</p>
-    <ul>
-      <li><strong>Right of access (Art. 15):</strong> Request information about which of your personal data we process</li>
-      <li><strong>Right to rectification (Art. 16):</strong> Have inaccurate data corrected</li>
-      <li><strong>Right to erasure (Art. 17):</strong> "Right to be forgotten" — request deletion of your data</li>
-      <li><strong>Right to restriction (Art. 18):</strong> Limit how we process your data</li>
-      <li><strong>Right to data portability (Art. 20):</strong> Receive your data in machine-readable format</li>
-      <li><strong>Right to object (Art. 21):</strong> Object to processing based on legitimate interests</li>
-      <li><strong>Right to lodge a complaint:</strong> File a complaint with the supervisory authority</li>
-    </ul>
-    <p>Note: EVSpend does not receive or store your calculator inputs. The inputs and saved calculations remain in your browser; the hosting provider may process technical connection data such as IP address, user agent, timestamp, request URL and referrer (see "Hosting" above). Where these rights apply to such hosting logs, requests can be addressed to the operator via the contact details in the Legal Notice.</p>
+    <p>On first visit, a server-side middleware may use the country header provided by Vercel (<code>x-vercel-ip-country</code>) to redirect to <code>/en-eu/</code> when the visitor's country is not part of the default path. No cookies are set in this step, and no locally stored calculator inputs are read or processed on the server.</p>
+    <p>Market and language selection then happen in the browser — based on the page path, browser language and any locally stored choice from the in-app market selector. The selection is held only in <code>localStorage</code>.</p>
+    <p>You can clear localStorage at any time via your browser's site settings. Doing so only resets the app to its initial state; no additional data is transmitted to the servers.</p>
   </div>
 
   <div class="card">

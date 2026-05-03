@@ -183,8 +183,9 @@
     </div>
     <h2>Çerez Yok</h2>
     <p>EVSpend <strong>hiçbir çerez kullanmaz</strong>. İşlevsel durum — seçilen pazar, tema, kaydedilmiş hesaplamalar ve benzeri tercihler — yalnızca tarayıcının <code>localStorage</code> alanında tutulur. Sunucularımıza herhangi bir tanımlayıcı iletilmez ve hiçbir değer HTTP isteğinin parçası olmaz.</p>
-    <p>Başlangıç pazarı, sayfa isteğinin barındırma sağlayıcımızca (Vercel) sunulan IP coğrafi konumuna göre bir kez belirlenir. Sonuç tercihinle uyuşmuyorsa, uygulama içindeki pazar seçicisi üzerinden istediğin zaman pazar değiştirilebilir; seçim daha sonra yerel olarak hatırlanır.</p>
-    <p>localStorage istediğin zaman tarayıcı ayarlarından silinebilir; bir sonraki ziyarette uygulama yeniden coğrafi konumdan türetilen başlangıç durumuna döner.</p>
+    <p>İlk ziyarette, sunucu tarafı bir ara katman (middleware), Vercel tarafından sağlanan ülke başlığına (<code>x-vercel-ip-country</code>) göre, ziyaretçinin ülkesi varsayılan rota dışındaysa <code>/en-eu/</code> yoluna yönlendirebilir. Bu adımda çerez ayarlanmaz ve yerel olarak kaydedilmiş hesaplayıcı girdileri sunucuda okunmaz veya işlenmez.</p>
+    <p>Pazar ve dil seçimi daha sonra tarayıcıda gerçekleşir — sayfa yolu, tarayıcı dili ve uygulama içi pazar seçicisinden yerel olarak kaydedilmiş bir seçim temel alınarak. Seçim yalnızca tarayıcının <code>localStorage</code> alanında tutulur.</p>
+    <p>localStorage istediğin zaman tarayıcı ayarlarından silinebilir. Bu yalnızca uygulamanın başlangıç durumunu sıfırlar; sunucuya ek veri iletilmez.</p>
   </div>
 
   <div class="card">
