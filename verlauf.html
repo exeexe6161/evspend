@@ -41,7 +41,7 @@
 <link rel="manifest" href="/site.webmanifest">
 <title>Verlauf – Deine E-Auto- und Verbrenner-Berechnungen | EVSpend</title>
 <script src="./theme-init.js?v=20260501-legal3"></script>
-<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal16">
+<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal17">
 </head>
 <body>
 <div class="top-controls" role="toolbar" aria-label="Einstellungen">
@@ -139,20 +139,20 @@
     </div>
     <div class="stats-grid">
       <div class="stats-cell">
-        <div class="stats-cell-lbl" data-i18n="statsTotalKm">Gesamt km</div>
-        <div class="stats-cell-val"><span id="statEvKm">—</span><span class="stats-cell-unit">km</span></div>
+        <div class="stats-cell-lbl" data-i18n="statsExampleTotal">Summe gespeicherter Beispielrechnungen</div>
+        <div class="stats-cell-val"><span id="statEvTotal">—</span><span class="stats-cell-unit"></span></div>
       </div>
       <div class="stats-cell">
-        <div class="stats-cell-lbl" data-i18n="statsTotalCost">Gesamt Energie-/Kraftstoffkosten</div>
-        <div class="stats-cell-val"><span id="statEvMonthly">—</span><span class="stats-cell-unit">€</span></div>
+        <div class="stats-cell-lbl" data-i18n="statsAvgCostPer100">Ø geschätzte Kosten / 100 {unit}</div>
+        <div class="stats-cell-val"><span id="statEvAvgCost">—</span><span class="stats-cell-unit"></span></div>
       </div>
       <div class="stats-cell">
-        <div class="stats-cell-lbl" data-i18n="statsAvgCost">Ø Kosten / 100 km</div>
-        <div class="stats-cell-val"><span id="statEvCost">—</span><span class="stats-cell-unit">€</span></div>
+        <div class="stats-cell-lbl" data-i18n="statsAvgPerEntry">Ø pro gespeicherter Berechnung</div>
+        <div class="stats-cell-val"><span id="statEvAvgPerEntry">—</span><span class="stats-cell-unit"></span></div>
       </div>
       <div class="stats-cell">
-        <div class="stats-cell-lbl" data-i18n="statsAvgConsumption">Ø Verbrauch</div>
-        <div class="stats-cell-val"><span id="statEvCons">—</span><span class="stats-cell-unit">kWh / 100 km</span></div>
+        <div class="stats-cell-lbl" data-i18n="statsLowestPer100">Niedrigster gespeicherter Ø/100-Wert</div>
+        <div class="stats-cell-val"><span id="statEvLowest">—</span><span class="stats-cell-unit"></span></div>
       </div>
     </div>
   </div>
@@ -164,26 +164,28 @@
     </div>
     <div class="stats-grid">
       <div class="stats-cell">
-        <div class="stats-cell-lbl" data-i18n="statsTotalKm">Gesamt km</div>
-        <div class="stats-cell-val"><span id="statVbKm">—</span><span class="stats-cell-unit">km</span></div>
+        <div class="stats-cell-lbl" data-i18n="statsExampleTotal">Summe gespeicherter Beispielrechnungen</div>
+        <div class="stats-cell-val"><span id="statVbTotal">—</span><span class="stats-cell-unit"></span></div>
       </div>
       <div class="stats-cell">
-        <div class="stats-cell-lbl" data-i18n="statsTotalCost">Gesamt Energie-/Kraftstoffkosten</div>
-        <div class="stats-cell-val"><span id="statVbMonthly">—</span><span class="stats-cell-unit">€</span></div>
+        <div class="stats-cell-lbl" data-i18n="statsAvgCostPer100">Ø geschätzte Kosten / 100 {unit}</div>
+        <div class="stats-cell-val"><span id="statVbAvgCost">—</span><span class="stats-cell-unit"></span></div>
       </div>
       <div class="stats-cell">
-        <div class="stats-cell-lbl" data-i18n="statsAvgCost">Ø Kosten / 100 km</div>
-        <div class="stats-cell-val"><span id="statVbCost">—</span><span class="stats-cell-unit">€</span></div>
+        <div class="stats-cell-lbl" data-i18n="statsAvgPerEntry">Ø pro gespeicherter Berechnung</div>
+        <div class="stats-cell-val"><span id="statVbAvgPerEntry">—</span><span class="stats-cell-unit"></span></div>
       </div>
       <div class="stats-cell">
-        <div class="stats-cell-lbl" data-i18n="statsAvgConsumption">Ø Verbrauch</div>
-        <div class="stats-cell-val"><span id="statVbCons">—</span><span class="stats-cell-unit">L / 100 km</span></div>
+        <div class="stats-cell-lbl" data-i18n="statsLowestPer100">Niedrigster gespeicherter Ø/100-Wert</div>
+        <div class="stats-cell-val"><span id="statVbLowest">—</span><span class="stats-cell-unit"></span></div>
       </div>
     </div>
   </div>
 
   <div class="stats-empty" id="statsEmpty" data-i18n="statsEmpty">Noch keine Einzelberechnungen gespeichert</div>
 </div>
+
+<p id="statsCaveat" class="stats-caveat" hidden data-i18n="statsCaveatFooter">Werte basieren auf deinen gespeicherten Beispielrechnungen. Nur Energie-/Kraftstoffkosten — Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten. Keine Garantie und keine Beratung.</p>
 
 </section>
 
@@ -255,6 +257,6 @@
 </footer>
 
 <script src="/vendor/chart-4.4.6.umd.js" defer></script>
-<script src="./verlauf.min.js?v=20260501-legal16" defer></script>
+<script src="./verlauf.min.js?v=20260501-legal17" defer></script>
 </body>
 </html>

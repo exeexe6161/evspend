@@ -1984,6 +1984,18 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
   font-size:14.5px;
   line-height:1.55;
 }
+/* Caveat under the stats card — defensive disclosure that values are
+   user-saved example calculations only. Dezent, no warning-box look. */
+.stats-caveat{
+  max-width:680px;
+  margin:10px auto 0;
+  padding:0 var(--gutter);
+  color:var(--l4);
+  font-size:11.5px;
+  line-height:1.55;
+  text-align:center;
+}
+.stats-caveat[hidden]{display:none !important;}
 
 /* ══ Legacy (old compare entries) section ══ */
 .legacy-wrap{
@@ -3894,6 +3906,11 @@ body[data-result-stale="true"] .stale-hint {
   html.history-print-mode .hist-diff,
   html.history-print-mode .chart-header h3{
     color:#111827 !important;
+  }
+  /* Caveat needs darker ink than var(--l4) (~#9ca3af) so it stays legible
+     on white paper. */
+  html.history-print-mode .stats-caveat{
+    color:#374151 !important;
   }
   /* Don't split a card or a single entry across pages where avoidable. */
   html.history-print-mode .chart-card,

@@ -220,6 +220,12 @@
       statsTotalCost: "Gesamt Energie-/Kraftstoffkosten",
       statsAvgCost: "Ø Kosten / 100 {unit}",
       statsAvgConsumption: "Ø Verbrauch",
+      statsExampleTotal: "Summe gespeicherter Beispielrechnungen",
+      statsAvgCostPer100: "Ø geschätzte Kosten / 100 {unit}",
+      statsAvgPerEntry: "Ø pro gespeicherter Berechnung",
+      statsLowestPer100: "Niedrigster gespeicherter Ø/100-Wert",
+      statsNeedsTwoEntries: "Mindestens 2 gespeicherte Einträge nötig",
+      statsCaveatFooter: "Werte basieren auf deinen gespeicherten Beispielrechnungen. Nur Energie-/Kraftstoffkosten — Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten. Keine Garantie und keine Beratung.",
       statsEmpty: "Noch keine Einzelberechnungen gespeichert",
       legacyLabel: "Alt-Einträge aus Vergleichsmodus",
       legacyClear: "Alt-Einträge löschen",
@@ -306,6 +312,12 @@
       statsTotalCost: "Total energy/fuel costs",
       statsAvgCost: "Avg. cost / 100 {unit}",
       statsAvgConsumption: "Avg. consumption",
+      statsExampleTotal: "Total of saved example calculations",
+      statsAvgCostPer100: "Avg. estimated cost / 100 {unit}",
+      statsAvgPerEntry: "Avg. per saved calculation",
+      statsLowestPer100: "Lowest saved avg./100 value",
+      statsNeedsTwoEntries: "At least 2 saved entries needed",
+      statsCaveatFooter: "Values are based on your saved example calculations. Only energy/fuel costs — maintenance, insurance, taxes, depreciation, charging losses and base fees are not included. No guarantee and no advice.",
       statsEmpty: "No single-calculations saved yet",
       legacyLabel: "Legacy compare entries",
       legacyClear: "Delete legacy entries",
@@ -392,6 +404,12 @@
       statsTotalCost: "Toplam enerji/yakıt maliyeti",
       statsAvgCost: "Ø maliyet / 100 {unit}",
       statsAvgConsumption: "Ø tüketim",
+      statsExampleTotal: "Kayıtlı örnek hesaplamaların toplamı",
+      statsAvgCostPer100: "Ø tahmini maliyet / 100 {unit}",
+      statsAvgPerEntry: "Kayıtlı hesap başına Ø",
+      statsLowestPer100: "Kaydedilen en düşük Ø/100 değeri",
+      statsNeedsTwoEntries: "En az 2 kayıtlı girdi gerekli",
+      statsCaveatFooter: "Değerler kaydettiğin örnek hesaplamalara dayanır. Yalnızca enerji/yakıt maliyetleri — bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir. Garanti veya tavsiye değildir.",
       statsEmpty: "Henüz kayıtlı tekli hesaplama yok",
       legacyLabel: "Eski karşılaştırma girdileri",
       legacyClear: "Eski girdileri sil",
@@ -551,16 +569,17 @@
   const statsEmpty   = document.getElementById("statsEmpty");
   const statBlockEv  = document.getElementById("statBlockEv");
   const statBlockVb  = document.getElementById("statBlockVb");
-  const statEvN       = document.getElementById("statEvN");
-  const statEvKm      = document.getElementById("statEvKm");
-  const statEvCons    = document.getElementById("statEvCons");
-  const statEvCost    = document.getElementById("statEvCost");
-  const statEvMonthly = document.getElementById("statEvMonthly");
-  const statVbN       = document.getElementById("statVbN");
-  const statVbKm      = document.getElementById("statVbKm");
-  const statVbCons    = document.getElementById("statVbCons");
-  const statVbCost    = document.getElementById("statVbCost");
-  const statVbMonthly = document.getElementById("statVbMonthly");
+  const statEvN           = document.getElementById("statEvN");
+  const statEvTotal       = document.getElementById("statEvTotal");
+  const statEvAvgCost     = document.getElementById("statEvAvgCost");
+  const statEvAvgPerEntry = document.getElementById("statEvAvgPerEntry");
+  const statEvLowest      = document.getElementById("statEvLowest");
+  const statVbN           = document.getElementById("statVbN");
+  const statVbTotal       = document.getElementById("statVbTotal");
+  const statVbAvgCost     = document.getElementById("statVbAvgCost");
+  const statVbAvgPerEntry = document.getElementById("statVbAvgPerEntry");
+  const statVbLowest      = document.getElementById("statVbLowest");
+  const statsCaveat       = document.getElementById("statsCaveat");
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   const fmt = (v, d) => isFinite(v)
@@ -949,6 +968,9 @@
   }
 
   // ── Stats (v2 only, split by type) ─────────────────────────────────────────
+  // Cost-focused stats: total / avg-per-100 / avg-per-entry / lowest-per-100.
+  // All language is DEFENSIVE — saved entries are example calculations, not
+  // real expenses. No EV-vs-ICE delta, no "savings" rhetoric, no advice.
   function renderStats(v2Entries, period) {
     const start = periodStart(period);
     const filtered = v2Entries.filter(e => new Date(e.date) >= start);
@@ -962,6 +984,7 @@
       statBlockEv.hidden = true;
       statBlockVb.hidden = true;
       if (statsEmpty) statsEmpty.hidden = false;
+      if (statsCaveat) statsCaveat.hidden = true;
       return;
     }
     if (statsEmpty) statsEmpty.hidden = true;
@@ -969,39 +992,61 @@
     // Phase 9: Stats aggregieren Rohwerte metrisch und konvertieren für den
     // aktuellen UI-Markt. Gemischte DE/TR/US-Einträge: Stats zeigen die
     // Summen/Durchschnitte in der aktuell ausgewählten Markt-Einheit.
-    const distUnit = _currentDistanceUnit();
-    const evUnit   = _currentEvEffUnit();
-    const iceUnit  = _currentIceEffUnit();
-    if (evs.length) {
-      statBlockEv.hidden = false;
-      statEvN.textContent       = evs.length + " " + (evs.length === 1 ? _tv("histEntrySingular") : _tv("histEntryPlural"));
-      statEvKm.textContent      = fmt(_kmToCurrentDist(sum(evs.map(e => e.km))), 0);
-      _setStatUnit(statEvKm, distUnit);
-      // Money-Werte nutzen aktuelle Währung; Unit-Span wird geleert.
-      statEvMonthly.textContent = fmtMoneyEntry(sum(evs.map(e => Number(e.costPer100) * Number(e.km) / 100)), null, 0);
-      _clearAdjacentUnit(statEvMonthly);
-      statEvCost.textContent    = fmtMoneyEntry(_currentIsUs() ? avg(evs.map(e => e.costPer100)) * UNIT_CONV.MI_TO_KM : avg(evs.map(e => e.costPer100)), null, 2);
-      _clearAdjacentUnit(statEvCost);
-      statEvCons.textContent    = fmt(_evConsToCurrent(avg(evs.map(e => e.consumption))), 1);
-      _setStatUnit(statEvCons, evUnit);
-    } else {
-      statBlockEv.hidden = true;
+    function fillBlock(blockEl, nEl, totalEl, avgCostEl, avgPerEntryEl, lowestEl, items) {
+      if (!items.length) {
+        blockEl.hidden = true;
+        return;
+      }
+      blockEl.hidden = false;
+      nEl.textContent = items.length + " " + (items.length === 1 ? _tv("histEntrySingular") : _tv("histEntryPlural"));
+
+      // Period sum: Σ (costPer100 × km / 100), in current market currency.
+      const total = sum(items.map(e => Number(e.costPer100) * Number(e.km) / 100));
+      totalEl.textContent = fmtMoneyEntry(total, null, 0);
+      _clearAdjacentUnit(totalEl);
+
+      // Avg cost / 100 {unit}, US-converted from per-100-km to per-100-mi.
+      const avgRaw       = avg(items.map(e => e.costPer100));
+      const avgConverted = _currentIsUs() ? avgRaw * UNIT_CONV.MI_TO_KM : avgRaw;
+      avgCostEl.textContent = fmtMoneyEntry(avgConverted, null, 2);
+      _clearAdjacentUnit(avgCostEl);
+
+      // Avg per saved calculation: total / count. With 1 entry equals total —
+      // that's mathematically correct, no special-casing needed.
+      const avgPerEntry = total / items.length;
+      avgPerEntryEl.textContent = fmtMoneyEntry(avgPerEntry, null, 2);
+      _clearAdjacentUnit(avgPerEntryEl);
+
+      // Lowest avg/100 — only meaningful with ≥2 entries. With <2 show "—"
+      // and a tooltip / aria-label so the reason is discoverable.
+      if (items.length >= 2) {
+        const finiteCosts = items.map(e => Number(e.costPer100)).filter(v => isFinite(v));
+        if (finiteCosts.length >= 2) {
+          const minRaw       = Math.min.apply(null, finiteCosts);
+          const minConverted = _currentIsUs() ? minRaw * UNIT_CONV.MI_TO_KM : minRaw;
+          lowestEl.textContent = fmtMoneyEntry(minConverted, null, 2);
+          lowestEl.removeAttribute("title");
+          lowestEl.removeAttribute("aria-label");
+        } else {
+          lowestEl.textContent = "—";
+          lowestEl.setAttribute("title", _tv("statsNeedsTwoEntries"));
+          lowestEl.setAttribute("aria-label", _tv("statsNeedsTwoEntries"));
+        }
+      } else {
+        lowestEl.textContent = "—";
+        lowestEl.setAttribute("title", _tv("statsNeedsTwoEntries"));
+        lowestEl.setAttribute("aria-label", _tv("statsNeedsTwoEntries"));
+      }
+      _clearAdjacentUnit(lowestEl);
     }
-    if (vbs.length) {
-      statBlockVb.hidden = false;
-      statVbN.textContent       = vbs.length + " " + (vbs.length === 1 ? _tv("histEntrySingular") : _tv("histEntryPlural"));
-      statVbKm.textContent      = fmt(_kmToCurrentDist(sum(vbs.map(e => e.km))), 0);
-      _setStatUnit(statVbKm, distUnit);
-      statVbMonthly.textContent = fmtMoneyEntry(sum(vbs.map(e => Number(e.costPer100) * Number(e.km) / 100)), null, 0);
-      _clearAdjacentUnit(statVbMonthly);
-      statVbCost.textContent    = fmtMoneyEntry(_currentIsUs() ? avg(vbs.map(e => e.costPer100)) * UNIT_CONV.MI_TO_KM : avg(vbs.map(e => e.costPer100)), null, 2);
-      _clearAdjacentUnit(statVbCost);
-      // ICE: US integer, DE/TR 1 decimal
-      const iceAvg = _iceConsToCurrent(avg(vbs.map(e => e.consumption)));
-      statVbCons.textContent    = fmt(iceAvg, _currentIsUs() ? 0 : 1);
-      _setStatUnit(statVbCons, iceUnit);
-    } else {
-      statBlockVb.hidden = true;
+
+    fillBlock(statBlockEv, statEvN, statEvTotal, statEvAvgCost, statEvAvgPerEntry, statEvLowest, evs);
+    fillBlock(statBlockVb, statVbN, statVbTotal, statVbAvgCost, statVbAvgPerEntry, statVbLowest, vbs);
+
+    // Caveat is shown whenever any block is visible — i.e. the user has at
+    // least one saved example calculation in the active period.
+    if (statsCaveat) {
+      statsCaveat.hidden = !(evs.length || vbs.length);
     }
   }
 
