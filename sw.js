@@ -14,16 +14,22 @@
  * downloads or fresh-fetch semantics.
  */
 
-const CACHE_VERSION  = 'v20260503-offline-core1';
+const CACHE_VERSION  = 'v20260503-offline-core2';
 const STATIC_CACHE   = 'evspend-static-' + CACHE_VERSION;
 const RUNTIME_CACHE  = 'evspend-runtime-' + CACHE_VERSION;
 
 // Offline shell. Covers calculator + history shell for both locales so
 // the installed PWA opens cold without a network round-trip; the rest
 // is filled by the runtime cache as the user navigates.
+//
+// Both the clean-URL form (/verlauf) and the .html sibling are listed
+// because Vercel cleanUrls serves the same content under both keys and
+// Cache API matches request URLs exactly — we want either lookup to hit.
 const PRECACHE_URLS = [
   '/',
   '/en-eu/',
+  '/verlauf',
+  '/en-eu/verlauf',
   '/verlauf.html',
   '/en-eu/verlauf.html',
   '/site.webmanifest',
@@ -110,15 +116,38 @@ function cacheFirst(request) {
 }
 
 function staleWhileRevalidate(request) {
-  return caches.open(RUNTIME_CACHE).then((cache) =>
-    cache.match(request).then((cached) => {
-      const network = fetch(request).then((response) => {
-        if (response && response.ok && response.status === 200) {
-          cache.put(request, response.clone()).catch(() => {});
-        }
-        return response;
-      }).catch(() => cached);
-      return cached || network;
-    })
+  // Look across STATIC_CACHE and RUNTIME_CACHE so navigation requests can
+  // see precached entries (the previous RUNTIME_CACHE-only lookup missed
+  // anything seeded at install time).
+  return caches.match(request).then((cached) => {
+    const network = fetch(request).then((response) => {
+      if (response && response.ok && response.status === 200) {
+        const clone = response.clone();
+        caches.open(RUNTIME_CACHE).then((cache) => cache.put(request, clone)).catch(() => {});
+      }
+      return response;
+    }).catch(() => cached || navigationFallback(new URL(request.url)));
+    return cached || network;
+  });
+}
+
+// When a navigation goes offline and no exact cache entry exists, walk a
+// short candidate list so clean-URL routes (/verlauf) can still resolve
+// via their .html sibling, locale roots survive a missing trailing slash,
+// and anything else falls back to the site root.
+function navigationFallback(url) {
+  const path = url.pathname;
+  const candidates = [];
+  if (path === '/verlauf') {
+    candidates.push('/verlauf', '/verlauf.html');
+  } else if (path === '/en-eu/verlauf') {
+    candidates.push('/en-eu/verlauf', '/en-eu/verlauf.html');
+  } else if (path === '/en-eu') {
+    candidates.push('/en-eu/');
+  }
+  candidates.push('/');
+  return candidates.reduce(
+    (chain, candidate) => chain.then((found) => found || caches.match(candidate)),
+    Promise.resolve(undefined)
   );
 }
