@@ -2489,7 +2489,7 @@ setTimeout(() => {
 
   on("qImgBtn",     "click", shareImageCanvas);
   on("qSaveBtn",    "click", saveEntrySafe);
-  on("qVerlaufBtn", "click", () => { location.href = "./verlauf.html"; });
+  on("qVerlaufBtn", "click", () => { location.href = "./verlauf"; });
   on("resetBtn",    "click", confirmReset);
 
   on("modeCompareBtn", "click", () => setMode("compare"));
