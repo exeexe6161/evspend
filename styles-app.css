@@ -2097,7 +2097,27 @@ html:not([data-theme="dark"]) .stats-card{border:1px solid rgba(0,0,0,0.04);}
 }
 .hist-empty-cta:hover{background:var(--blue);}
 .hist-empty-cta:active{transform:scale(.97);}
-.hist-actions{margin:18px var(--gutter) 0;display:flex;justify-content:center;}
+.hist-actions{margin:18px var(--gutter) 0;display:flex;flex-wrap:wrap;justify-content:center;gap:10px;}
+.hist-actions[hidden]{display:none!important;}
+/* Neutral history action (export / import). Distinct from .hist-clear which
+   stays red/destructive — colour alone signals consequence. */
+.hist-action-btn{
+  background:var(--s2);
+  color:var(--l1);
+  border:1px solid var(--sep);
+  border-radius:var(--r-btn);
+  padding:11px 22px;
+  font-family:inherit;
+  font-size:var(--fs-base);
+  font-weight:500;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background var(--t-base),transform var(--t-fast);
+}
+.hist-action-btn:hover{background:var(--s3);}
+.hist-action-btn:active{transform:scale(var(--press-scale));}
+[data-theme="dark"] .hist-action-btn{background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.1);}
+[data-theme="dark"] .hist-action-btn:hover{background:rgba(255,255,255,.1);}
 .hist-clear{
   background:rgba(239,68,68,.07);
   color:var(--red);

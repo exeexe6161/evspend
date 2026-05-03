@@ -226,6 +226,14 @@
       clearAll: "Alle löschen",
       confirmClearAll: "Alle gespeicherten Einzelberechnungen löschen?",
       confirmClearLegacy: "Alle alten Vergleichs-Einträge löschen?",
+      historyExport: "Verlauf exportieren",
+      historyImport: "Verlauf importieren",
+      historyExportFilename: "evspend-verlauf-{date}.json",
+      importInvalid: "Ungültige oder beschädigte Datei. Import abgebrochen.",
+      importTooLarge: "Datei zu groß (max. 2 MB).",
+      importVersionMismatch: "Datei stammt aus einer anderen Version und ist nicht kompatibel.",
+      importMerged: "{new} neue Einträge importiert, {skipped} übersprungen.",
+      exportEmpty: "Verlauf ist leer — nichts zu exportieren.",
       histEmptyNone: "Dein Verlauf ist leer. Starte mit deiner ersten Berechnung.",
       histEmptyCta: "Erste Fahrt berechnen",
       histEmptySearch: "Keine Einträge für diese Suche",
@@ -298,6 +306,14 @@
       clearAll: "Clear all",
       confirmClearAll: "Delete all saved single calculations?",
       confirmClearLegacy: "Delete all legacy compare entries?",
+      historyExport: "Export history",
+      historyImport: "Import history",
+      historyExportFilename: "evspend-history-{date}.json",
+      importInvalid: "Invalid or corrupted file. Import cancelled.",
+      importTooLarge: "File too large (max 2 MB).",
+      importVersionMismatch: "File is from a different version and not compatible.",
+      importMerged: "{new} new entries imported, {skipped} skipped.",
+      exportEmpty: "History is empty — nothing to export.",
       histEmptyNone: "Nothing saved yet. Start with your first calculation.",
       histEmptyCta: "Calculate first trip",
       histEmptySearch: "No entries for this search",
@@ -370,6 +386,14 @@
       clearAll: "Tümünü sil",
       confirmClearAll: "Tüm kayıtlı tekli hesaplamaları silmek istiyor musunuz?",
       confirmClearLegacy: "Tüm eski karşılaştırma girdilerini silmek istiyor musunuz?",
+      historyExport: "Geçmişi dışa aktar",
+      historyImport: "Geçmişi içe aktar",
+      historyExportFilename: "evspend-gecmis-{date}.json",
+      importInvalid: "Geçersiz veya bozuk dosya. İçe aktarma iptal edildi.",
+      importTooLarge: "Dosya çok büyük (en fazla 2 MB).",
+      importVersionMismatch: "Dosya farklı bir sürümden ve uyumlu değil.",
+      importMerged: "{new} yeni kayıt içe aktarıldı, {skipped} atlandı.",
+      exportEmpty: "Geçmiş boş — dışa aktarılacak bir şey yok.",
       histEmptyNone: "Geçmişin boş. İlk hesabını kaydet ve takibe başla.",
       histEmptyCta: "İlk yolculuğu hesapla",
       histEmptySearch: "Bu arama için girdi yok",
@@ -557,6 +581,213 @@
   }
   function saveAll(arr) {
     try { localStorage.setItem(HIST_KEY, JSON.stringify(arr)); } catch (e) {}
+  }
+
+  // ── Export / Import (v1) ───────────────────────────────────────────────────
+  // Export: full history (incl. legacy entries) wrapped in an envelope so
+  // future readers can detect format/version. Import: STRICT v2-only —
+  // legacy/unknown shapes are silently skipped so a malicious or stale file
+  // can't sneak unexpected fields into storage. Merge-only (no replace).
+  const HIST_MAX_LOCAL    = 50;
+  const IMPORT_MAX_BYTES  = 2 * 1024 * 1024;
+  const IMPORT_MAX_ENTRIES = 1000;
+  const NOTE_MAX_LEN      = 200;
+  const ALLOWED_LANG      = { de: 1, en: 1, tr: 1 };
+  const ALLOWED_MARKET    = { de: 1, eu: 1, us: 1, tr: 1 };
+  const ALLOWED_CURRENCY  = { EUR: 1, USD: 1, TRY: 1 };
+
+  function _isPlainObject(o) {
+    return o != null && typeof o === "object" && !Array.isArray(o)
+        && Object.prototype.toString.call(o) === "[object Object]";
+  }
+  function _sanitizeNote(s) {
+    if (typeof s !== "string") return "";
+    var cleaned = s.replace(/[\x00-\x1f\x7f]/g, "").trim();
+    if (cleaned.length > NOTE_MAX_LEN) cleaned = cleaned.slice(0, NOTE_MAX_LEN);
+    return cleaned;
+  }
+  function _finitePos(v) {
+    var n = Number(v);
+    return Number.isFinite(n) && n >= 0 ? n : NaN;
+  }
+  function _validateEnvelope(obj) {
+    if (!_isPlainObject(obj)) return false;
+    if (obj.app !== "evspend") return false;
+    if (obj.kind !== "history-export") return false;
+    if (obj.schemaVersion !== 1) return false;
+    if (!Array.isArray(obj.entries)) return false;
+    if (obj.entries.length > IMPORT_MAX_ENTRIES) return false;
+    return true;
+  }
+  function _sanitizeImportEntry(raw) {
+    if (!_isPlainObject(raw)) return null;
+    if (raw.schema !== "v2") return null;                 // strict v2 only
+    if (raw.type !== "ev" && raw.type !== "vb") return null;
+    var date = Number(raw.date);
+    if (!Number.isFinite(date) || date <= 0) return null;
+    var km          = _finitePos(raw.km);
+    var consumption = _finitePos(raw.consumption);
+    var price       = _finitePos(raw.price);
+    if (!Number.isFinite(km) || !Number.isFinite(consumption) || !Number.isFinite(price)) return null;
+    var costPer100  = _finitePos(raw.costPer100);
+    var monthlyCost = _finitePos(raw.monthlyCost);
+    var yearlyCost  = _finitePos(raw.yearlyCost);
+    var entry = {
+      date:        date,
+      schema:      "v2",
+      type:        raw.type,
+      km:          km,
+      consumption: consumption,
+      price:       price,
+      costPer100:  Number.isFinite(costPer100)  ? costPer100  : 0,
+      monthlyCost: Number.isFinite(monthlyCost) ? monthlyCost : 0,
+      yearlyCost:  Number.isFinite(yearlyCost)  ? yearlyCost  : 0,
+      ridesharing: !!raw.ridesharing,
+      persons:     Math.max(1, Math.min(99, Math.round(Number(raw.persons)) || 1)),
+      note:        _sanitizeNote(raw.note)
+    };
+    if (typeof raw.language === "string" && ALLOWED_LANG[raw.language]) {
+      entry.language = raw.language;
+    }
+    if (typeof raw.marketCode === "string" && ALLOWED_MARKET[raw.marketCode]) {
+      entry.marketCode = raw.marketCode;
+    }
+    if (_isPlainObject(raw.currencyMetadata)) {
+      var cm = raw.currencyMetadata;
+      if (typeof cm.code === "string" && ALLOWED_CURRENCY[cm.code]
+       && typeof cm.symbol === "string" && cm.symbol.length <= 4
+       && typeof cm.locale === "string" && cm.locale.length <= 16) {
+        entry.currencyMetadata = { code: cm.code, symbol: cm.symbol, locale: cm.locale };
+      }
+    }
+    if (typeof raw.sourceLocale === "string" && raw.sourceLocale.length <= 16) {
+      entry.sourceLocale = raw.sourceLocale;
+    }
+    return entry;
+  }
+  function _dedupKey(e) {
+    return [
+      e && e.date,
+      (e && e.type) || "",
+      Number(e && e.km) || 0,
+      Number(e && e.consumption) || 0,
+      Number(e && e.price) || 0
+    ].join("|");
+  }
+  function _todayIsoDate() {
+    var d = new Date();
+    var y = d.getFullYear();
+    var m = String(d.getMonth() + 1).padStart(2, "0");
+    var day = String(d.getDate()).padStart(2, "0");
+    return y + "-" + m + "-" + day;
+  }
+  function exportHistory() {
+    var all = loadAll();
+    if (!all.length) {
+      alert(_tv("exportEmpty"));
+      return;
+    }
+    var envelope = {
+      app: "evspend",
+      kind: "history-export",
+      schemaVersion: 1,
+      exportedAt: new Date().toISOString(),
+      entryCount: all.length,
+      entries: all
+    };
+    try {
+      var json = JSON.stringify(envelope, null, 2);
+      var blob = new Blob([json], { type: "application/json" });
+      var url  = URL.createObjectURL(blob);
+      var a    = document.createElement("a");
+      var pat  = _tv("historyExportFilename") || "evspend-verlauf-{date}.json";
+      a.href     = url;
+      a.download = pat.replace("{date}", _todayIsoDate());
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { try { URL.revokeObjectURL(url); } catch (_) {} }, 1000);
+    } catch (_) {
+      alert(_tv("importInvalid"));
+    }
+  }
+  function importHistory(file) {
+    if (!file) return;
+    if (file.size > IMPORT_MAX_BYTES) {
+      alert(_tv("importTooLarge"));
+      return;
+    }
+    var reader = new FileReader();
+    reader.onload = function () {
+      var text = String(reader.result || "");
+      var obj;
+      try { obj = JSON.parse(text); } catch (_) {
+        alert(_tv("importInvalid"));
+        return;
+      }
+      if (!_validateEnvelope(obj)) {
+        if (_isPlainObject(obj) && obj.app === "evspend" && obj.kind === "history-export"
+         && typeof obj.schemaVersion === "number" && obj.schemaVersion !== 1) {
+          alert(_tv("importVersionMismatch"));
+        } else {
+          alert(_tv("importInvalid"));
+        }
+        return;
+      }
+      // Validate + sanitize each import entry. Invalid ones are silently
+      // dropped and counted toward the user-visible "skipped" total.
+      var validImports = [];
+      for (var i = 0; i < obj.entries.length; i++) {
+        var ev = _sanitizeImportEntry(obj.entries[i]);
+        if (ev) validImports.push(ev);
+      }
+      var invalidCount = obj.entries.length - validImports.length;
+
+      // Dedupe against existing storage AND against earlier imports in the
+      // same file (a malformed export could repeat the same tuple).
+      var existing = loadAll();
+      var seen = Object.create(null);
+      for (var ex = 0; ex < existing.length; ex++) {
+        seen[_dedupKey(existing[ex])] = 1;
+      }
+      var freshImports = [];
+      var dupCount = 0;
+      for (var v = 0; v < validImports.length; v++) {
+        var ck = _dedupKey(validImports[v]);
+        if (seen[ck]) {
+          dupCount++;
+        } else {
+          seen[ck] = 1;
+          freshImports.push(validImports[v]);
+        }
+      }
+
+      // Sort merged list by date desc, cap at HIST_MAX_LOCAL. Only count
+      // freshImports that actually survived the cap as "new" — ones pushed
+      // off the end count toward "skipped".
+      var freshKeys = Object.create(null);
+      for (var fk = 0; fk < freshImports.length; fk++) {
+        freshKeys[_dedupKey(freshImports[fk])] = 1;
+      }
+      var merged = existing.concat(freshImports);
+      merged.sort(function (a, b) { return (Number(b && b.date) || 0) - (Number(a && a.date) || 0); });
+      if (merged.length > HIST_MAX_LOCAL) merged.length = HIST_MAX_LOCAL;
+      var newCount = 0;
+      for (var m = 0; m < merged.length; m++) {
+        if (freshKeys[_dedupKey(merged[m])]) newCount++;
+      }
+      var capDropped = Math.max(0, freshImports.length - newCount);
+      saveAll(merged);
+
+      var skipped = invalidCount + dupCount + capDropped;
+      var msg = (_tv("importMerged") || "{new} new entries imported, {skipped} skipped.")
+        .replace("{new}", String(newCount))
+        .replace("{skipped}", String(skipped));
+      alert(msg);
+      try { refresh(); } catch (_) {}
+    };
+    reader.onerror = function () { alert(_tv("importInvalid")); };
+    reader.readAsText(file);
   }
 
   // ── Period filter ──────────────────────────────────────────────────────────
@@ -847,6 +1078,16 @@
     const info = paginate(filtered, state.page);
     state.page = info.page;
 
+    // Action bar always visible — Import must remain reachable on a fresh
+    // device (empty history). Clear-all is destructive, so it's only shown
+    // when there is something to clear (v2 entries; legacy is wiped via the
+    // separate `legacyClearBtn` inside the legacy <details>).
+    if (actionsEl) actionsEl.removeAttribute("hidden");
+    if (clearBtn) {
+      if (v2Entries.length > 0) clearBtn.removeAttribute("hidden");
+      else                      clearBtn.setAttribute("hidden", "");
+    }
+
     if (!v2Entries.length) {
       const empty = document.createElement("div");
       empty.className = "hist-empty hist-empty--first";
@@ -860,17 +1101,14 @@
       cta.textContent = _tv("histEmptyCta");
       empty.appendChild(cta);
       listEl.appendChild(empty);
-      if (actionsEl) actionsEl.setAttribute("hidden", "");
       if (pagerEl) pagerEl.setAttribute("hidden", "");
     } else if (!filtered.length) {
       const empty = document.createElement("div");
       empty.className = "hist-empty";
       empty.textContent = _tv("histEmptySearch");
       listEl.appendChild(empty);
-      if (actionsEl) actionsEl.removeAttribute("hidden");
       if (pagerEl) pagerEl.setAttribute("hidden", "");
     } else {
-      if (actionsEl) actionsEl.removeAttribute("hidden");
       info.slice.forEach(e => listEl.appendChild(renderV2Entry(e)));
       renderPager(info);
     }
@@ -1413,6 +1651,22 @@
       const remaining = state.all.filter(isV2);         // keep v2
       saveAll(remaining);
       refresh();
+    });
+  }
+
+  // Export / Import (v1) — neutral buttons next to "Alle löschen".
+  const exportBtn   = document.getElementById("histExportBtn");
+  const importBtn   = document.getElementById("histImportBtn");
+  const importInput = document.getElementById("histImportInput");
+  if (exportBtn) {
+    exportBtn.addEventListener("click", exportHistory);
+  }
+  if (importBtn && importInput) {
+    importBtn.addEventListener("click", function () { importInput.click(); });
+    importInput.addEventListener("change", function () {
+      var f = importInput.files && importInput.files[0];
+      if (f) importHistory(f);
+      importInput.value = "";   // reset so re-selecting the same file still fires change
     });
   }
 
