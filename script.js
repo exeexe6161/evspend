@@ -1,16 +1,16 @@
 const $ = id => document.getElementById(id);
 
 // ── EVSpend Splash lifecycle ─────────────────────────────────────────────────
-// First-paint Variant-B (notch) splash. Decorative only, never blocks the app:
+// First-paint Final-B (notch) splash. Decorative only, never blocks the app:
 //   • shown once per browser session (sessionStorage flag)
 //   • hidden almost immediately if `prefers-reduced-motion` is set
-//   • normal session view: ~1.3 s on screen, then opacity fade-out (~0.32 s)
-//   • hard safety timeout: ~2.4 s, the overlay is force-removed regardless
+//   • normal session view: ~1.5 s on screen (covers draw + diamond + ring +
+//     atmo + a short hold), then opacity fade-out (~0.32 s)
+//   • hard safety timeout: ~2.4 s — the overlay is force-removed regardless
 //     of whether the fade callbacks fired
-//   • exact path lengths are measured via getTotalLength() so the
-//     stroke-dashoffset reveal lands cleanly on the apex
-// All DOM access is wrapped in try/catch so any failure here cannot prevent
-// the rest of the app from initialising.
+// Path lengths are normalised in markup via pathLength="220", so no JS
+// measuring is needed. All DOM access is wrapped in try/catch so any
+// failure here cannot prevent the rest of the app from initialising.
 (function initEvspendSplash() {
   try {
     var el = document.getElementById("evspend-splash");
@@ -54,27 +54,18 @@ const $ = id => document.getElementById(id);
       return;
     }
 
-    // Set exact path lengths on each leg so stroke-dashoffset:0 lands clean.
-    try {
-      var legs = el.querySelectorAll(".evs-leg");
-      for (var i = 0; i < legs.length; i++) {
-        var L = legs[i].getTotalLength();
-        legs[i].style.setProperty("--L", (L + 2).toFixed(2));
-      }
-    } catch (_) {}
-
     // Kick off the draw-in on the next frame so initial styles paint first.
     raf(function () { el.classList.add("run"); });
 
-    // Normal lifecycle: ~1.3 s on screen, then fade out.
-    var hideTimer = setTimeout(removeSplash, 1300);
+    // Normal lifecycle: ~1.5 s on screen, then fade out.
+    var hideTimer = setTimeout(removeSplash, 1500);
     // Hard safety: even if hideTimer is throttled by background tabs, this
     // wins after ~2.4 s so the calculator is never blocked.
     var killTimer = setTimeout(function () {
       clearTimeout(hideTimer);
       removeSplash();
     }, 2400);
-    // Tap to dismiss — power users skip the wait. NEVER replays.
+    // Tap to dismiss — power users skip the wait. Never replays.
     // Both listeners share the same idempotent dismiss; whichever fires
     // first wins and the other is harmless because removeSplash() guards
     // against double-runs via el._removed.
@@ -2669,10 +2660,10 @@ setTimeout(() => {
       marketTr: "TR · ₺",
       marketSwitchSr: "Markt wechseln, aktuell",
       // Phase 7 — dynamische Ergebnis-/Aktionstexte (rechtlich vorsichtig formuliert)
-      evCheaper: "Geschätzter Vorteil E-Auto — laut deinen Eingaben",
-      vbCheaper: "Geschätzter Vorteil Verbrenner — laut deinen Eingaben",
+      evCheaper: "Niedrigerer geschätzter Betrag — E-Auto (laut deinen Eingaben)",
+      vbCheaper: "Niedrigerer geschätzter Betrag — Verbrenner (laut deinen Eingaben)",
       costsEqual: "Kosten ähnlich (laut Eingaben)",
-      savingsFor: "Geschätzte Ersparnis auf {km}",
+      savingsFor: "Geschätzte Differenz auf {km}",
       extraCostFor: "Geschätzte Mehrkosten auf {km}",
       differenceFor: "Geschätzte Differenz für {km}",
       costForKm: "Geschätzte Energie-/Kraftstoffkosten für {km}",
@@ -2691,7 +2682,7 @@ setTimeout(() => {
       breakevenAfter: "Geschätzter Break-Even nach ca. {years}",
       yearOne: "Jahr",
       yearOther: "Jahre",
-      profitableNow: "Laut Eingaben ab sofort günstiger",
+      profitableNow: "Laut deinen Eingaben aktuell mit niedrigerem Betrag",
       noBreakeven: "Kein Break-Even im gewählten Zeitraum",
       totalSavingsLabel: "Geschätzte Differenz nach Break-Even: {val}",
       kmPerYearApprox: "≈ {km} {unit} pro Jahr",
@@ -2747,13 +2738,13 @@ setTimeout(() => {
       chartAxisX: "Kilometer",
       chartAxisY: "Kosten ({symbol})",
       // Share text templates (mit Platzhaltern)
-      shareSavings: "💰 Ersparnis:",
+      shareSavings: "💰 Differenz:",
       sharePerPersonSuffix: "pro Person",
       shareCompareTitle: "E-Auto vs. Verbrenner Vergleich",
       // Share-Image (Canvas-PNG) — neue Keys Phase 11
       shareImgSubCompare: "Energie-/Kraftstoffkosten-Vergleich (Beispielrechnung)",
       shareImgSubSingle: "Energie-/Kraftstoffkosten-Berechnung (Beispielrechnung)",
-      shareImgSavings: "Geschätzte Ersparnis",
+      shareImgSavings: "Geschätzte Differenz",
       shareImgDiff: "Geschätzte Differenz",
       shareImgCostFor: "Geschätzte Energie-/Kraftstoffkosten für {km}",
       shareImgPerPersonCtx: "pro Person · {km}",
@@ -2763,16 +2754,16 @@ setTimeout(() => {
       shareImgExclusions: "Nur Energie-/Kraftstoffkosten; Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.",
       shareTextDisclaimer: "Hinweis: Geschätzte Differenz auf Basis deiner Eingaben. Nur Energie-/Kraftstoffkosten; Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.",
       // Result sentence (legally qualified, "you" perspective — used in result + share image)
-      sentenceCompareSavings:  "Geschätzte Ersparnis: {val} auf {km} (laut deinen Eingaben)",
-      sentenceCompareExtra:    "Laut deiner Berechnung ist der Verbrenner um {val} günstiger auf {km}",
+      sentenceCompareSavings:  "Geschätzte Differenz: {val} auf {km} (laut deinen Eingaben)",
+      sentenceCompareExtra:    "Laut deiner Berechnung liegt der Verbrenner-Wert um {val} niedriger auf {km}",
       sentenceCompareEqual:    "Laut deiner Berechnung sind beide Optionen ähnlich teuer",
       sentenceCompareLongterm: "Laut deiner Berechnung: Kostenunterschied über den gewählten Zeitraum",
       sentenceSingle:          "Laut deiner Berechnung betragen deine Kosten {val} für {km}",
       sentenceSingleCarpool:   "Laut deiner Eingabe betragen die Kosten pro Person {val} für {km}",
       sentenceCarpoolSuffix:   "(pro Person, {n} Personen)",
       // Share-text variant ("I" perspective — used only in share text bodies)
-      shareCompareSavings:     "Geschätzte Ersparnis: {val} auf {km} (laut meinen Eingaben)",
-      shareCompareExtra:       "Laut meiner Berechnung ist der Verbrenner um {val} günstiger auf {km}",
+      shareCompareSavings:     "Geschätzte Differenz: {val} auf {km} (laut meinen Eingaben)",
+      shareCompareExtra:       "Laut meiner Berechnung liegt der Verbrenner-Wert um {val} niedriger auf {km}",
       shareCompareEqual:       "Laut meiner Berechnung sind beide Optionen ähnlich teuer",
       shareCompareLongterm:    "Laut meiner Berechnung: Kostenunterschied über den gewählten Zeitraum",
       shareSingle:             "Laut meiner Berechnung betragen meine Kosten {val} für {km}",
@@ -2780,7 +2771,7 @@ setTimeout(() => {
       // Phase B — Marketing-Share-Texte (multi-line, mit www.evspend.com CTA)
       shareTextSingleEv: "E-Auto: {value} {currency} auf {km} km ⚡\nBerechne deinen: www.evspend.com",
       shareTextSingleVb: "Verbrenner: {value} {currency} auf {km} km ⛽\nBerechne deinen: www.evspend.com",
-      shareTextCompare:  "E-Auto: {ev_value} {currency} | Verbrenner: {ice_value} {currency}\nGeschätzte Ersparnis {savings} {currency} auf {km} km ⚡\n\nwww.evspend.com",
+      shareTextCompare:  "E-Auto: {ev_value} {currency} | Verbrenner: {ice_value} {currency}\nGeschätzte Differenz {savings} {currency} auf {km} km ⚡\n\nwww.evspend.com",
       shareRideshareLine: "Fahrgemeinschaft {n} Personen: {perPerson} € pro Person",
       // Verlauf (für verlauf.html + verlauf.js)
       verlaufTitle: "Verlauf",
@@ -2892,10 +2883,10 @@ setTimeout(() => {
       marketTr: "TR · ₺",
       marketSwitchSr: "Change market, currently",
       // Phase 7 — dynamic result/action texts (legally-careful wording)
-      evCheaper: "Estimated EV advantage — based on your inputs",
-      vbCheaper: "Estimated ICE advantage — based on your inputs",
+      evCheaper: "Lower estimated amount — EV (based on your inputs)",
+      vbCheaper: "Lower estimated amount — ICE (based on your inputs)",
       costsEqual: "Costs roughly equal (based on your inputs)",
-      savingsFor: "Estimated savings over {km}",
+      savingsFor: "Estimated difference over {km}",
       extraCostFor: "Estimated extra cost over {km}",
       differenceFor: "Estimated difference for {km}",
       costForKm: "Estimated energy/fuel costs for {km}",
@@ -2914,7 +2905,7 @@ setTimeout(() => {
       breakevenAfter: "Estimated break-even after approx. {years}",
       yearOne: "year",
       yearOther: "years",
-      profitableNow: "Cheaper right away (based on your inputs)",
+      profitableNow: "Currently the lower estimated amount based on your inputs",
       noBreakeven: "No break-even within this period",
       totalSavingsLabel: "Estimated difference after break-even: {val}",
       kmPerYearApprox: "≈ {km} {unit} per year",
@@ -2970,13 +2961,13 @@ setTimeout(() => {
       chartAxisX: "{unit}",
       chartAxisY: "Cost ({symbol})",
       // Share text
-      shareSavings: "💰 Savings:",
+      shareSavings: "💰 Difference:",
       sharePerPersonSuffix: "per person",
       shareCompareTitle: "Electric vs. Combustion comparison",
       // Share-Image (Canvas-PNG)
       shareImgSubCompare: "Energy/fuel cost comparison (example)",
       shareImgSubSingle: "Energy/fuel cost calculation (example)",
-      shareImgSavings: "Estimated savings",
+      shareImgSavings: "Estimated difference",
       shareImgDiff: "Estimated difference",
       shareImgCostFor: "Estimated energy/fuel costs for {km}",
       shareImgPerPersonCtx: "per person · {km}",
@@ -2986,16 +2977,16 @@ setTimeout(() => {
       shareImgExclusions: "Energy/fuel costs only; maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.",
       shareTextDisclaimer: "Note: Estimated difference based on your inputs. Energy/fuel costs only; maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.",
       // Result sentence (legally qualified, used in result/share/share-image)
-      sentenceCompareSavings:  "Estimated savings: {val} over {km} (based on your inputs)",
-      sentenceCompareExtra:    "The combustion vehicle is cheaper by {val} over {km} based on your inputs",
+      sentenceCompareSavings:  "Estimated difference: {val} over {km} (based on your inputs)",
+      sentenceCompareExtra:    "Based on your inputs, the ICE value is lower by {val} over {km}",
       sentenceCompareEqual:    "Both options are similarly priced based on your inputs",
       sentenceCompareLongterm: "Cost difference over the selected period based on your inputs",
       sentenceSingle:          "Your calculated cost: {val} for {km}",
       sentenceSingleCarpool:   "Cost per person: {val} for {km} (based on your input)",
       sentenceCarpoolSuffix:   "(per person, {n} people)",
       // Share-text variant ("I" perspective)
-      shareCompareSavings:     "Estimated savings: {val} over {km} (based on my inputs)",
-      shareCompareExtra:       "Based on my inputs, the combustion vehicle is cheaper by {val} over {km}",
+      shareCompareSavings:     "Estimated difference: {val} over {km} (based on my inputs)",
+      shareCompareExtra:       "Based on my inputs, the ICE value is lower by {val} over {km}",
       shareCompareEqual:       "Based on my inputs, both options are similarly priced",
       shareCompareLongterm:    "Based on my inputs, cost difference over the selected period",
       shareSingle:             "Based on my inputs, my calculated cost is {val} for {km}",
@@ -3003,7 +2994,7 @@ setTimeout(() => {
       // Phase B — Marketing share text (multi-line, with www.evspend.com CTA)
       shareTextSingleEv: "EV: {value} {currency} for {km} km ⚡\nRun your numbers: www.evspend.com",
       shareTextSingleVb: "ICE: {value} {currency} for {km} km ⛽\nRun your numbers: www.evspend.com",
-      shareTextCompare:  "EV: {ev_value} {currency} | ICE: {ice_value} {currency}\nEstimated savings {savings} {currency} over {km} km ⚡\n\nwww.evspend.com",
+      shareTextCompare:  "EV: {ev_value} {currency} | ICE: {ice_value} {currency}\nEstimated difference {savings} {currency} over {km} km ⚡\n\nwww.evspend.com",
       shareRideshareLine: "Carpool {n} people: {perPerson} {currency} per person",
       // Verlauf
       verlaufTitle: "History",
@@ -3115,10 +3106,10 @@ setTimeout(() => {
       marketTr: "TR · ₺",
       marketSwitchSr: "Pazar değiştir, şu an",
       // Phase 7 — dinamik sonuç/aksiyon metinleri (hukuki olarak temkinli)
-      evCheaper: "Tahmini elektrikli avantajı — girdilerine göre",
-      vbCheaper: "Tahmini benzinli avantajı — girdilerine göre",
+      evCheaper: "Daha düşük tahmini tutar — Elektrikli (girdilerine göre)",
+      vbCheaper: "Daha düşük tahmini tutar — Benzinli (girdilerine göre)",
       costsEqual: "Maliyetler benzer (girdilerine göre)",
-      savingsFor: "{km} için tahmini tasarruf",
+      savingsFor: "{km} için tahmini fark",
       extraCostFor: "{km} için tahmini fazla maliyet",
       differenceFor: "{km} için tahmini fark",
       costForKm: "{km} için tahmini enerji/yakıt maliyeti",
@@ -3137,7 +3128,7 @@ setTimeout(() => {
       breakevenAfter: "Tahmini break-even yaklaşık {years} sonra",
       yearOne: "yıl",
       yearOther: "yıl",
-      profitableNow: "Girdilerine göre hemen daha uygun",
+      profitableNow: "Girdilerine göre şu anda daha düşük tahmini tutar",
       noBreakeven: "Seçilen süre içinde break-even yok",
       totalSavingsLabel: "Başabaş sonrası tahmini fark: {val}",
       kmPerYearApprox: "≈ {km} {unit} yıllık",
@@ -3193,13 +3184,13 @@ setTimeout(() => {
       chartAxisX: "Kilometre",
       chartAxisY: "Maliyet ({symbol})",
       // Share text
-      shareSavings: "💰 Tasarruf:",
+      shareSavings: "💰 Fark:",
       sharePerPersonSuffix: "kişi başı",
       shareCompareTitle: "Elektrikli & Benzinli karşılaştırması",
       // Share-Image (Canvas-PNG)
       shareImgSubCompare: "Enerji/yakıt maliyeti karşılaştırması (örnek)",
       shareImgSubSingle: "Enerji/yakıt maliyeti hesaplaması (örnek)",
-      shareImgSavings: "Tahmini tasarruf",
+      shareImgSavings: "Tahmini fark",
       shareImgDiff: "Tahmini fark",
       shareImgCostFor: "{km} için tahmini enerji/yakıt maliyeti",
       shareImgPerPersonCtx: "kişi başı · {km}",
@@ -3209,16 +3200,16 @@ setTimeout(() => {
       shareImgExclusions: "Yalnızca enerji/yakıt maliyetleri; bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
       shareTextDisclaimer: "Not: Girdilerine göre tahmini fark. Yalnızca enerji/yakıt maliyetleri; bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
       // Result sentence (legally qualified, used in result/share/share-image)
-      sentenceCompareSavings:  "Tahmini tasarruf: {km} için {val} (girdilerine göre)",
-      sentenceCompareExtra:    "İçten yanmalı araç {km} için {val} daha ekonomik (girdilerine göre)",
+      sentenceCompareSavings:  "Tahmini fark: {km} için {val} (girdilerine göre)",
+      sentenceCompareExtra:    "Girdilerine göre benzinli değer {km} için {val} daha düşük",
       sentenceCompareEqual:    "Her iki seçenek girdilerine göre benzer maliyette",
       sentenceCompareLongterm: "Seçilen süre için maliyet farkı (girdilere göre)",
       sentenceSingle:          "{km} için hesaplanan maliyet: {val}",
       sentenceSingleCarpool:   "Kişi başı maliyet: {val} ({km} için, girdine göre)",
       sentenceCarpoolSuffix:   "(kişi başı, {n} kişi)",
       // Share-text variant ("I" perspective)
-      shareCompareSavings:     "Tahmini tasarruf: {km} için {val} (girdilerime göre)",
-      shareCompareExtra:       "İçten yanmalı araç {km} için {val} daha ekonomik (girdilerime göre)",
+      shareCompareSavings:     "Tahmini fark: {km} için {val} (girdilerime göre)",
+      shareCompareExtra:       "Girdilerime göre benzinli değer {km} için {val} daha düşük",
       shareCompareEqual:       "Her iki seçenek girdilerime göre benzer maliyette",
       shareCompareLongterm:    "Seçilen süre için maliyet farkı (girdilerime göre)",
       shareSingle:             "{km} için hesaplanan maliyetim: {val}",
@@ -3226,7 +3217,7 @@ setTimeout(() => {
       // Phase B — Marketing-Share-Metni (çok satır, www.evspend.com CTA ile)
       shareTextSingleEv: "Elektrikli: {value} {currency} — {km} km ⚡\nSen de hesapla: www.evspend.com",
       shareTextSingleVb: "Benzinli: {value} {currency} — {km} km ⛽\nSen de hesapla: www.evspend.com",
-      shareTextCompare:  "Elektrikli: {ev_value} {currency} | Benzinli: {ice_value} {currency}\nTahmini tasarruf {savings} {currency} — {km} km ⚡\n\nwww.evspend.com",
+      shareTextCompare:  "Elektrikli: {ev_value} {currency} | Benzinli: {ice_value} {currency}\nTahmini fark {savings} {currency} — {km} km ⚡\n\nwww.evspend.com",
       shareRideshareLine: "Araç paylaşımı {n} kişi: {perPerson} ₺ kişi başı",
       // Verlauf
       verlaufTitle: "Geçmiş",

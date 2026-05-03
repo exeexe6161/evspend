@@ -3730,12 +3730,17 @@ body[data-result-stale="true"] .stale-hint {
 }
 [data-theme="dark"] .calc-info-body strong{color:var(--l1);}
 
-/* ══ EVSpend Splash · Variant B (Notch — final geometry) ═════════════
-   First-paint splash, locked to Final_B_Symbol.svg geometry. Sits above
-   every layer (z-index 2000, incl. PWA bar/popup), runs ~1.3 s on first
-   session view, then fades out and detaches. JS adds `.run` to start
-   the draw-in, then `.is-hidden` to fade. A CSS safety-fallback keyframe
-   closes the overlay at 2.0 s in case JS never executes. */
+/* ══ EVSpend Splash · Final-B (notch) ═══════════════════════════════
+   First-paint splash, geometry locked to Final_B_Symbol.svg. JS adds
+   `.run` to start the draw-in, then `.is-hidden` to fade. Safety-
+   fallback keyframe drops the overlay at 2.0 s if JS never executes.
+   Sequence:
+     0.00–0.40s   left-bottom + right draw (rise from corners)
+     0.40–0.65s   left-top connector closes (notch → apex)
+     0.65–0.85s   diamond/spark pops in
+     0.68–1.00s   one-shot expansion ring
+     0.70–1.05s   atmospheric halo eases in
+     ~1.50s       fade-out via .is-hidden (JS) */
 .evspend-splash{
   position:fixed; inset:0;
   z-index:2000;
@@ -3753,14 +3758,6 @@ body[data-result-stale="true"] .stale-hint {
   -webkit-tap-highlight-color:transparent;
   opacity:1;
   transition:opacity .32s ease-in;
-
-  /* Premium-Smooth-Timing — total ~1.30 s */
-  --t-leg:   .50s;
-  --t-apex:  .10s;
-  --t-spark: .22s;
-  --t-hold:  .28s;
-
-  /* Safety fallback: even without JS, the overlay self-removes after 2 s. */
   animation:evspendSplashFallback 0ms ease-in 2000ms forwards;
 }
 .evspend-splash.is-hidden{opacity:0;pointer-events:none;}
@@ -3768,91 +3765,89 @@ body[data-result-stale="true"] .stale-hint {
 .evspend-splash__mark{
   width:220px; height:220px;
   position:relative;
-  will-change:transform,opacity,filter;
 }
 .evspend-splash__svg{
   width:100%; height:100%; display:block; overflow:visible;
 }
 
-.evs-leg{
-  fill:none; stroke:#10E0A0; stroke-width:30;
-  stroke-linecap:round; stroke-linejoin:round;
-  stroke-dasharray: var(--L, 200);
-  stroke-dashoffset: var(--L, 200);
+/* pathLength="220" on each segment normalises dasharray across all
+   three so the same offset reveals every stroke uniformly. */
+.evs-seg{
+  stroke-dasharray:220;
+  stroke-dashoffset:220;
 }
-.evs-spark{
-  fill:#10E0A0;
+.evs-glow-layer .evs-seg{ opacity:0; }
+.evs-atmo{ opacity:0; }
+.evs-diamond{
+  opacity:0;
   transform-box:fill-box; transform-origin:center;
-  transform:scale(0); opacity:0;
+  transform:scale(.2);
 }
-.evs-glow{
-  fill:#10E0A0; opacity:0; filter:blur(22px);
-  transform-box:fill-box; transform-origin:center; transform:scale(.6);
-}
-.evs-impulse{
-  fill:none; stroke:#10E0A0; stroke-width:3; opacity:0;
-  transform-box:fill-box; transform-origin:center; transform:scale(.6);
+.evs-spark-ring{
+  opacity:0;
+  transform-box:fill-box; transform-origin:center;
+  transform:scale(.6);
 }
 
-.evspend-splash.run .evs-leg-left-bottom{
-  animation:
-    evsDraw    var(--t-leg)  cubic-bezier(.22,.7,.18,1) 0s   forwards,
-    evsLegGlow var(--t-hold) ease-out
-               calc(var(--t-leg) + var(--t-apex) + var(--t-spark) * .4) forwards;
+/* Foreground draw — left-bottom + right rise together, left-top closes after. */
+.evspend-splash.run .evs-left-bottom{
+  animation:evsDraw 400ms cubic-bezier(.22,.61,.36,1) 0ms forwards;
 }
-.evspend-splash.run .evs-leg-right{
-  animation:
-    evsDraw    var(--t-leg)  cubic-bezier(.22,.7,.18,1) .04s forwards,
-    evsLegGlow var(--t-hold) ease-out
-               calc(var(--t-leg) + var(--t-apex) + var(--t-spark) * .4) forwards;
+.evspend-splash.run .evs-right{
+  animation:evsDraw 400ms cubic-bezier(.22,.61,.36,1) 0ms forwards;
 }
-.evspend-splash.run .evs-leg-left-top{
-  animation:
-    evsDraw    calc(var(--t-leg) * .65) cubic-bezier(.22,.7,.18,1)
-               calc(var(--t-leg) * .35) forwards,
-    evsLegGlow var(--t-hold) ease-out
-               calc(var(--t-leg) + var(--t-apex) + var(--t-spark) * .4) forwards;
+.evspend-splash.run .evs-left-top{
+  animation:evsDraw 250ms cubic-bezier(.22,.61,.36,1) 400ms forwards;
 }
-
-.evspend-splash.run .evspend-splash__mark{
-  animation:evsApex var(--t-apex) ease-out forwards;
-  animation-delay:calc(var(--t-leg) + .04s);
+/* Glow under-layer follows the same draw timing, eased to 0.18 opacity. */
+.evspend-splash.run .evs-glow-layer .evs-left-bottom{
+  animation:evsDrawGlow 400ms cubic-bezier(.22,.61,.36,1) 0ms forwards;
 }
-.evspend-splash.run .evs-spark{
-  animation:evsSpark var(--t-spark) cubic-bezier(.2,.8,.2,1.1) forwards;
-  animation-delay:calc(var(--t-leg) + var(--t-apex) + .02s);
+.evspend-splash.run .evs-glow-layer .evs-right{
+  animation:evsDrawGlow 400ms cubic-bezier(.22,.61,.36,1) 0ms forwards;
 }
-.evspend-splash.run .evs-impulse{
-  animation:evsImpulse var(--t-spark) ease-out forwards;
-  animation-delay:calc(var(--t-leg) + var(--t-apex) + .02s);
+.evspend-splash.run .evs-glow-layer .evs-left-top{
+  animation:evsDrawGlow 250ms cubic-bezier(.22,.61,.36,1) 400ms forwards;
 }
-.evspend-splash.run .evs-glow{
-  animation:evsDisk var(--t-spark) ease-out forwards;
-  animation-delay:calc(var(--t-leg) + var(--t-apex) + .02s);
+.evspend-splash.run .evs-diamond{
+  animation:evsDiamondIn 200ms cubic-bezier(.34,1.4,.5,1) 650ms forwards;
+}
+.evspend-splash.run .evs-spark-ring{
+  animation:evsSparkRing 320ms cubic-bezier(.22,.61,.36,1) 680ms forwards;
+}
+.evspend-splash.run .evs-atmo{
+  animation:evsAtmoIn 350ms ease-out 700ms forwards;
 }
 
-@keyframes evsDraw    { to { stroke-dashoffset:0; } }
-@keyframes evsApex    { 0%{transform:scale(1)} 40%{transform:scale(1.012)} 100%{transform:scale(1)} }
-@keyframes evsSpark   { 0%{transform:scale(0);opacity:0} 55%{transform:scale(1.18);opacity:1} 100%{transform:scale(1);opacity:1} }
-@keyframes evsImpulse { 0%{transform:scale(.5);opacity:0;stroke-width:3} 25%{opacity:.55} 100%{transform:scale(2.6);opacity:0;stroke-width:1} }
-@keyframes evsDisk    { 0%{opacity:0;transform:scale(.6)} 50%{opacity:.45;transform:scale(1.1)} 100%{opacity:.12;transform:scale(1)} }
-@keyframes evsLegGlow {
-  0%   { filter:drop-shadow(0 0 0   rgba(16,224,160,0)); }
-  35%  { filter:drop-shadow(0 0 14px rgba(16,224,160,.55))
-                 drop-shadow(0 0 30px rgba(16,224,160,.18)); }
-  100% { filter:drop-shadow(0 0 6px  rgba(16,224,160,.28))
-                 drop-shadow(0 0 18px rgba(16,224,160,.08)); }
+@keyframes evsDraw{
+  from{ stroke-dashoffset:220; }
+  to  { stroke-dashoffset:0; }
 }
-@keyframes evspendSplashFallback { to { opacity:0; pointer-events:none; visibility:hidden; } }
+@keyframes evsDrawGlow{
+  from{ stroke-dashoffset:220; opacity:0; }
+  to  { stroke-dashoffset:0;   opacity:.18; }
+}
+@keyframes evsDiamondIn{
+  0%   { opacity:0; transform:scale(.2); }
+  60%  { opacity:1; transform:scale(1.15); }
+  100% { opacity:1; transform:scale(1); }
+}
+@keyframes evsSparkRing{
+  0%   { opacity:.55; transform:scale(.6); }
+  100% { opacity:0;   transform:scale(2.4); }
+}
+@keyframes evsAtmoIn{
+  from{ opacity:0; }
+  to  { opacity:.07; }
+}
+@keyframes evspendSplashFallback{ to { opacity:0; pointer-events:none; visibility:hidden; } }
 
 @media (prefers-reduced-motion: reduce){
-  .evspend-splash .evs-leg{
-    stroke-dashoffset:0;
-    filter:drop-shadow(0 0 4px rgba(16,224,160,.22));
-  }
-  .evspend-splash .evs-spark{ transform:scale(1); opacity:1; }
-  .evspend-splash .evs-glow { opacity:.10; transform:scale(1); }
-  .evspend-splash.run *{ animation:none !important; }
+  .evspend-splash .evs-seg{ stroke-dashoffset:0 !important; animation:none !important; }
+  .evspend-splash .evs-glow-layer .evs-seg{ opacity:.18 !important; animation:none !important; }
+  .evspend-splash .evs-diamond{ opacity:1 !important; transform:scale(1) !important; animation:none !important; }
+  .evspend-splash .evs-atmo{ opacity:.07 !important; animation:none !important; }
+  .evspend-splash .evs-spark-ring{ display:none !important; }
   .evspend-splash{ opacity:0; pointer-events:none; visibility:hidden; animation:none; }
 }
 
