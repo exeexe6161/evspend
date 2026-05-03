@@ -3843,3 +3843,68 @@ body[data-result-stale="true"] .stale-hint {
   .evspend-splash.run *{ animation:none !important; }
   .evspend-splash{ opacity:0; pointer-events:none; visibility:hidden; animation:none; }
 }
+
+/* ══ Print / PDF — /verlauf only ═════════════════════════════════════
+   Scoped to `html.history-print-mode` so it only kicks in when the JS
+   helper opts in (export-as-PDF button → window.print()). Hides the page
+   chrome (top toolbar, export bar, search, pager, footer, back-link),
+   strips dark-theme card backgrounds for legible monochrome, and uses
+   A4 with a comfortable margin. */
+@media print {
+  html.history-print-mode,
+  html.history-print-mode body{
+    background:#fff !important;
+    color:#111827 !important;
+  }
+  /* Hide UI chrome that doesn't belong in a printed report. */
+  html.history-print-mode .top-controls,
+  html.history-print-mode .hero-banner,
+  html.history-print-mode .period-tabs,
+  html.history-print-mode .hist-search-wrap,
+  html.history-print-mode .hist-pager,
+  html.history-print-mode .hist-actions,
+  html.history-print-mode .hist-export-help,
+  html.history-print-mode .hist-del,
+  html.history-print-mode .result-actions,
+  html.history-print-mode footer,
+  html.history-print-mode .pwa-popup,
+  html.history-print-mode .toast{
+    display:none !important;
+  }
+  /* Strip card shadows and dark-theme backgrounds so the print is legible
+     on white paper regardless of the on-screen theme. */
+  html.history-print-mode .list-card,
+  html.history-print-mode .chart-card,
+  html.history-print-mode .stats-card,
+  html.history-print-mode .hist-item,
+  html.history-print-mode .hist-item-body,
+  html.history-print-mode .legacy-wrap{
+    box-shadow:none !important;
+    background:#fff !important;
+    color:#111827 !important;
+    border:1px solid #d4d4d8 !important;
+  }
+  html.history-print-mode .verlauf-title,
+  html.history-print-mode .verlauf-sub,
+  html.history-print-mode .verlauf-trust,
+  html.history-print-mode .verlauf-privacy,
+  html.history-print-mode .stats-top-val,
+  html.history-print-mode .stats-hero-val,
+  html.history-print-mode .stats-cell-val,
+  html.history-print-mode .hist-diff,
+  html.history-print-mode .chart-header h3{
+    color:#111827 !important;
+  }
+  /* Don't split a card or a single entry across pages where avoidable. */
+  html.history-print-mode .chart-card,
+  html.history-print-mode .stats-card,
+  html.history-print-mode .hist-item,
+  html.history-print-mode .legacy-wrap{
+    break-inside:avoid;
+    page-break-inside:avoid;
+  }
+  @page{
+    size:A4;
+    margin:14mm;
+  }
+}

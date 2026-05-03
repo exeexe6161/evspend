@@ -41,7 +41,7 @@
 <link rel="manifest" href="/site.webmanifest">
 <title>Verlauf – Deine E-Auto- und Verbrenner-Berechnungen | EVSpend</title>
 <script src="./theme-init.js?v=20260501-legal3"></script>
-<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal15">
+<link rel="stylesheet" href="./styles-app.min.css?v=20260501-legal16">
 </head>
 <body>
 <div class="top-controls" role="toolbar" aria-label="Einstellungen">
@@ -221,12 +221,13 @@
   <button id="histExportBtn" class="hist-action-btn" type="button" data-i18n="historyBackupExport">Backup exportieren</button>
   <button id="histImportBtn" class="hist-action-btn" type="button" data-i18n="historyBackupImport">Backup importieren</button>
   <button id="histCsvExportBtn" class="hist-action-btn" type="button" data-i18n="historyCsvExport">CSV exportieren</button>
+  <button id="histPdfExportBtn" class="hist-action-btn" type="button" data-i18n="historyPdfExport">PDF / Drucken</button>
   <input id="histImportInput" type="file" accept="application/json,.json" hidden>
   <button id="histClearBtn" class="hist-clear" type="button" data-i18n="clearAll">Alle löschen</button>
 </div>
 
 <p id="histExportHelp" class="hist-export-help" data-i18n="historyExportHelp">
-  Backup-Dateien dienen zur Wiederherstellung in EVSpend. CSV ist eine lesbare Tabelle für Excel, Numbers oder Google Sheets. Importierte Dateien werden nur lokal in deinem Browser verarbeitet und nicht hochgeladen.
+  Backup-Dateien dienen zur Wiederherstellung in EVSpend. CSV ist eine lesbare Tabelle für Excel, Numbers oder Google Sheets. PDF / Drucken erstellt einen Bericht über die Druckfunktion deines Browsers. Dateien werden nur lokal in deinem Browser verarbeitet und nicht hochgeladen.
 </p>
 
 <div class="result-actions">
@@ -254,6 +255,6 @@
 </footer>
 
 <script src="/vendor/chart-4.4.6.umd.js" defer></script>
-<script src="./verlauf.min.js?v=20260501-legal15" defer></script>
+<script src="./verlauf.min.js?v=20260501-legal16" defer></script>
 </body>
 </html>

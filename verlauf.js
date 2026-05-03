@@ -229,9 +229,12 @@
       historyBackupExport: "Backup exportieren",
       historyBackupImport: "Backup importieren",
       historyCsvExport: "CSV exportieren",
+      historyPdfExport: "PDF / Drucken",
+      historyPdfTitle: "EVSpend Verlauf",
+      historyPdfUnavailable: "Druckfunktion nicht verfügbar.",
       historyExportFilename: "evspend-verlauf-{date}.json",
       historyCsvFilename: "evspend-verlauf-{date}.csv",
-      historyExportHelp: "Backup-Dateien dienen zur Wiederherstellung in EVSpend. CSV ist eine lesbare Tabelle für Excel, Numbers oder Google Sheets. Importierte Dateien werden nur lokal in deinem Browser verarbeitet und nicht hochgeladen.",
+      historyExportHelp: "Backup-Dateien dienen zur Wiederherstellung in EVSpend. CSV ist eine lesbare Tabelle für Excel, Numbers oder Google Sheets. PDF / Drucken erstellt einen Bericht über die Druckfunktion deines Browsers. Dateien werden nur lokal in deinem Browser verarbeitet und nicht hochgeladen.",
       importInvalid: "Ungültige oder beschädigte Datei. Import abgebrochen.",
       importTooLarge: "Datei zu groß (max. 2 MB).",
       importVersionMismatch: "Datei stammt aus einer anderen Version und ist nicht kompatibel.",
@@ -312,9 +315,12 @@
       historyBackupExport: "Export backup",
       historyBackupImport: "Import backup",
       historyCsvExport: "Export CSV",
+      historyPdfExport: "PDF / Print",
+      historyPdfTitle: "EVSpend History",
+      historyPdfUnavailable: "Print feature not available.",
       historyExportFilename: "evspend-history-{date}.json",
       historyCsvFilename: "evspend-history-{date}.csv",
-      historyExportHelp: "Backup files are used to restore data in EVSpend. CSV is a readable table for Excel, Numbers, or Google Sheets. Imported files are processed locally in your browser and are not uploaded.",
+      historyExportHelp: "Backup files are used to restore data in EVSpend. CSV is a readable table for Excel, Numbers, or Google Sheets. PDF / Print creates a report using your browser’s print feature. Files are processed locally in your browser and are not uploaded.",
       importInvalid: "Invalid or corrupted file. Import cancelled.",
       importTooLarge: "File too large (max 2 MB).",
       importVersionMismatch: "File is from a different version and not compatible.",
@@ -395,9 +401,12 @@
       historyBackupExport: "Yedeği dışa aktar",
       historyBackupImport: "Yedeği içe aktar",
       historyCsvExport: "CSV dışa aktar",
+      historyPdfExport: "PDF / Yazdır",
+      historyPdfTitle: "EVSpend Geçmiş",
+      historyPdfUnavailable: "Yazdırma özelliği kullanılamıyor.",
       historyExportFilename: "evspend-gecmis-{date}.json",
       historyCsvFilename: "evspend-gecmis-{date}.csv",
-      historyExportHelp: "Yedek dosyaları EVSpend içinde verileri geri yüklemek için kullanılır. CSV; Excel, Numbers veya Google Sheets için okunabilir bir tablodur. İçe aktarılan dosyalar yalnızca tarayıcında yerel olarak işlenir ve yüklenmez.",
+      historyExportHelp: "Yedek dosyaları EVSpend içinde verileri geri yüklemek için kullanılır. CSV; Excel, Numbers veya Google Sheets için okunabilir bir tablodur. PDF / Yazdır, tarayıcının yazdırma özelliğiyle bir rapor oluşturur. Dosyalar yalnızca tarayıcında yerel olarak işlenir ve yüklenmez.",
       importInvalid: "Geçersiz veya bozuk dosya. İçe aktarma iptal edildi.",
       importTooLarge: "Dosya çok büyük (en fazla 2 MB).",
       importVersionMismatch: "Dosya farklı bir sürümden ve uyumlu değil.",
@@ -791,6 +800,58 @@
     } catch (_) {
       alert(_tv("importInvalid"));
     }
+  }
+  // Browser-native print → PDF / paper. No external libraries, no uploads.
+  // Adds `history-print-mode` to <html> so a scoped @media print block shows
+  // only the verlauf content (chart, stats, list) and hides chrome (toolbar,
+  // export bar, footer, search, pager). The class + document.title are
+  // restored on `afterprint` (preferred) or via a 5 s safety timeout for
+  // browsers where afterprint is unreliable (mobile Safari).
+  function exportHistoryPdf() {
+    if (typeof window.print !== "function") {
+      alert(_tv("historyPdfUnavailable"));
+      return;
+    }
+    var v2 = loadAll().filter(function (e) {
+      return e && e.schema === "v2" && (e.type === "ev" || e.type === "vb");
+    });
+    if (!v2.length) {
+      alert(_tv("exportEmpty"));
+      return;
+    }
+    var htmlEl       = document.documentElement;
+    var prevTitle    = document.title;
+    var newTitle     = (_tv("historyPdfTitle") || "EVSpend Verlauf") + " " + _todayIsoDate();
+    var restored     = false;
+    var restoreTimer = null;
+    function restore() {
+      if (restored) return;
+      restored = true;
+      if (restoreTimer) { clearTimeout(restoreTimer); restoreTimer = null; }
+      htmlEl.classList.remove("history-print-mode");
+      document.title = prevTitle;
+    }
+    htmlEl.classList.add("history-print-mode");
+    document.title = newTitle;
+    window.addEventListener("afterprint", function onAfter() {
+      window.removeEventListener("afterprint", onAfter);
+      restore();
+    });
+    // Belt-and-braces: some browsers (mobile Safari) don't fire afterprint
+    // reliably AND don't block on window.print(). 60 s is long enough for the
+    // user to interact with the print/PDF dialog without the screen flipping
+    // back to non-print styles mid-dialog. Cleared by restore() if afterprint
+    // wins the race.
+    restoreTimer = setTimeout(restore, 60000);
+    // Defer print() one frame so the print-mode class is guaranteed to be
+    // applied before the browser snapshots styles for the print preview.
+    requestAnimationFrame(function () {
+      try {
+        window.print();
+      } catch (_) {
+        restore();
+      }
+    });
   }
   function importHistory(file) {
     if (!file) return;
@@ -1755,6 +1816,10 @@
   }
   if (csvExportBtn) {
     csvExportBtn.addEventListener("click", exportHistoryCsv);
+  }
+  const pdfExportBtn = document.getElementById("histPdfExportBtn");
+  if (pdfExportBtn) {
+    pdfExportBtn.addEventListener("click", exportHistoryPdf);
   }
 
   // ── Phase B/C: Markt-Pill init (konsistente Top-Bar Hauptseite + Verlauf) ──
