@@ -35,3 +35,7 @@ styles-pages.css
 # source. The .min.* bundles themselves stay reachable; only the
 # accompanying .map files are excluded.
 *.map
+
+# Build metadata - not served publicly
+package.json
+package-lock.json
