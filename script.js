@@ -1751,8 +1751,7 @@ function _drawCompare9x16(ctx, d) {
   _drawDisclaimerPill(ctx, W, 1690, _t("shareImgDisclaimer"));
   _ctWrap(ctx, _t("shareImgExclusions"),
       W/2, 1755, "rgba(235,235,245,.55)", 18, 400, 980, 24);
-  _ct(ctx, "www.evspend.com",
-      W/2, 1860, "rgba(235,235,245,.55)", 22, 600);
+  _drawShareSiteBadge(ctx, W, 1856);
 }
 
 // ── Single 9:16 (1080×1920) — premium, neutral, clean (konsumiert unified result)
@@ -1818,8 +1817,7 @@ function _drawSingle9x16(ctx, d) {
   _drawDisclaimerPill(ctx, W, 1690, _t("shareImgDisclaimer"));
   _ctWrap(ctx, _t("shareImgExclusions"),
       W/2, 1755, "rgba(235,235,245,.55)", 18, 400, 980, 24);
-  _ct(ctx, "www.evspend.com",
-      W/2, 1860, "rgba(235,235,245,.55)", 22, 600);
+  _drawShareSiteBadge(ctx, W, 1856);
 }
 
 // Word-wrap helper: render `text` centered at (x, y), wrapping inside maxWidth.
@@ -1848,6 +1846,41 @@ function _ctWrap(ctx, text, x, y, color, size, weight, maxWidth, lineHeight) {
   }
   ctx.restore();
   return lines.length * lineHeight;
+}
+
+// Large site badge: keeps the product URL visible even when platforms ignore
+// native share text for image/file shares.
+function _drawShareSiteBadge(ctx, W, y) {
+  ctx.save();
+  const text = "EVSpend · www.evspend.com";
+  let size = 34;
+  ctx.font = `700 ${size}px ${_CF}`;
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  while (ctx.measureText(text).width > W - 160 && size > 24) {
+    size -= 1;
+    ctx.font = `700 ${size}px ${_CF}`;
+  }
+  const tw = ctx.measureText(text).width;
+  const pw = Math.min(W - 90, tw + 76);
+  const ph = size + 38;
+  const x = (W - pw) / 2;
+  const yy = y - ph / 2;
+  ctx.fillStyle = "rgba(255,255,255,0.13)";
+  ctx.strokeStyle = "rgba(255,255,255,0.28)";
+  ctx.lineWidth = 1.5;
+  if (ctx.roundRect) {
+    ctx.beginPath();
+    ctx.roundRect(x, yy, pw, ph, 8);
+    ctx.fill();
+    ctx.stroke();
+  } else {
+    ctx.fillRect(x, yy, pw, ph);
+    ctx.strokeRect(x, yy, pw, ph);
+  }
+  ctx.fillStyle = "rgba(255,255,255,0.96)";
+  ctx.fillText(text, W / 2, y);
+  ctx.restore();
 }
 
 // Disclaimer pill: high-contrast band so the legal hint is unambiguously
