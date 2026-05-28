@@ -1751,7 +1751,7 @@ function _drawCompare9x16(ctx, d) {
   _drawDisclaimerPill(ctx, W, 1690, _t("shareImgDisclaimer"));
   _ctWrap(ctx, _t("shareImgExclusions"),
       W/2, 1755, "rgba(235,235,245,.55)", 18, 400, 980, 24);
-  _drawShareSiteBadge(ctx, W, 1856);
+  _drawShareSiteBadge(ctx, W, 390);
 }
 
 // ── Single 9:16 (1080×1920) — premium, neutral, clean (konsumiert unified result)
@@ -1817,7 +1817,7 @@ function _drawSingle9x16(ctx, d) {
   _drawDisclaimerPill(ctx, W, 1690, _t("shareImgDisclaimer"));
   _ctWrap(ctx, _t("shareImgExclusions"),
       W/2, 1755, "rgba(235,235,245,.55)", 18, 400, 980, 24);
-  _drawShareSiteBadge(ctx, W, 1856);
+  _drawShareSiteBadge(ctx, W, 390);
 }
 
 // Word-wrap helper: render `text` centered at (x, y), wrapping inside maxWidth.
