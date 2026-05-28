@@ -1962,11 +1962,15 @@ function _injectShareDisclaimer(text) {
   lines.splice(lines.length - 1, 0, "", disc, "");
   return lines.join("\n");
 }
+function _shareSiteUrl() {
+  return "https://www.evspend.com/";
+}
 function buildShareTextSingle(d) {
   const kmDisp = Math.round(Math.max(0, _kmToDist(d.km))).toLocaleString(_currentLocale());
   const key = d.isEv ? "shareTextSingleEv" : "shareTextSingleVb";
   const text = _t(key, {
     km: kmDisp,
+    unit: _distanceUnit(),
     value: fmt(d.totalCost, 2),
     currency: _currencySymbol()
   });
@@ -1977,6 +1981,7 @@ function buildShareTextCompare(d) {
   const kmDisp = Math.round(Math.max(0, _kmToDist(d.kmEv))).toLocaleString(_currentLocale());
   const text = _t("shareTextCompare", {
     km: kmDisp,
+    unit: _distanceUnit(),
     ev_value:  fmt(d.eAutoTotal, 2),
     ice_value: fmt(d.verbrennerTotal, 2),
     savings:   fmt(Math.abs(d.savingsTotal), 2),
@@ -2025,26 +2030,31 @@ function shareImageCanvas() {
   cvs.width  = 1080;
   cvs.height = 1920;
   const ctx = cvs.getContext("2d");
-  let title;
+  let title, text;
   if (appMode === "single") {
     const data = _getSingleData();
     if (!data) { eafToast(_t("toastCalcFirst")); return; }
     _assertShareSafe(data);
     _drawSingle9x16(ctx, data);
-    title = (data.isEv ? _t("typeEv") : _t("typeVb")) + " – " + _t("shareImgSubSingle");
+    title = _t("shareImageTitle");
+    text = buildShareTextSingle(data);
   } else {
     const data = _getCompareData();
     if (!data) { eafToast(_t("toastCalcFirst")); return; }
     _assertShareSafe(data);
     _drawCompare9x16(ctx, data);
-    title = _t("shareCompareTitle");
+    title = _t("shareImageTitle");
+    text = buildShareTextCompare(data);
   }
   cvs.toBlob(blob => {
     if (!blob) { eafToast(_t("toastImageError")); return; }
     const file = new File([blob], "evspend.png", { type: "image/png" });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
-      navigator.share({ files: [file], title }).catch(err => {
-        if (err?.name !== "AbortError") _downloadBlob(blob, "evspend.png");
+      navigator.share({ files: [file], title, text, url: _shareSiteUrl() }).catch(err => {
+        if (err?.name === "AbortError") return;
+        navigator.share({ files: [file], title, text }).catch(() => {
+          _downloadBlob(blob, "evspend.png");
+        });
       });
     } else {
       const url = URL.createObjectURL(blob);
@@ -2768,11 +2778,12 @@ setTimeout(() => {
       shareCompareLongterm:    "Laut meiner Berechnung: Kostenunterschied über den gewählten Zeitraum",
       shareSingle:             "Laut meiner Berechnung betragen meine Kosten {val} für {km}",
       shareSingleCarpool:      "Laut meiner Eingabe betragen die Kosten pro Person {val} für {km}",
-      // Phase B — Marketing-Share-Texte (multi-line, mit www.evspend.com CTA)
-      shareTextSingleEv: "E-Auto: {value} {currency} auf {km} km ⚡\nBerechne deinen: www.evspend.com",
-      shareTextSingleVb: "Verbrenner: {value} {currency} auf {km} km ⛽\nBerechne deinen: www.evspend.com",
-      shareTextCompare:  "E-Auto: {ev_value} {currency} | Verbrenner: {ice_value} {currency}\nGeschätzte Differenz {savings} {currency} auf {km} km ⚡\n\nwww.evspend.com",
-      shareRideshareLine: "Fahrgemeinschaft {n} Personen: {perPerson} € pro Person",
+      // Phase B — professionelle Share-Texte (neutral, mit sichtbarer URL)
+      shareImageTitle: "EVSpend Beispielrechnung – www.evspend.com",
+      shareTextSingleEv: "EVSpend Beispielrechnung\nE-Auto: {value} {currency} für {km} {unit}\nEigene Werte berechnen: www.evspend.com",
+      shareTextSingleVb: "EVSpend Beispielrechnung\nVerbrenner: {value} {currency} für {km} {unit}\nEigene Werte berechnen: www.evspend.com",
+      shareTextCompare:  "EVSpend Beispielrechnung\nE-Auto: {ev_value} {currency} | Verbrenner: {ice_value} {currency}\nGeschätzte Differenz: {savings} {currency} für {km} {unit}\nEigene Werte berechnen: www.evspend.com",
+      shareRideshareLine: "Fahrgemeinschaft {n} Personen: {perPerson} {currency} pro Person",
       // Verlauf (für verlauf.html + verlauf.js)
       verlaufTitle: "Verlauf",
       verlaufSub: "Deine persönlichen Berechnungen",
@@ -2991,10 +3002,11 @@ setTimeout(() => {
       shareCompareLongterm:    "Based on my inputs, cost difference over the selected period",
       shareSingle:             "Based on my inputs, my calculated cost is {val} for {km}",
       shareSingleCarpool:      "Based on my inputs, cost per person is {val} for {km}",
-      // Phase B — Marketing share text (multi-line, with www.evspend.com CTA)
-      shareTextSingleEv: "EV: {value} {currency} for {km} km ⚡\nRun your numbers: www.evspend.com",
-      shareTextSingleVb: "ICE: {value} {currency} for {km} km ⛽\nRun your numbers: www.evspend.com",
-      shareTextCompare:  "EV: {ev_value} {currency} | ICE: {ice_value} {currency}\nEstimated difference {savings} {currency} over {km} km ⚡\n\nwww.evspend.com",
+      // Phase B — professional share text (neutral, with visible URL)
+      shareImageTitle: "EVSpend example calculation – www.evspend.com",
+      shareTextSingleEv: "EVSpend example calculation\nEV: {value} {currency} for {km} {unit}\nCalculate with your own inputs: www.evspend.com",
+      shareTextSingleVb: "EVSpend example calculation\nICE: {value} {currency} for {km} {unit}\nCalculate with your own inputs: www.evspend.com",
+      shareTextCompare:  "EVSpend example calculation\nEV: {ev_value} {currency} | ICE: {ice_value} {currency}\nEstimated difference: {savings} {currency} over {km} {unit}\nCalculate with your own inputs: www.evspend.com",
       shareRideshareLine: "Carpool {n} people: {perPerson} {currency} per person",
       // Verlauf
       verlaufTitle: "History",
@@ -3214,11 +3226,12 @@ setTimeout(() => {
       shareCompareLongterm:    "Seçilen süre için maliyet farkı (girdilerime göre)",
       shareSingle:             "{km} için hesaplanan maliyetim: {val}",
       shareSingleCarpool:      "Kişi başı maliyet: {val} ({km} için, girdime göre)",
-      // Phase B — Marketing-Share-Metni (çok satır, www.evspend.com CTA ile)
-      shareTextSingleEv: "Elektrikli: {value} {currency} — {km} km ⚡\nSen de hesapla: www.evspend.com",
-      shareTextSingleVb: "Benzinli: {value} {currency} — {km} km ⛽\nSen de hesapla: www.evspend.com",
-      shareTextCompare:  "Elektrikli: {ev_value} {currency} | Benzinli: {ice_value} {currency}\nTahmini fark {savings} {currency} — {km} km ⚡\n\nwww.evspend.com",
-      shareRideshareLine: "Araç paylaşımı {n} kişi: {perPerson} ₺ kişi başı",
+      // Phase B — profesyonel paylaşım metni (nötr, görünür URL ile)
+      shareImageTitle: "EVSpend örnek hesaplama – www.evspend.com",
+      shareTextSingleEv: "EVSpend örnek hesaplama\nElektrikli: {value} {currency} — {km} {unit}\nKendi değerlerinle hesapla: www.evspend.com",
+      shareTextSingleVb: "EVSpend örnek hesaplama\nBenzinli: {value} {currency} — {km} {unit}\nKendi değerlerinle hesapla: www.evspend.com",
+      shareTextCompare:  "EVSpend örnek hesaplama\nElektrikli: {ev_value} {currency} | Benzinli: {ice_value} {currency}\nTahmini fark: {savings} {currency} — {km} {unit}\nKendi değerlerinle hesapla: www.evspend.com",
+      shareRideshareLine: "Araç paylaşımı {n} kişi: {perPerson} {currency} kişi başı",
       // Verlauf
       verlaufTitle: "Geçmiş",
       verlaufSub: "Kişisel hesaplamalarınız",
