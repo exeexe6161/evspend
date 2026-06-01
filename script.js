@@ -2735,6 +2735,7 @@ setTimeout(() => {
       toastSaved: "Im Verlauf gespeichert",
       toastSaveFailed: "Speichern nicht möglich",
       saveCooldown: "Bitte einen Moment warten — erneutes Speichern ist nach kurzer Pause wieder möglich.",
+      marketResetWarn: "„{market}“ nutzt andere Einheiten/Währung. Deine eingegebenen Werte werden auf die Standardwerte dieses Marktes zurückgesetzt. Fortfahren?",
       toastCalcFirst: "Bitte zuerst berechnen",
       toastImageReady: "Bild bereit zum Teilen",
       toastClipboard: "In Zwischenablage kopiert",
@@ -2959,6 +2960,7 @@ setTimeout(() => {
       toastSaved: "Saved to history",
       toastSaveFailed: "Save failed",
       saveCooldown: "Please wait a moment — saving again is possible after a short pause.",
+      marketResetWarn: "“{market}” uses different units/currency. Your entered values will be reset to this market’s defaults. Continue?",
       toastCalcFirst: "Please calculate first",
       toastImageReady: "Image ready to share",
       toastClipboard: "Copied to clipboard",
@@ -3183,6 +3185,7 @@ setTimeout(() => {
       toastSaved: "Geçmişe kaydedildi",
       toastSaveFailed: "Kaydedilemedi",
       saveCooldown: "Lütfen biraz bekleyin — kısa bir aradan sonra tekrar kaydetmek mümkün.",
+      marketResetWarn: "“{market}” farklı birim/para birimi kullanıyor. Girdiğin değerler bu pazarın varsayılan değerlerine sıfırlanacak. Devam edilsin mi?",
       toastCalcFirst: "Önce hesaplama yapın",
       toastImageReady: "Resim paylaşıma hazır",
       toastClipboard: "Panoya kopyalandı",
@@ -3441,6 +3444,50 @@ setTimeout(() => {
     });
   }
 
+  // BUG-09 (audit-3b1-1): two markets are "compatible" — entered values stay
+  // meaningful without conversion — iff same currency AND identical unit
+  // system. Today only DE↔EU qualifies (both EUR + km/L/kWh). Anything
+  // touching US (mi/mpg/$) or the EUR↔TRY currency gap is incompatible by
+  // design (no FX layer exists — Phase P Sprint 4 removed it deliberately).
+  function _marketsCompatible(a, b) {
+    if (!a || !b) return false;
+    if (a.currency !== b.currency) return false;
+    var ua = a.units || {}, ub = b.units || {};
+    return ua.distance === ub.distance && ua.fuelVolume === ub.fuelVolume &&
+           ua.iceEfficiency === ub.iceEfficiency && ua.evEfficiency === ub.evEfficiency;
+  }
+
+  // BUG-09: true if any input differs from the CURRENT market's default value.
+  // Used only on the incompatible path to decide whether a reset warning is due.
+  function _hasCustomInputs(fromMk) {
+    if (!fromMk || !fromMk.defaults) return false;
+    var ids = ["strompreis", "benzinpreis", "verbrauchVerbrenner", "evVerbrauch",
+               "kmEv", "kmVb", "kmShared", "kmMonat", "batteryKwh", "longtermPremium"];
+    for (var i = 0; i < ids.length; i++) {
+      var cfg = fromMk.defaults[ids[i]], el = document.getElementById(ids[i]);
+      if (!el || !cfg || cfg.value == null) continue;
+      var cur = parseFloat(el.value), def = parseFloat(cfg.value);
+      if (isFinite(cur) && isFinite(def) && Math.abs(cur - def) > 1e-9) return true;
+    }
+    return false;
+  }
+
+  // BUG-09: clamp preserved values into the (re-applied) market ranges. Reuses
+  // the exact min/max clamp from loadInputs(). No-op when ranges match (DE↔EU).
+  function _reclampMarketInputs(mk) {
+    if (!mk || !mk.defaults) return;
+    ["strompreis", "benzinpreis", "verbrauchVerbrenner", "evVerbrauch",
+     "kmEv", "kmVb", "kmShared", "kmMonat", "batteryKwh", "longtermPremium"
+    ].forEach(function (id) {
+      var el = document.getElementById(id);
+      if (!el) return;
+      var num = parseFloat(el.value);
+      if (!isFinite(num)) return;
+      var min = parseFloat(el.min), max = parseFloat(el.max);
+      if (isFinite(min) && isFinite(max)) el.value = String(Math.min(max, Math.max(min, num)));
+    });
+  }
+
   // Phase P Sprint 4 (F1.5): hard-coded CURRENCY_RATES + convertFromEur /
   // convertToEur removed. They were last touched in Phase 4 and untouched by
   // every render path since Phase 5; the comment promised "future Admin /
@@ -3642,6 +3689,17 @@ setTimeout(() => {
   function setMarket(code) {
     var mk = MARKET_CONFIG[code];
     if (!mk) return;
+    // BUG-09 (audit-3b1-1): capture the OLD market BEFORE any mutation, to
+    // decide whether entered values can be preserved or must be reset.
+    var fromMk = MARKET_CONFIG[currentMarket];
+    var compatible = _marketsCompatible(fromMk, mk);
+    // An incompatible switch (different currency or unit system) destroys the
+    // entered values. Warn first if the user changed anything away from the
+    // current market's defaults — honours the "Stored locally" promise.
+    if (!compatible && _hasCustomInputs(fromMk) &&
+        !confirm(_t("marketResetWarn", { market: mk.label }))) {
+      return; // user cancelled → stay in current market, values untouched
+    }
     currentMarket = code;
     try { localStorage.setItem(MARKET_KEY, code); } catch (_) {}
     // Phase P Sprint 1 (F6.2): currency MUST be set before language, because
@@ -3651,8 +3709,18 @@ setTimeout(() => {
     // chart axis until the next translation pass.
     setCurrency(mk.currency);
     setLanguage(mk.language);
-    // Phase 7: marktabhängige Slider-Ranges + Preis-Defaults anwenden.
-    applyMarketDefaults(mk);
+    if (compatible) {
+      // Same currency + units (today only DE↔EU): keep user values, only
+      // re-apply ranges and re-clamp defensively. No calc formula touched.
+      applyMarketRanges(mk);
+      _reclampMarketInputs(mk);
+      syncSliderVisuals("market");
+      saveInputs();
+      calc();
+    } else {
+      // Phase 7: marktabhängige Slider-Ranges + Preis-Defaults anwenden.
+      applyMarketDefaults(mk); // unchanged legacy behaviour (now warned above)
+    }
     _refreshMarketPillLabel();
     updateMenuActive();
     document.dispatchEvent(new CustomEvent("eaf:marketchange", { detail: { market: code } }));
