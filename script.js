@@ -1137,14 +1137,15 @@ function confirmReset() {
 }
 
 function reset() {
-  $("evVerbrauch").value = 17;
-  $("strompreis").value = 0.35;
-  $("benzinpreis").value = 1.85;
-  $("verbrauchVerbrenner").value = 7.0;
-  $("kmEv").value = 50;
-  $("kmVb").value = 50;
-  if ($("kmShared")) $("kmShared").value = 1000;
-  if ($("batteryKwh")) $("batteryKwh").value = 60;
+  const set = (id, v) => { const el = $(id); if (el) el.value = v; };  // BUG-02→audit-3b1-3: null-safe write
+  set("evVerbrauch", 17);
+  set("strompreis", 0.35);
+  set("benzinpreis", 1.85);
+  set("verbrauchVerbrenner", 7.0);
+  set("kmEv", 50);
+  set("kmVb", 50);
+  set("kmShared", 1000);
+  set("batteryKwh", 60);
   if ($("kmMonat")) { $("kmMonat").value = 1000; kmMonat = 1000; try { localStorage.setItem(LT_KM_MONAT_KEY, "1000"); } catch(_) {} }
   refreshSliderValues();
   updateRangeDisplay();
