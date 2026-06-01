@@ -588,14 +588,19 @@
   const statsCaveat       = document.getElementById("statsCaveat");
 
   // ── Helpers ────────────────────────────────────────────────────────────────
+  // Aktuelle UI-Markt-Locale (identisch zur Quelle des Geld-Chips, fmtMoneyEntry):
+  // DE/EU → de-DE, US → en-US, TR → tr-TR. Hält Datum/Zahl konsistent mit der
+  // Währungs-Formatierung in derselben Verlauf-Zeile.
+  const _listLocale = () => { try { return getCurrentCurrency().locale || "de-DE"; } catch (_) { return "de-DE"; } };
+
   const fmt = (v, d) => isFinite(v)
-    ? v.toLocaleString("de-DE", { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 })
+    ? v.toLocaleString(_listLocale(), { minimumFractionDigits: d || 0, maximumFractionDigits: d || 0 })
     : "—";
 
   const fmtDate = ts => {
     const d = new Date(ts);
     if (isNaN(d.getTime())) return "";
-    return d.toLocaleString("de-DE", {
+    return d.toLocaleString(_listLocale(), {
       day: "2-digit", month: "2-digit", year: "numeric",
       hour: "2-digit", minute: "2-digit",
     });
