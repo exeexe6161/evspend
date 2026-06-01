@@ -657,14 +657,18 @@ function setType(t) {
 // sie Raw-Slider-Werte (mi, gal, mpg, kWh/100 mi) vor Rückgabe um. Dadurch
 // rechnet die gesamte Calc-Kette unverändert in metrischen Einheiten.
 function n(id) {
-  const v = parseFloat($(id).value);
+  const el = $(id);
+  if (!el) return NaN;                 // BUG-01→audit-3b1-2: null-guard before .value
+  const v = parseFloat(el.value);
   if (!isFinite(v)) return NaN;
   return _rawToInternal(id, v);
 }
 // Raw-Wert ohne Konversion (für Anzeige-/Speicher-Zwecke, wenn der User-Wert
 // direkt benötigt wird, z. B. beim Label-Rendering "300 mi").
 function _nRaw(id) {
-  const v = parseFloat($(id).value);
+  const el = $(id);
+  if (!el) return NaN;                 // BUG-01→audit-3b1-2: null-guard before .value
+  const v = parseFloat(el.value);
   return isFinite(v) ? v : NaN;
 }
 
