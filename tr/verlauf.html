@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<!-- Phase 2: Preload Inter Variable für FOIT-Vermeidung (font-display: swap) -->
+<link rel="preload" href="/fonts/InterVariable.woff2" as="font" type="font/woff2" crossorigin>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<!-- iOS Safari "Add to Home Screen" PWA hooks (W3C de-facto standard,
+     also honoured by Android Chrome, Edge, Firefox; not Apple branding —
+     functional necessity for installable PWA support). -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
+<meta name="description" content="EVSpend hesaplama geçmişi — tarayıcında yerel olarak saklanan kayıtlı hesaplamalar.">
+<link rel="canonical" href="https://www.evspend.com/tr/verlauf">
+<link rel="alternate" hreflang="de" href="https://www.evspend.com/verlauf">
+<link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/verlauf">
+<link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/verlauf">
+<link rel="alternate" hreflang="tr" href="https://www.evspend.com/tr/verlauf">
+<link rel="alternate" hreflang="x-default" href="https://www.evspend.com/verlauf">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://www.evspend.com/tr/verlauf">
+<meta property="og:site_name" content="EVSpend">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:title" content="Geçmiş – EVSpend">
+<meta property="og:description" content="EVSpend calculation history — saved locally in your browser. When the website is loaded, technical connection data may be processed by the hosting provider.">
+<meta property="og:image" content="https://www.evspend.com/og-image-tr.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="EVSpend – Elektrikli vs Benzinli Enerji/Yakıt Maliyeti Tahmini">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="Geçmiş – EVSpend">
+<meta name="twitter:description" content="EVSpend calculation history.">
+<meta name="twitter:image" content="https://www.evspend.com/og-image-tr.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="shortcut icon" href="/favicon.ico">
+<link rel="apple-touch-icon" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/android-chrome-192x192.png">
+<link rel="icon" type="image/png" sizes="512x512" href="/android-chrome-512x512.png">
+<link rel="manifest" href="/site.webmanifest">
+<title>EVSpend Geçmiş – Kayıtlı Hesaplamalar</title>
+<script src="/theme-init.js?v=20260501-legal3"></script>
+<script src="/tr/init-tr.js?v=20260601-audit-3b2"></script>
+<link rel="stylesheet" href="/styles-app.min.css?v=20260601-audit-fix-2">
+<link rel="stylesheet" href="/tr/styles-tr.css?v=20260601-audit-3b2">
+</head>
+<body>
+<div class="top-controls" role="toolbar" aria-label="Settings">
+  <div class="top-pill-wrap">
+    <button class="top-pill" id="marketSwitch" type="button" aria-label="Select market" aria-haspopup="menu" aria-expanded="false">
+      <span class="top-pill-text" id="marketSwitchLabel">EU</span>
+      <svg class="top-pill-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"/></svg>
+    </button>
+    <div class="top-menu" id="marketMenu" role="menu" hidden>
+      <button class="top-menu-item" type="button" role="menuitem" data-market="de"><span data-i18n="marketDe">DE · €</span></button>
+      <button class="top-menu-item" type="button" role="menuitem" data-market="eu"><span data-i18n="marketEu">EU · €</span></button>
+      <button class="top-menu-item" type="button" role="menuitem" data-market="us"><span data-i18n="marketUs">US · $</span></button>
+      <button class="top-menu-item" type="button" role="menuitem" data-market="tr"><span data-i18n="marketTr">TR · ₺</span></button>
+    </div>
+  </div>
+  <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle theme" title="Light / Dark"></button>
+</div>
+
+<header class="hero" role="banner">
+  <a href="/tr/" aria-label="Back to calculator">
+    <picture>
+      <source srcset="/banner.webp?v=20260502-brand1" type="image/webp">
+      <img class="hero-banner" src="/banner.png?v=20260502-brand1" alt="EVSpend Banner" width="1024" height="165">
+    </picture>
+  </a>
+
+  <div class="verlauf-head">
+    <h1 class="verlauf-title" data-i18n="verlaufTitle">History</h1>
+    <p class="verlauf-sub" data-i18n="verlaufSub">Your personal calculations</p>
+    <p class="verlauf-trust" data-i18n="verlaufTrust">Based on your saved inputs</p>
+    <p class="verlauf-privacy" data-i18n="verlaufPrivacy">
+      All calculations are stored exclusively locally on your device.
+      When the website is loaded, technical connection data may be processed by the hosting provider.
+      Data remains in your browser's storage and can be deleted at any time.
+      Please note that data may be lost if you clear browser data or use a different device.
+    </p>
+  </div>
+</header>
+
+<main class="app-main">
+
+<!-- Chart: shows EV vs ICE costs per day in selected period. -->
+<div id="chartWrap" class="chart-wrap" hidden>
+  <div class="list-card chart-card">
+    <div class="chart-header"><h3 id="chartTitle"></h3></div>
+    <figure class="chart-figure" role="figure" aria-labelledby="chartCaption">
+      <canvas id="costChart" class="chart-canvas"></canvas>
+      <div id="chartHint" class="chart-hint" hidden>
+        <svg class="chart-hint-ico" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3v18h18"/><path d="M7 14v4"/><path d="M12 9v9"/><path d="M17 5v13"/></svg>
+        <div class="chart-hint-title" data-i18n="chartHintSingleTitle">No entries in this period</div>
+        <div class="chart-hint-sub" data-i18n="chartHintSingleSub">Save some calculations first to see them here.</div>
+      </div>
+      <figcaption id="chartCaption" class="sr-only"></figcaption>
+      <table id="chartDataTable" class="sr-only">
+        <caption data-i18n="tableCaption">Detailed history data</caption>
+        <thead>
+          <tr>
+            <th scope="col" data-i18n="tableHeaderDate">Date</th>
+            <th scope="col" id="chartTableHeaderDistance">Kilometres</th>
+            <th scope="col" data-i18n="tableHeaderType">Type</th>
+            <th scope="col" data-i18n="tableHeaderConsumption">Consumption</th>
+            <th scope="col" data-i18n="tableHeaderPrice">Price</th>
+            <th scope="col" data-i18n="tableHeaderCostPer100">Cost per 100</th>
+          </tr>
+        </thead>
+        <tbody id="chartDataTableBody"></tbody>
+      </table>
+    </figure>
+  </div>
+</div>
+
+<!-- Statistics -->
+<section class="hist-stats-section" aria-labelledby="histStatsHead">
+<h2 class="sh" id="histStatsHead" data-i18n="statsHeader">Statistics</h2>
+
+<div class="period-tabs" role="tablist" aria-label="Time period">
+  <button class="period-btn period-btn--active" role="tab" data-period="today" aria-selected="true" type="button" data-i18n="periodToday">Today</button>
+  <button class="period-btn" role="tab" data-period="week"  aria-selected="false" type="button" data-i18n="periodWeek">Week</button>
+  <button class="period-btn" role="tab" data-period="month" aria-selected="false" type="button" data-i18n="periodMonth">Month</button>
+  <button class="period-btn" role="tab" data-period="year"  aria-selected="false" type="button" data-i18n="periodYear">Year</button>
+  <button class="period-btn" role="tab" data-period="yearly" aria-selected="false" type="button" data-i18n="yearly">Years</button>
+</div>
+
+<div class="list-card stats-card">
+  <div class="stats-top">
+    <div class="stats-top-lbl" data-i18n="statsInPeriod">Entries in period</div>
+    <div class="stats-top-val" id="statCount">0</div>
+  </div>
+
+  <div class="stats-block" id="statBlockEv" hidden>
+    <div class="stats-block-hdr">
+      <span class="mode-badge mode-badge--ev" data-i18n="typeEv">EV</span>
+      <span class="stats-block-count" id="statEvN">0 entries</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsExampleTotal">Total of saved example calculations</div>
+        <div class="stats-cell-val"><span id="statEvTotal">—</span><span class="stats-cell-unit"></span></div>
+      </div>
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsAvgCostPer100">Avg. estimated cost / 100 {unit}</div>
+        <div class="stats-cell-val"><span id="statEvAvgCost">—</span><span class="stats-cell-unit"></span></div>
+      </div>
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsAvgPerEntry">Avg. per saved calculation</div>
+        <div class="stats-cell-val"><span id="statEvAvgPerEntry">—</span><span class="stats-cell-unit"></span></div>
+      </div>
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsLowestPer100">Lowest saved avg./100 value</div>
+        <div class="stats-cell-val"><span id="statEvLowest">—</span><span class="stats-cell-unit"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-block" id="statBlockVb" hidden>
+    <div class="stats-block-hdr">
+      <span class="mode-badge mode-badge--vb" data-i18n="typeVb">ICE</span>
+      <span class="stats-block-count" id="statVbN">0 entries</span>
+    </div>
+    <div class="stats-grid">
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsExampleTotal">Total of saved example calculations</div>
+        <div class="stats-cell-val"><span id="statVbTotal">—</span><span class="stats-cell-unit"></span></div>
+      </div>
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsAvgCostPer100">Avg. estimated cost / 100 {unit}</div>
+        <div class="stats-cell-val"><span id="statVbAvgCost">—</span><span class="stats-cell-unit"></span></div>
+      </div>
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsAvgPerEntry">Avg. per saved calculation</div>
+        <div class="stats-cell-val"><span id="statVbAvgPerEntry">—</span><span class="stats-cell-unit"></span></div>
+      </div>
+      <div class="stats-cell">
+        <div class="stats-cell-lbl" data-i18n="statsLowestPer100">Lowest saved avg./100 value</div>
+        <div class="stats-cell-val"><span id="statVbLowest">—</span><span class="stats-cell-unit"></span></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="stats-empty" id="statsEmpty" data-i18n="statsEmpty">No single calculations saved yet</div>
+</div>
+
+<p id="statsCaveat" class="stats-caveat" hidden data-i18n="statsCaveatFooter">Values are based on your saved example calculations. Only energy/fuel costs — maintenance, insurance, taxes, depreciation, charging losses and base fees are not included. No guarantee and no advice.</p>
+
+</section>
+
+<!-- Entries -->
+<section class="hist-entries-section" aria-labelledby="histEntriesHead">
+<h2 class="sh" id="histEntriesHead" data-i18n="entriesHeader">All entries</h2>
+<div class="hist-search-wrap">
+  <svg class="hist-search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false">
+    <circle cx="11" cy="11" r="8"/>
+    <path d="m21 21-4.3-4.3"/>
+  </svg>
+  <input id="searchInput" class="hist-search" type="text" placeholder="Search entries…" autocomplete="off" aria-label="Search entries" data-i18n-placeholder="searchPlaceholder">
+</div>
+<div id="histList" class="hist-list"></div>
+<div id="histPager" class="hist-pager" hidden>
+  <button id="histPrevBtn" class="hist-pager-btn" type="button" aria-label="Previous page" data-i18n="pagerPrev">← Previous</button>
+  <span id="histPagerInfo" class="hist-pager-info">1 / 1</span>
+  <button id="histNextBtn" class="hist-pager-btn" type="button" aria-label="Next page" data-i18n="pagerNext">Next →</button>
+</div>
+</section>
+
+<!-- Legacy (compare entries from older version) -->
+<details id="legacyWrap" class="legacy-wrap" hidden>
+  <summary class="legacy-summary">
+    <span class="legacy-sum-label" data-i18n="legacyLabel">Old entries from compare mode</span>
+    <span class="legacy-sum-count" id="legacyCount">0</span>
+  </summary>
+  <div id="legacyList" class="hist-list legacy-list"></div>
+  <div class="hist-actions">
+    <button id="legacyClearBtn" class="hist-clear" type="button" data-i18n="legacyClear">Delete old entries</button>
+  </div>
+</details>
+
+<div id="histActions" class="hist-actions" hidden>
+  <button id="histExportBtn" class="hist-action-btn" type="button" data-i18n="historyBackupExport">Export backup</button>
+  <button id="histImportBtn" class="hist-action-btn" type="button" data-i18n="historyBackupImport">Import backup</button>
+  <button id="histCsvExportBtn" class="hist-action-btn" type="button" data-i18n="historyCsvExport">Export CSV</button>
+  <button id="histPdfExportBtn" class="hist-action-btn" type="button" data-i18n="historyPdfExport">PDF / Print</button>
+  <input id="histImportInput" type="file" accept="application/json,.json" hidden>
+  <button id="histClearBtn" class="hist-clear" type="button" data-i18n="clearAll">Delete all</button>
+</div>
+
+<p id="histExportHelp" class="hist-export-help" data-i18n="historyExportHelp">
+  Backup files are used to restore data in EVSpend. CSV is a readable table for Excel, Numbers, or Google Sheets. PDF / Print creates a report using your browser’s print feature. Files are processed locally in your browser and are not uploaded.
+</p>
+
+<div class="result-actions">
+  <a href="/tr/" class="ra-back-link" data-i18n="backToCalc">Back to calculator</a>
+</div>
+
+</main>
+
+<footer>
+  <div class="footer-links">
+    <a href="/tr/" data-i18n="footerCalc">Calculator</a>
+    <span>·</span>
+    <a href="/impressum.tr" data-i18n="footerImpressum">Legal Notice</a>
+    <span>·</span>
+    <a href="/datenschutz.tr" data-i18n="footerDatenschutz">Privacy</a>
+    <span>·</span>
+    <a href="/terms.tr" data-i18n="footerTerms">Terms of Use</a>
+    <span>·</span>
+    <a href="/hinweise.tr" data-i18n="footerHinweise">Usage Notes</a>
+    <span>·</span>
+    <a href="/barrierefreiheit.tr" data-i18n="footerBarrierefreiheit">Accessibility</a>
+  </div>
+  <p class="footer-note" data-i18n="verlaufFooterNote">Saved entries remain locally on this device only.</p>
+  <p class="footer-copy">© 2026 EVSpend – www.evspend.com</p>
+</footer>
+
+<script src="/vendor/chart-4.4.6.umd.js" defer></script>
+<script src="/verlauf.min.js?v=20260601-audit-fix-2" defer></script>
+</body>
+</html>
