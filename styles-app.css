@@ -22,7 +22,7 @@
    pick the matching variant in dark mode. */
 html{color-scheme:light dark;}
 html,body{background:#f5f7fa;overscroll-behavior:none;-webkit-tap-highlight-color:transparent;}
-html,body{overflow-x:clip;}
+html,body{overflow-x:hidden;overflow-x:clip;}
 body{min-width:0;}
 html[data-theme="dark"],html[data-theme="dark"] body{background:#0f1115;}
 
