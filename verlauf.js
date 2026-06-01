@@ -1992,6 +1992,12 @@
       try { _applyTranslationsVerlauf(); } catch (_) {}
       try { refresh(); } catch (_) {}
     }
+    // Phase Audit-2.2: Cross-Tab-Sync — ein in einem anderen Tab gespeicherter
+    // oder gelöschter Verlaufseintrag aktualisiert die offene Liste live.
+    // Nur Daten-Refresh, keine Übersetzungen (Sprache ändert sich nicht).
+    if (e.key === HIST_KEY) {
+      try { refresh(); } catch (_) {}
+    }
   });
   document.addEventListener("eaf:marketchange", () => {
     try { _applyTranslationsVerlauf(); } catch (_) {}
