@@ -3798,12 +3798,29 @@ setTimeout(() => {
       if (isOpen) closeAll(); else openMarket();
     });
 
-    // Optionen-Klick: Markt setzen + Dropdown SOFORT schließen
+    // Optionen-Klick: Markt setzen + Dropdown SOFORT schließen.
+    // CONS-01b (Option Y): TR und EU sind kanonische Locale-URLs mit echten
+    // Shells (/tr/, /en-eu/). Ihre Auswahl NAVIGIERT dorthin, statt rein
+    // In-App umzuschalten — außer wir sind schon in der Shell. DE/US haben
+    // keine eigene URL und bleiben In-App. Der inTr/inEu-Guard matcht auch die
+    // servierte Canonical OHNE Trailing Slash (/tr, /en-eu — cleanUrls ohne
+    // trailingSlash) sowie ?query/#hash, ohne /trolling fälschlich zu treffen.
+    // Markt wird VOR der Navigation persistiert (lang-switch.js-Pattern), damit
+    // die Ziel-Shell ihn beim Laden sofort liest.
+    function gotoLocale(code, path) {
+      try { localStorage.setItem(MARKET_KEY, code); } catch (_) {}
+      location.href = path;
+    }
     document.querySelectorAll("[data-market]").forEach(function (item) {
       item.addEventListener("click", function (e) {
         e.stopPropagation();
         var code = item.getAttribute("data-market");
         closeAll();
+        var p = location.pathname;
+        var inTr = (p === "/tr" || p.indexOf("/tr/") === 0);
+        var inEu = (p === "/en-eu" || p.indexOf("/en-eu/") === 0);
+        if (code === "tr" && !inTr) return gotoLocale("tr", "/tr/");
+        if (code === "eu" && !inEu) return gotoLocale("eu", "/en-eu/");
         setMarket(code);
       });
     });

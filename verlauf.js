@@ -1953,11 +1953,25 @@
       if (isOpen) closeAll(); else openMarket();
     });
 
+    // CONS-01b (Option Y): analog script.js — TR/EU navigieren zu den
+    // kanonischen Verlauf-URLs (/tr/verlauf, /en-eu/verlauf), außer wir sind
+    // schon dort. DE/US bleiben In-App. inTr/inEu-Guard matcht auch die
+    // Ohne-Slash-Canonical (cleanUrls ohne trailingSlash) + ?query/#hash.
+    // Markt VOR Navigation persistieren (lang-switch.js-Pattern).
+    const gotoLocaleVerlauf = (code, path) => {
+      try { localStorage.setItem(MARKET_KEY, code); } catch (_) {}
+      location.href = path;
+    };
     document.querySelectorAll("[data-market]").forEach((item) => {
       item.addEventListener("click", (e) => {
         e.stopPropagation();
         const code = item.getAttribute("data-market");
         closeAll();
+        const p = location.pathname;
+        const inTr = (p === "/tr" || p.indexOf("/tr/") === 0);
+        const inEu = (p === "/en-eu" || p.indexOf("/en-eu/") === 0);
+        if (code === "tr" && !inTr) return gotoLocaleVerlauf("tr", "/tr/verlauf");
+        if (code === "eu" && !inEu) return gotoLocaleVerlauf("eu", "/en-eu/verlauf");
         _setMarketVerlauf(code);
       });
     });
