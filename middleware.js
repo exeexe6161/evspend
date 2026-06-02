@@ -11,7 +11,7 @@
 export const config = {
   matcher: [
     '/',
-    '/((?!en-eu|api|_next|_vercel|fonts|favicon|robots.txt|sitemap.xml|manifest|.*\\..*).*)'
+    '/((?!en-eu|tr|api|_next|_vercel|fonts|favicon|robots.txt|sitemap.xml|manifest|.*\\..*).*)'
   ],
 };
 
@@ -28,7 +28,19 @@ export default function middleware(request) {
     return;
   }
 
-  // 2. Non-domestic country on / → redirect to /en-eu/.
+  // 2. Turkish IP → dedicated /tr/ market shell (parity with /en-eu/). Runs
+  //    BEFORE the generic branch; TR stays in DOMESTIC_COUNTRIES so that branch
+  //    can never grab it. /tr/* is also matcher-excluded, so this fires only
+  //    off-shell (no loop). Guard mirrors the /en-eu/ branch (startsWith) —
+  //    the matcher already gates /tr/*.
+  if (country === 'TR' && !url.pathname.startsWith('/tr')) {
+    return Response.redirect(
+      new URL('/tr' + url.pathname, request.url),
+      302
+    );
+  }
+
+  // 3. Other non-domestic country → redirect to /en-eu/.
   if (!DOMESTIC_COUNTRIES.includes(country) && !url.pathname.startsWith('/en-eu')) {
     return Response.redirect(
       new URL('/en-eu' + url.pathname, request.url),
