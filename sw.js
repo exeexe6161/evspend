@@ -14,7 +14,7 @@
  * downloads or fresh-fetch semantics.
  */
 
-const CACHE_VERSION  = 'v20260608-legal-anschrift';
+const CACHE_VERSION  = 'v20260609-audit-bugs';
 const STATIC_CACHE   = 'evspend-static-' + CACHE_VERSION;
 const RUNTIME_CACHE  = 'evspend-runtime-' + CACHE_VERSION;
 
@@ -35,8 +35,8 @@ const PRECACHE_URLS = [
   '/site.webmanifest',
   '/styles-app.min.css?v=20260601-audit-fix-2',
   '/theme-init.js?v=20260501-legal3',
-  '/script.min.js?v=20260602-audit-3b2',
-  '/verlauf.min.js?v=20260602-audit-3b2',
+  '/script.min.js?v=20260609-audit-bugs',
+  '/verlauf.min.js?v=20260609-audit-bugs',
   '/vendor/chart-4.4.6.umd.js',
   '/fonts/InterVariable.woff2',
   '/banner.webp?v=20260502-brand1',

@@ -2729,7 +2729,7 @@ setTimeout(() => {
       costLabelVb: "Kraftstoffkosten Verbrenner",
       per100km: "/ 100 {unit}",
       rangeText: "Ca. {km} {unit} Reichweite",
-      rangeEmpty: "Ca. — {unit} Reichweite",
+      rangeEmpty: "Ca. {unit} Reichweite",
       fullChargeText: "Geschätzte Vollladung: {cost}",
       fullChargeHint: "Ohne Ladeverluste und Grundgebühren.",
       rideshareLine: "Fahrgemeinschaft · {n} Personen",
