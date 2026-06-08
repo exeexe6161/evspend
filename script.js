@@ -3179,7 +3179,7 @@ setTimeout(() => {
       costLabelVb: "İçten yanmalı yakıt maliyeti",
       per100km: "/ 100 {unit}",
       rangeText: "Tahmini menzil: {km} {unit}",
-      rangeEmpty: "Yaklaşık — {unit} menzil",
+      rangeEmpty: "Tahmini menzil: {unit}",
       fullChargeText: "Tahmini tam şarj: {cost}",
       fullChargeHint: "Şarj kayıpları ve sabit ücretler dahil değildir.",
       rideshareLine: "Ortak yolculuk · {n} kişi",
