@@ -869,7 +869,7 @@
       return;
     }
     var COL = ["Datum", "Typ", "Kilometer", "Verbrauch", "Preis",
-               "Kosten pro 100 km", "Monat", "Jahr", "Notiz",
+               "Kosten pro 100 km", "Kosten (Strecke)", "Kosten (12x Strecke)", "Notiz",
                "Währung", "Markt", "Sprache"];
     var lines = [COL.map(_csvEscape).join(";")];
     for (var i = 0; i < v2.length; i++) {
