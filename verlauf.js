@@ -191,6 +191,79 @@
     return (c && c.symbol) || "€";
   }
 
+  // ── BUG-B: Leitwährung für Aggregate (REGEL B: KEINE FX-Umrechnung) ────────
+  // Aggregate (Stats-Summen, Chart-Balken, A11y-Schnitt) dürfen nicht über
+  // Währungsgrenzen summieren. Wir wählen EINE Leitwährung und aggregieren nur
+  // Einträge dieser Währung; der Rest wird ausgeschlossen und per Caveat
+  // ausgewiesen. Währungscode je Eintrag aus currencyMetadata (Legacy → EUR).
+  function _entryCurrencyCode(entry) {
+    const c = _pickEntryCurrency(entry);
+    return (c && c.code) || "EUR";
+  }
+
+  // Liefert { code, table, kept, excluded } für eine Eintragsmenge:
+  //   genau 1 distinct → diese Währung (Normalfall, excluded = 0)
+  //   >1 distinct      → Währung des aktuellen UI-Marktes falls vertreten,
+  //                      sonst die häufigste.
+  function _leadCurrency(entries) {
+    const counts = new Map();
+    entries.forEach((e) => {
+      const code = _entryCurrencyCode(e);
+      counts.set(code, (counts.get(code) || 0) + 1);
+    });
+    if (!counts.size) {
+      return { code: null, table: getCurrentCurrency(), kept: [], excluded: 0 };
+    }
+    let lead;
+    if (counts.size === 1) {
+      lead = counts.keys().next().value;
+    } else {
+      const ui = getCurrentCurrency().code;
+      lead = counts.has(ui)
+        ? ui
+        : Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0][0];
+    }
+    const kept = entries.filter((e) => _entryCurrencyCode(e) === lead);
+    return {
+      code: lead,
+      table: CURRENCY_TABLE[lead] || getCurrentCurrency(),
+      kept: kept,
+      excluded: entries.length - kept.length
+    };
+  }
+
+  // Geld-Format in EINER bestimmten Währung statt blind getCurrentCurrency():
+  // reicht ein synthetisches Pseudo-Entry an den vorhandenen Formatter.
+  function _fmtMoneyInCurrency(value, table, decimals) {
+    return fmtMoneyEntry(value, table ? { currencyMetadata: table } : null, decimals);
+  }
+
+  // BUG-B: dezenter Hinweis, wenn Aggregate Fremdwährungs-Einträge ausschließen.
+  // Element wird lazy erzeugt (wiederverwendete .stats-caveat-CSS) → keine
+  // Struktur-Edits an verlauf.html / tr/ / en-eu/.
+  function _renderMixCaveat(where, excluded) {
+    const anchorId = where === "chart" ? "chartWrap" : "statsCaveat";
+    const id       = where === "chart" ? "chartMixCaveat" : "statsMixCaveat";
+    let el = document.getElementById(id);
+    if (excluded > 0) {
+      if (!el) {
+        const anchor = document.getElementById(anchorId);
+        if (!anchor || !anchor.parentNode) return;
+        el = document.createElement("p");
+        el.id = id;
+        el.className = "stats-caveat";
+        anchor.parentNode.insertBefore(el, anchor.nextSibling);
+      }
+      el.textContent = _tv("mixCurrencyNote", {
+        n: excluded,
+        noun: _tv(excluded === 1 ? "histEntrySingular" : "histEntryPlural")
+      });
+      el.hidden = false;
+    } else if (el) {
+      el.hidden = true;
+    }
+  }
+
   // ── Phase 7: Inline-Übersetzungs-Dict (verlauf.html wird nicht von
   // script.js bedient → eigene Mini-Copy, nur Verlauf-relevante Keys).
   // Wenn Schlüssel fehlen, wird der Roh-Schlüssel als Fallback angezeigt.
@@ -226,6 +299,7 @@
       statsLowestPer100: "Niedrigster gespeicherter Ø/100-Wert",
       statsNeedsTwoEntries: "Mindestens 2 gespeicherte Einträge nötig",
       statsCaveatFooter: "Werte basieren auf deinen gespeicherten Beispielrechnungen. Nur Energie-/Kraftstoffkosten — Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten. Keine Garantie und keine Beratung.",
+      mixCurrencyNote: "{n} {noun} in anderer Währung nicht einbezogen.",
       statsEmpty: "Noch keine Einzelberechnungen gespeichert",
       legacyLabel: "Alt-Einträge aus Vergleichsmodus",
       legacyClear: "Alt-Einträge löschen",
@@ -320,6 +394,7 @@
       statsLowestPer100: "Lowest saved avg./100 value",
       statsNeedsTwoEntries: "At least 2 saved entries needed",
       statsCaveatFooter: "Values are based on your saved example calculations. Only energy/fuel costs — maintenance, insurance, taxes, depreciation, charging losses and base fees are not included. No guarantee and no advice.",
+      mixCurrencyNote: "{n} {noun} in another currency not included.",
       statsEmpty: "No single-calculations saved yet",
       legacyLabel: "Legacy compare entries",
       legacyClear: "Delete legacy entries",
@@ -414,6 +489,7 @@
       statsLowestPer100: "Kaydedilen en düşük Ø/100 değeri",
       statsNeedsTwoEntries: "En az 2 kayıtlı girdi gerekli",
       statsCaveatFooter: "Değerler kaydettiğin örnek hesaplamalara dayanır. Yalnızca enerji/yakıt maliyetleri — bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir. Garanti veya tavsiye değildir.",
+      mixCurrencyNote: "{n} {noun} farklı para biriminde olduğu için dahil edilmedi.",
       statsEmpty: "Henüz kayıtlı tekli hesaplama yok",
       legacyLabel: "Eski karşılaştırma girdileri",
       legacyClear: "Eski girdileri sil",
@@ -1002,6 +1078,7 @@
         statsEmpty.hidden = false;
       }
       if (statsCaveat) statsCaveat.hidden = true;
+      _renderMixCaveat("stats", 0);
       return;
     }
     if (statsEmpty) statsEmpty.hidden = true;
@@ -1012,36 +1089,41 @@
     function fillBlock(blockEl, nEl, totalEl, avgCostEl, avgPerEntryEl, lowestEl, items) {
       if (!items.length) {
         blockEl.hidden = true;
-        return;
+        return 0;
       }
       blockEl.hidden = false;
+
+      // BUG-B: nur Einträge der Leitwährung aggregieren (keine FX, REGEL B).
+      // Bei genau einer Währung bleibt agg === items (Normalfall unverändert).
+      const lead = _leadCurrency(items);
+      const agg  = lead.kept;
+
       nEl.textContent = items.length + " " + (items.length === 1 ? _tv("histEntrySingular") : _tv("histEntryPlural"));
 
-      // Period sum: Σ (costPer100 × km / 100), in current market currency.
-      const total = sum(items.map(e => Number(e.costPer100) * Number(e.km) / 100));
-      totalEl.textContent = fmtMoneyEntry(total, null, 0);
+      // Period sum: Σ (costPer100 × km / 100), in Leitwährung.
+      const total = sum(agg.map(e => Number(e.costPer100) * Number(e.km) / 100));
+      totalEl.textContent = _fmtMoneyInCurrency(total, lead.table, 0);
       _clearAdjacentUnit(totalEl);
 
       // Avg cost / 100 {unit}, US-converted from per-100-km to per-100-mi.
-      const avgRaw       = avg(items.map(e => e.costPer100));
+      const avgRaw       = avg(agg.map(e => e.costPer100));
       const avgConverted = _currentIsUs() ? avgRaw * UNIT_CONV.MI_TO_KM : avgRaw;
-      avgCostEl.textContent = fmtMoneyEntry(avgConverted, null, 2);
+      avgCostEl.textContent = _fmtMoneyInCurrency(avgConverted, lead.table, 2);
       _clearAdjacentUnit(avgCostEl);
 
-      // Avg per saved calculation: total / count. With 1 entry equals total —
-      // that's mathematically correct, no special-casing needed.
-      const avgPerEntry = total / items.length;
-      avgPerEntryEl.textContent = fmtMoneyEntry(avgPerEntry, null, 2);
+      // Avg per saved calculation: total / count (über die aggregierten Einträge).
+      const avgPerEntry = total / agg.length;
+      avgPerEntryEl.textContent = _fmtMoneyInCurrency(avgPerEntry, lead.table, 2);
       _clearAdjacentUnit(avgPerEntryEl);
 
       // Lowest avg/100 — only meaningful with ≥2 entries. With <2 show "—"
       // and a tooltip / aria-label so the reason is discoverable.
-      if (items.length >= 2) {
-        const finiteCosts = items.map(e => Number(e.costPer100)).filter(v => isFinite(v));
+      if (agg.length >= 2) {
+        const finiteCosts = agg.map(e => Number(e.costPer100)).filter(v => isFinite(v));
         if (finiteCosts.length >= 2) {
           const minRaw       = Math.min.apply(null, finiteCosts);
           const minConverted = _currentIsUs() ? minRaw * UNIT_CONV.MI_TO_KM : minRaw;
-          lowestEl.textContent = fmtMoneyEntry(minConverted, null, 2);
+          lowestEl.textContent = _fmtMoneyInCurrency(minConverted, lead.table, 2);
           lowestEl.removeAttribute("title");
           lowestEl.removeAttribute("aria-label");
         } else {
@@ -1055,10 +1137,14 @@
         lowestEl.setAttribute("aria-label", _tv("statsNeedsTwoEntries"));
       }
       _clearAdjacentUnit(lowestEl);
+      return lead.excluded;
     }
 
-    fillBlock(statBlockEv, statEvN, statEvTotal, statEvAvgCost, statEvAvgPerEntry, statEvLowest, evs);
-    fillBlock(statBlockVb, statVbN, statVbTotal, statVbAvgCost, statVbAvgPerEntry, statVbLowest, vbs);
+    const exEv = fillBlock(statBlockEv, statEvN, statEvTotal, statEvAvgCost, statEvAvgPerEntry, statEvLowest, evs);
+    const exVb = fillBlock(statBlockVb, statVbN, statVbTotal, statVbAvgCost, statVbAvgPerEntry, statVbLowest, vbs);
+
+    // BUG-B: Hinweis, wenn Aggregate Fremdwährungs-Einträge ausgeschlossen haben.
+    _renderMixCaveat("stats", exEv + exVb);
 
     // Caveat is shown whenever any block is visible — i.e. the user has at
     // least one saved example calculation in the active period.
@@ -1475,7 +1561,7 @@
   //   Symbole und Kürzel inkonsistent interpretieren.
   // - Tabellen-Zellen: Symbole und Kürzel zulässig, da Spaltenheader den Kontext
   //   liefert und Screenreader-Tabellen-Navigation den Header vor der Zelle vorliest.
-  function _updateChartAccessibility(entries, range) {
+  function _updateChartAccessibility(entries, range, excluded) {
     const cap = document.getElementById("chartCaption");
     const tbody = document.getElementById("chartDataTableBody");
     const distHeader = document.getElementById("chartTableHeaderDistance");
@@ -1554,6 +1640,14 @@
         unit: distLong
       });
 
+      // BUG-B: Hinweis auf ausgeschlossene Fremdwährungs-Einträge (A11y-Text).
+      if (excluded > 0) {
+        cap.textContent += " " + _tv("mixCurrencyNote", {
+          n: excluded,
+          noun: _tv(excluded === 1 ? "histEntrySingular" : "histEntryPlural")
+        });
+      }
+
       // Build table rows. Symbols/abbreviations are fine here (header context).
       const escHtml = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
       const rows = entries.map(e => {
@@ -1614,14 +1708,17 @@
     if (!wrap || !canvas || typeof window.Chart !== "function") return;
 
     const filtered = _filterChartEntries(entries || [], range);
-    const series   = filtered.length ? _buildChartSeries(filtered, range) : { labels: [], evData: [], iceData: [] };
+    // BUG-B: eine Leitwährung für den ganzen Chart (Balken, Achse, Tooltip, A11y).
+    const lead     = _leadCurrency(filtered);
+    const series   = lead.kept.length ? _buildChartSeries(lead.kept, range) : { labels: [], evData: [], iceData: [] };
+    _renderMixCaveat("chart", lead.excluded);
 
     // ── EMPTY-STATE: no entries in this period ─────────────────────────────
     // Empty-State NUR wenn wirklich 0 Einträge im Zeitraum liegen — 1 Eintrag
     // ist ein legitimer Datenpunkt. Sichtbarkeit doppelt setzen (property +
     // attribute), damit das CSS-`display:flex` auf .chart-hint nicht erneut
     // versehentlich über dem hidden-Attribut sitzt.
-    if (!filtered.length || !series.labels.length) {
+    if (!lead.kept.length || !series.labels.length) {
       if (_chartInstance) { _chartInstance.destroy(); _chartInstance = null; }
       canvas.hidden = true;
       canvas.setAttribute("hidden", "");
@@ -1654,9 +1751,7 @@
     if (_chartInstance) _chartInstance.destroy();
 
     const ctx2d = canvas.getContext("2d");
-    const currencySym = (function () {
-      try { var c = getCurrentCurrency(); return (c && c.symbol) || ""; } catch (_) { return ""; }
-    })();
+    const currencySym = (lead.table && lead.table.symbol) || "";  // BUG-B: Leitwährung
 
     // Soft vertical gradient for each bar — depth without noise. Hovered bar
     // jumps to full opacity; everything else sits at 0.6. Fades to transparent
@@ -1778,7 +1873,7 @@
 
     _updateChartTitle(range);
     wrap.hidden = false;
-    _updateChartAccessibility(filtered, range);
+    _updateChartAccessibility(lead.kept, range, lead.excluded);
   }
 
   periodBtns.forEach(btn => {
