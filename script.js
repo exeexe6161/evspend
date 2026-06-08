@@ -310,13 +310,14 @@ function loadInputs() {
     if (entry.schema === "v2" && (entry.type === "ev" || entry.type === "vb")) {
       // Single-mode entry → restore only the matching side and switch to single mode
       if (entry.type === "ev") {
-        if ($("kmEv"))        $("kmEv").value        = entry.km;
-        if ($("evVerbrauch")) $("evVerbrauch").value = entry.consumption;
-        if ($("strompreis"))  $("strompreis").value  = entry.price;
+        // BUG-A: internal-metrische Werte zurück in Markt-Einheiten (identity außer US).
+        if ($("kmEv"))        $("kmEv").value        = _kmToDist(entry.km);
+        if ($("evVerbrauch")) $("evVerbrauch").value = _evConsumptionToMarket(entry.consumption);
+        if ($("strompreis"))  $("strompreis").value  = entry.price;   // $/kWh: identity (kein *ToMarket)
       } else {
-        if ($("kmVb"))                $("kmVb").value                = entry.km;
-        if ($("verbrauchVerbrenner")) $("verbrauchVerbrenner").value = entry.consumption;
-        if ($("benzinpreis"))         $("benzinpreis").value         = entry.price;
+        if ($("kmVb"))                $("kmVb").value                = _kmToDist(entry.km);
+        if ($("verbrauchVerbrenner")) $("verbrauchVerbrenner").value = _iceConsumptionToMarket(entry.consumption);
+        if ($("benzinpreis"))         $("benzinpreis").value         = _fuelPriceToMarket(entry.price);
       }
       appMode   = "single";
       singleType = entry.type;
@@ -756,7 +757,13 @@ const UNIT_CONV = {
 // Aktiver Markt == USA?
 function _isUsMarket() {
   try {
-    return !!(window.EAF_I18N && typeof window.EAF_I18N.getMarketCode === "function" && window.EAF_I18N.getMarketCode() === "us");
+    if (window.EAF_I18N && typeof window.EAF_I18N.getMarketCode === "function") {
+      return window.EAF_I18N.getMarketCode() === "us";
+    }
+    // Pre-init Fallback: restoreFromHistoryParam läuft VOR dem EAF_I18N-Setup.
+    // Markt direkt aus dem persistierten localStorage-Schlüssel lesen — dieselbe
+    // Quelle, aus der currentMarket später ohnehin abgeleitet wird.
+    return localStorage.getItem("eaf.market") === "us";
   } catch (_) {}
   return false;
 }
