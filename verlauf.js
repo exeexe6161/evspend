@@ -94,7 +94,10 @@
     const unit  = _currentDistanceUnit();
     const dist  = Math.round(_kmToCurrentDist(entry.km || 0));
     const cost  = entry.monthlyCost;
-    const costStr = fmtMoneyEntry(cost, null, 0); // null → aktuelle UI-Währung, kein Entry-Currency-Lookup
+    // BUG-E: Geld in der Eintrags-Währung rendern, GEGATED auf currencyMetadata.
+    // Eintrag mit Metadata → dessen Währung/Symbol; ohne Metadata → null → heutiges
+    // UI-Markt-Verhalten (kein €-Flip für US/TR-Legacy/Import-Einträge).
+    const costStr = fmtMoneyEntry(cost, _pickEntryCurrency(entry) ? entry : null, 0);
     if (lang === "en") return `${costStr} for ${dist} ${unit}`;
     if (lang === "tr") return `${dist} ${unit} için ${costStr}`;
     return `${costStr} für ${dist} ${unit}`;
@@ -1205,7 +1208,10 @@
     // damit keine gemischten Einheiten (km + mi) auf einer Seite erscheinen.
     const distUnit  = _currentDistanceUnit();
     const consUnit  = isEv ? _currentEvEffUnit() : _currentIceEffUnit();
-    const currSym   = (function(){ var c = getCurrentCurrency(); return (c && c.symbol) || "€"; })();
+    // BUG-E: Preis-Symbol pro Eintrag, GEGATED — Eintrag mit currencyMetadata → dessen
+    // Symbol; ohne → getCurrentCurrency() (UI-Markt), exakt wie bisher. priceUnit (unten)
+    // bleibt unverändert; _currentFuelVolumeUnit bleibt UI-Markt → kein gal/L-Mix.
+    const currSym   = (function(){ var ce = _pickEntryCurrency(e); var c = ce || getCurrentCurrency(); return (c && c.symbol) || "€"; })();
     const priceUnit = isEv ? (currSym + " / kWh") : (currSym + " / " + _currentFuelVolumeUnit());
     const consDisp  = isEv ? _evConsToCurrent(e.consumption) : _iceConsToCurrent(e.consumption);
     const priceDisp = isEv ? e.price : _fuelPriceToCurrent(e.price);
@@ -1213,7 +1219,9 @@
     const costPer100Disp = _currentIsUs() ? e.costPer100 * UNIT_CONV.MI_TO_KM : e.costPer100;
     const parts = [
       fmt(consDisp, consDec) + " " + consUnit,
-      fmtMoneyEntry(costPer100Disp, null, 2) + " / 100 " + distUnit,
+      // BUG-E: Kosten/100 in Eintrags-Währung, GEGATED. costPer100Disp (Distanz-Skalierung,
+      // REGEL-B-safe) und distUnit bleiben UI-Markt-gekoppelt → kein km+mi-Mix.
+      fmtMoneyEntry(costPer100Disp, _pickEntryCurrency(e) ? e : null, 2) + " / 100 " + distUnit,
       fmt(priceDisp, 2) + " " + priceUnit,
     ];
     parts.forEach(p => {
