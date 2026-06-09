@@ -2694,7 +2694,7 @@ setTimeout(() => {
       hintSingleFoot: "Basierend auf deinen Eingaben und voreingestellten Beispielwerten. Reale Kosten können abweichen.",
       hintCompareExclusions: "Nur Energie-/Kraftstoffkosten — Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.",
       hintSingleExclusions:  "Nur Energie-/Kraftstoffkosten — Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.",
-      calcInfoBlock: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Hinweis zur Berechnung</span></summary><div class=\"calc-info-body\"><p>Die angezeigten Werte basieren auf deinen Eingaben sowie voreingestellten Beispielwerten (Slider-Defaults). Tatsächliche Kosten können je nach Fahrweise, Fahrzeug, Energiepreisen, Wartung, Versicherung, Steuern, Wertverlust, Ladeverlusten und Grundgebühren abweichen.</p><p><strong>So wird berechnet:</strong><br>Kosten = Verbrauch × Preis × Strecke</p><p>Der Rechner ist eine Beispielrechnung zur Orientierung und stellt keine Garantie oder Beratung dar.</p></div></details>",
+      calcInfoBlock: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Hinweis zur Berechnung</span></summary><div class=\"calc-info-body\"><p>Die angezeigten Werte basieren auf deinen Eingaben sowie voreingestellten Beispielwerten (Slider-Defaults). Tatsächliche Kosten können je nach Fahrweise, Fahrzeug, Energiepreisen, Wartung, Versicherung, Steuern, Wertverlust, Ladeverlusten und Grundgebühren abweichen.</p><p><strong>So wird berechnet:</strong><br>Kosten = (Verbrauch × Preis × Strecke) ÷ 100</p><p>Der Rechner ist eine Beispielrechnung zur Orientierung und stellt keine Garantie oder Beratung dar.</p></div></details>",
       footerImpressum: "Impressum",
       footerDatenschutz: "Datenschutz",
       footerTerms: "Nutzungsbedingungen",
@@ -2791,8 +2791,6 @@ setTimeout(() => {
       pwaStepDesktopInstall: "Wähle <strong>„App installieren“</strong>",
       footerCalc: "Rechner",
       chartHeader: "Energie-/Kraftstoffkosten-Vergleich",
-      chartAxisX: "Kilometer",
-      chartAxisY: "Kosten ({symbol})",
       // Share text templates (mit Platzhaltern)
       shareSavings: "💰 Differenz:",
       sharePerPersonSuffix: "pro Person",
@@ -2919,7 +2917,7 @@ setTimeout(() => {
       hintSingleFoot: "Based on your inputs and pre-set example values. Real costs may differ.",
       hintCompareExclusions: "Energy/fuel costs only — maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.",
       hintSingleExclusions:  "Energy/fuel costs only — maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.",
-      calcInfoBlock: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Calculation Notice</span></summary><div class=\"calc-info-body\"><p>The displayed values are estimates based on your inputs and on pre-set example values (slider defaults). Actual costs may vary depending on driving style, vehicle, energy prices, maintenance, insurance, taxes, depreciation, charging losses and base fees.</p><p><strong>How it's calculated:</strong><br>Cost = consumption × price × distance</p><p>This tool is an example calculation for orientation only and does not constitute advice or guarantee.</p></div></details>",
+      calcInfoBlock: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Calculation Notice</span></summary><div class=\"calc-info-body\"><p>The displayed values are estimates based on your inputs and on pre-set example values (slider defaults). Actual costs may vary depending on driving style, vehicle, energy prices, maintenance, insurance, taxes, depreciation, charging losses and base fees.</p><p><strong>How it's calculated:</strong><br>Cost = (consumption × price × distance) ÷ 100</p><p>This tool is an example calculation for orientation only and does not constitute advice or guarantee.</p></div></details>",
       footerImpressum: "Imprint",
       footerDatenschutz: "Privacy",
       footerTerms: "Terms of Use",
@@ -3016,8 +3014,6 @@ setTimeout(() => {
       pwaStepDesktopInstall: "Pick <strong>“Install app”</strong>",
       footerCalc: "Calculator",
       chartHeader: "Energy/fuel cost comparison",
-      chartAxisX: "{unit}",
-      chartAxisY: "Cost ({symbol})",
       // Share text
       shareSavings: "💰 Difference:",
       sharePerPersonSuffix: "per person",
@@ -3144,7 +3140,7 @@ setTimeout(() => {
       hintSingleFoot: "Girdilerine ve önceden tanımlanmış örnek değerlere dayanır. Gerçek maliyetler değişebilir.",
       hintCompareExclusions: "Yalnızca enerji/yakıt maliyetleri — bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
       hintSingleExclusions:  "Yalnızca enerji/yakıt maliyetleri — bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
-      calcInfoBlock: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Hesaplama Bilgisi</span></summary><div class=\"calc-info-body\"><p>Gösterilen değerler, girdilerine ve önceden tanımlanmış örnek değerlere (sürgü varsayılanları) dayalı tahminlerdir. Gerçek maliyetler sürüş tarzına, araç tipine, enerji fiyatlarına, bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretlere göre değişebilir.</p><p><strong>Nasıl hesaplanır:</strong><br>Maliyet = tüketim × fiyat × mesafe</p><p>Bu araç yalnızca yönlendirme amaçlı bir örnek hesaplamadır ve garanti veya danışmanlık sunmaz.</p></div></details>",
+      calcInfoBlock: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Hesaplama Bilgisi</span></summary><div class=\"calc-info-body\"><p>Gösterilen değerler, girdilerine ve önceden tanımlanmış örnek değerlere (sürgü varsayılanları) dayalı tahminlerdir. Gerçek maliyetler sürüş tarzına, araç tipine, enerji fiyatlarına, bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretlere göre değişebilir.</p><p><strong>Nasıl hesaplanır:</strong><br>Maliyet = (tüketim × fiyat × mesafe) ÷ 100</p><p>Bu araç yalnızca yönlendirme amaçlı bir örnek hesaplamadır ve garanti veya danışmanlık sunmaz.</p></div></details>",
       footerImpressum: "Künye",
       footerDatenschutz: "Gizlilik",
       footerTerms: "Kullanım Koşulları",
@@ -3241,8 +3237,6 @@ setTimeout(() => {
       pwaStepDesktopInstall: "<strong>„Uygulamayı yükle“</strong> seçeneğini tıkla",
       footerCalc: "Hesaplayıcı",
       chartHeader: "Enerji/yakıt maliyeti karşılaştırması",
-      chartAxisX: "Kilometre",
-      chartAxisY: "Maliyet ({symbol})",
       // Share text
       shareSavings: "💰 Fark:",
       sharePerPersonSuffix: "kişi başı",
@@ -3331,7 +3325,7 @@ setTimeout(() => {
   };
 
   // ── Phase 6/7: Markt-Konfiguration als Single Source of Truth ────────────
-  // Drei Märkte — Deutschland / USA / Türkiye. Jeder Markt definiert Sprache,
+  // Vier Märkte (Deutschland / EU / USA / Türkiye). Jeder Markt definiert Sprache,
   // Locale, Währung, Symbol, Pill-Label und seine eigenen Preis-Defaults
   // (inkl. Slider-Range). setMarket(code) ist der zentrale Einstiegspunkt.
   // Phase 9: MARKET_CONFIG erweitert um `units` (Metadaten) und komplette
@@ -3398,8 +3392,8 @@ setTimeout(() => {
       units: { distance: "km", fuelVolume: "liter", iceEfficiency: "l/100km", evEfficiency: "kWh/100km" },
       defaults: {
         // TR-Marktdefaults (TRY, km, L, L/100 km, kWh/100 km) — manuell pflegbar
-        strompreis:          { value: 2.80,   min: 0.50,  max: 10.00,   step: 0.05 },  // ₺/kWh
-        benzinpreis:         { value: 48.00,  min: 20.00, max: 80.00,   step: 0.50 },  // ₺/L
+        strompreis:          { value: 3.40,   min: 0.50,  max: 10.00,   step: 0.05 },  // ₺/kWh (all-in Haushalt, Juni 2026)
+        benzinpreis:         { value: 63.00,  min: 20.00, max: 80.00,   step: 0.50 },  // ₺/L (Juni 2026, live verifiziert)
         verbrauchVerbrenner: { value: 7.0,    min: 3,     max: 20,      step: 0.1 },   // L/100 km
         evVerbrauch:         { value: 17,     min: 8,     max: 35,      step: 0.5 },   // kWh/100 km
         kmEv:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a
