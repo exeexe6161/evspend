@@ -13,3 +13,7 @@ Inter-4/
 *.bak
 *.orig
 *~
+
+# Secrets / lokale Tool-Configs (präventiv, Secret-Scan 2026-06-10)
+.env*
+.claude/
