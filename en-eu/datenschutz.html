@@ -149,7 +149,7 @@
     </div>
     <h2>No Cookies</h2>
     <p>EVSpend does <strong>not set any cookies</strong>. Functional state — your selected market, theme, saved calculations and similar preferences — is held purely in your browser's <code>localStorage</code>. No identifier is transmitted to our servers and no value crosses an HTTP request.</p>
-    <p>On first visit, a server-side middleware may use the country header provided by Vercel (<code>x-vercel-ip-country</code>) to redirect to <code>/en-eu/</code> when the visitor's country is not part of the default path. No cookies are set in this step, and no locally stored calculator inputs are read or processed on the server.</p>
+    <p>On first visit, a server-side middleware may use the country header provided by Vercel (<code>x-vercel-ip-country</code>) to redirect to a matching language version: visitors from Türkiye to <code>/tr/</code>, visitors from most other countries to <code>/en-eu/</code>. Visitors from Germany, Austria, Switzerland and a few other countries stay on the default path. No cookies are set in this step, and no locally stored calculator inputs are read or processed on the server.</p>
     <p>Market and language selection then happen in the browser — based on the page path, browser language and any locally stored choice from the in-app market selector. The selection is held only in <code>localStorage</code>.</p>
     <p>You can clear localStorage at any time via your browser's site settings. Doing so only resets the app to its initial state; no additional data is transmitted to the servers.</p>
   </div>

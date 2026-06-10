@@ -148,7 +148,7 @@
     </div>
     <h2>Keine Cookies</h2>
     <p>EVSpend setzt <strong>keinerlei Cookies</strong>. Funktionaler Zustand — gewählter Markt, Theme, gespeicherte Berechnungen und ähnliche Präferenzen — wird ausschließlich im <code>localStorage</code> des Browsers gehalten. Es wird keine Kennung an unsere Server übertragen und kein Wert verlässt das HTTP-Request.</p>
-    <p>Beim ersten Aufruf kann eine Server-Middleware anhand des von Vercel bereitgestellten Länder-Headers (<code>x-vercel-ip-country</code>) auf <code>/en-eu/</code> weiterleiten, sofern das Land nicht zum nicht-EU-Standardpfad zählt. Dabei werden keine Cookies gesetzt, und keine lokal gespeicherten Rechner-Eingaben werden serverseitig gelesen oder ausgewertet.</p>
+    <p>Beim ersten Aufruf kann eine Server-Middleware anhand des von Vercel bereitgestellten Länder-Headers (<code>x-vercel-ip-country</code>) auf eine passende Sprachfassung weiterleiten: Besucher aus der Türkei nach <code>/tr/</code>, Besucher aus den meisten anderen Ländern nach <code>/en-eu/</code>. Besucher aus Deutschland, Österreich, der Schweiz und einigen weiteren Ländern bleiben auf dem Standardpfad. Dabei werden keine Cookies gesetzt, und keine lokal gespeicherten Rechner-Eingaben werden serverseitig gelesen oder ausgewertet.</p>
     <p>Markt- und Sprachauswahl erfolgen anschließend im Browser — anhand des Seitenpfads, der Browsersprache und ggf. einer lokal gespeicherten Auswahl aus dem In-App-Marktwähler. Die Auswahl wird ausschließlich im <code>localStorage</code> gehalten.</p>
     <p>Der localStorage kann jederzeit über die Browser-Einstellungen gelöscht werden. Damit wird lediglich der Initialzustand der App zurückgesetzt; an die Server werden keine zusätzlichen Daten übermittelt.</p>
   </div>
