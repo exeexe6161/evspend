@@ -92,7 +92,7 @@
     </div>
     <h2>Service Worker / Offline-Cache</h2>
     <p>Diese Website verwendet einen <strong>Service Worker</strong> — eine standardisierte Browser-Funktion, die HTML-Seiten und statische Ressourcen (CSS, JavaScript, Schriftarten, Bilder) im Cache des Browsers ablegt. Ziel ist ausschließlich der schnellere Wiederbesuch und die Verfügbarkeit der App ohne aktive Internet­verbindung.</p>
-    <p>Im Service-Worker-Cache werden <strong>keinerlei personenbezogene Daten</strong> gespeichert. Es findet keine Übertragung an Server statt; der Cache lebt vollständig im Browser des Nutzers. Er kann jederzeit über die Browser-Einstellungen geleert werden („Browserdaten löschen“ o. ä.) — dabei gehen lediglich Performance-Vorteile beim nächsten Besuch verloren.</p>
+    <p>Im Service-Worker-Cache werden nur statische Dateien gespeichert (HTML, CSS, JavaScript, Schriften, Bilder), keine Rechner-Eingaben. Abgesehen von den Verbindungsdaten, die der Hosting-Anbieter beim ursprünglichen Abruf dieser Dateien ohnehin verarbeitet, überträgt der Cache selbst nichts. Er lebt vollständig im Browser des Nutzers und kann jederzeit über die Browser-Einstellungen geleert werden („Browserdaten löschen“ oder ähnlich). Der einzige Effekt ist, dass der nächste Besuch nicht mehr von den zwischengespeicherten Dateien profitiert.</p>
   </div>
 
   <div class="card">

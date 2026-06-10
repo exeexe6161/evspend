@@ -129,7 +129,7 @@
     </div>
     <h2>Service Worker / Çevrimdışı Önbellek</h2>
     <p>Bu web sitesi, HTML sayfalarını ve statik kaynakları (CSS, JavaScript, yazı tipleri, görseller) tarayıcıda önbelleğe alan standart bir <strong>Service Worker</strong> kullanır. Tek amaç, daha hızlı yeniden ziyaret ve uygulamanın çevrimdışı erişilebilirliğidir.</p>
-    <p>Service-Worker önbelleğinde <strong>hiçbir kişisel veri</strong> saklanmaz. Sunuculara herhangi bir aktarım gerçekleşmez; önbellek tamamen kullanıcının tarayıcısında kalır. İstediğin zaman tarayıcı ayarlarından önbelleği temizleyebilirsin („Tarayıcı verilerini temizle“ veya benzer seçenek) — tek etkisi bir sonraki ziyaretin önbellekten faydalanamamasıdır.</p>
+    <p>Service-Worker önbelleğinde yalnızca statik dosyalar saklanır (HTML, CSS, JavaScript, yazı tipleri, görseller), hesaplama girdileri saklanmaz. Barındırma sağlayıcısının bu dosyalar ilk kez talep edildiğinde zaten işlediği bağlantı verileri dışında, önbelleğin kendisi hiçbir şey aktarmaz. Önbellek tamamen kullanıcının tarayıcısında kalır ve istediğiniz zaman tarayıcı ayarlarından temizlenebilir („Tarayıcı verilerini temizle“ veya benzer seçenek). Tek etkisi, bir sonraki ziyaretin önbelleğe alınmış dosyalardan yararlanamamasıdır.</p>
   </div>
 
   <div class="card">
