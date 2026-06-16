@@ -16,7 +16,7 @@
  * downloads or fresh-fetch semantics.
  */
 
-const CACHE_VERSION  = 'v1781632196780';
+const CACHE_VERSION  = 'v1781634073308';
 const STATIC_CACHE   = 'evspend-static-' + CACHE_VERSION;
 const RUNTIME_CACHE  = 'evspend-runtime-' + CACHE_VERSION;
 
