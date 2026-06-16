@@ -6,15 +6,17 @@
  *   - HTML / navigation         → stale-while-revalidate
  *   - Everything else / cross-origin → pass-through (no SW handling)
  *
- * Cache invalidation: bumping CACHE_VERSION below drops both caches on
- * the next activate. Use a date-stamp suffix to make intent explicit.
+ * Cache invalidation: CACHE_VERSION below is injected at build time by
+ * build-sw.mjs (from VERCEL_GIT_COMMIT_SHA, else a Date.now() timestamp),
+ * so it changes on every build and drops both caches on the next activate.
+ * Do not edit the value by hand — build-sw.mjs is the single source.
  *
  * Range requests, POST/PUT, and any request explicitly opting out via
  * `cache: 'no-store'` are skipped to avoid breaking partial-content
  * downloads or fresh-fetch semantics.
  */
 
-const CACHE_VERSION  = 'v20260609-block2';
+const CACHE_VERSION  = 'v1781632196780';
 const STATIC_CACHE   = 'evspend-static-' + CACHE_VERSION;
 const RUNTIME_CACHE  = 'evspend-runtime-' + CACHE_VERSION;
 
@@ -48,13 +50,20 @@ const PRECACHE_URLS = [
 ];
 
 self.addEventListener('install', (event) => {
-  // Use individual cache.add() calls under Promise.allSettled so a single
-  // missing or failing entry can't abort the whole install (cache.addAll
-  // is all-or-nothing).
+  // Fetch each entry under Promise.allSettled so a single missing or failing
+  // entry can't abort the whole install (cache.addAll is all-or-nothing).
+  // Use cache: 'reload' to bypass the browser HTTP cache: the fixed,
+  // immutable asset filenames would otherwise be re-seeded from a stale
+  // long-lived cache entry instead of the freshly deployed bytes.
   event.waitUntil(
     caches.open(STATIC_CACHE)
       .then((cache) => Promise.allSettled(
-        PRECACHE_URLS.map((url) => cache.add(url))
+        PRECACHE_URLS.map((url) =>
+          fetch(new Request(url, { cache: 'reload' })).then((response) => {
+            if (response && response.ok) return cache.put(url, response);
+            return undefined;
+          })
+        )
       ))
       .then(() => self.skipWaiting())
       .catch(() => self.skipWaiting())

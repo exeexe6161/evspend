@@ -6,7 +6,8 @@
   "scripts": {
     "build:css": "esbuild styles-app.css --minify --legal-comments=inline --target=es2020 > styles-app.min.css && esbuild styles-pages.css --minify --legal-comments=inline --target=es2020 > styles-pages.min.css",
     "build:js": "esbuild script.js --minify --legal-comments=inline --sourcemap=external --target=es2020 --outfile=script.min.js && esbuild verlauf.js --minify --legal-comments=inline --sourcemap=external --target=es2020 --outfile=verlauf.min.js",
-    "build": "npm run build:css && npm run build:js"
+    "build:sw": "node build-sw.mjs",
+    "build": "npm run build:css && npm run build:js && npm run build:sw"
   },
   "devDependencies": {
     "esbuild": "0.28.0"
