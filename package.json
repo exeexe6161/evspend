@@ -10,6 +10,6 @@
     "build": "npm run build:css && npm run build:js && npm run build:sw"
   },
   "devDependencies": {
-    "esbuild": "0.28.0"
+    "esbuild": "0.28.1"
   }
 }
