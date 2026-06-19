@@ -589,11 +589,11 @@ function applyMode() {
   document.body.setAttribute("data-single-type", singleType);
   const typeToggle = $("typeToggle"); if (typeToggle) typeToggle.hidden = (appMode !== "single");
   const mC = $("modeCompareBtn"), mS = $("modeSingleBtn");
-  if (mC) { mC.classList.toggle("mode-btn--active", appMode === "compare"); mC.setAttribute("aria-selected", String(appMode === "compare")); }
-  if (mS) { mS.classList.toggle("mode-btn--active", appMode === "single");  mS.setAttribute("aria-selected", String(appMode === "single")); }
+  if (mC) { mC.classList.toggle("mode-btn--active", appMode === "compare"); mC.setAttribute("aria-pressed", String(appMode === "compare")); }
+  if (mS) { mS.classList.toggle("mode-btn--active", appMode === "single");  mS.setAttribute("aria-pressed", String(appMode === "single")); }
   const tE = $("typeEvBtn"), tV = $("typeVbBtn");
-  if (tE) { tE.classList.toggle("type-btn--active", singleType === "ev"); tE.setAttribute("aria-selected", String(singleType === "ev")); }
-  if (tV) { tV.classList.toggle("type-btn--active", singleType === "vb"); tV.setAttribute("aria-selected", String(singleType === "vb")); }
+  if (tE) { tE.classList.toggle("type-btn--active", singleType === "ev"); tE.setAttribute("aria-pressed", String(singleType === "ev")); }
+  if (tV) { tV.classList.toggle("type-btn--active", singleType === "vb"); tV.setAttribute("aria-pressed", String(singleType === "vb")); }
   updateSaveButton();
 }
 

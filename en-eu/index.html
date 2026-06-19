@@ -96,16 +96,16 @@
 
 <div class="top-controls" role="toolbar" aria-label="Settings">
   <div class="top-pill-wrap">
-    <button class="top-pill" id="marketSwitch" type="button" aria-haspopup="menu" aria-expanded="false">
+    <button class="top-pill" id="marketSwitch" type="button" aria-haspopup="true" aria-expanded="false">
       <span class="sr-only" data-i18n="marketSwitchSr">Change market, currently</span>
       <span class="top-pill-text" id="marketSwitchLabel">DE</span>
       <svg class="top-pill-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <div class="top-menu" id="marketMenu" role="menu" hidden>
-      <button class="top-menu-item" type="button" role="menuitem" data-market="de"><span data-i18n="marketDe">DE · €</span></button>
-      <button class="top-menu-item" type="button" role="menuitem" data-market="eu"><span data-i18n="marketEu">EU · €</span></button>
-      <button class="top-menu-item" type="button" role="menuitem" data-market="us"><span data-i18n="marketUs">US · $</span></button>
-      <button class="top-menu-item" type="button" role="menuitem" data-market="tr"><span data-i18n="marketTr">TR · ₺</span></button>
+    <div class="top-menu" id="marketMenu" hidden>
+      <button class="top-menu-item" type="button" data-market="de"><span data-i18n="marketDe">DE · €</span></button>
+      <button class="top-menu-item" type="button" data-market="eu"><span data-i18n="marketEu">EU · €</span></button>
+      <button class="top-menu-item" type="button" data-market="us"><span data-i18n="marketUs">US · $</span></button>
+      <button class="top-menu-item" type="button" data-market="tr"><span data-i18n="marketTr">TR · ₺</span></button>
     </div>
   </div>
   <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle theme" title="Light / Dark"></button>
@@ -138,15 +138,15 @@
 <main class="app-main">
 
 <!-- Mode (Single / Compare) -->
-<div class="mode-toggle" role="tablist" aria-label="Calculation mode">
-  <button id="modeSingleBtn"  class="mode-btn"                  role="tab" aria-selected="false" data-mode="single"  type="button" data-i18n="modeSingle">Single</button>
-  <button id="modeCompareBtn" class="mode-btn mode-btn--active" role="tab" aria-selected="true"  data-mode="compare" type="button" data-i18n="modeCompare">Compare</button>
+<div class="mode-toggle" role="group" aria-label="Calculation mode">
+  <button id="modeSingleBtn"  class="mode-btn"                  aria-pressed="false" data-mode="single"  type="button" data-i18n="modeSingle">Single</button>
+  <button id="modeCompareBtn" class="mode-btn mode-btn--active" aria-pressed="true"  data-mode="compare" type="button" data-i18n="modeCompare">Compare</button>
 </div>
 
 <!-- Vehicle type (visible only in single mode) -->
-<div id="typeToggle" class="type-toggle mode-single-only" role="tablist" aria-label="Vehicle type">
-  <button id="typeEvBtn" class="type-btn type-btn--ev type-btn--active" role="tab" aria-selected="true" data-type="ev" type="button" data-i18n="typeEv">EV</button>
-  <button id="typeVbBtn" class="type-btn type-btn--vb" role="tab" aria-selected="false" data-type="vb" type="button" data-i18n="typeVb">ICE</button>
+<div id="typeToggle" class="type-toggle mode-single-only" role="group" aria-label="Vehicle type">
+  <button id="typeEvBtn" class="type-btn type-btn--ev type-btn--active" aria-pressed="true" data-type="ev" type="button" data-i18n="typeEv">EV</button>
+  <button id="typeVbBtn" class="type-btn type-btn--vb" aria-pressed="false" data-type="vb" type="button" data-i18n="typeVb">ICE</button>
 </div>
 
 <section class="calc-section" aria-label="Inputs">

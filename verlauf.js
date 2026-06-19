@@ -1458,7 +1458,7 @@
     state.period = period;
     periodBtns.forEach(b => {
       b.classList.toggle("period-btn--active", b.dataset.period === period);
-      b.setAttribute("aria-selected", b.dataset.period === period ? "true" : "false");
+      b.setAttribute("aria-pressed", b.dataset.period === period ? "true" : "false");
     });
     try { localStorage.setItem(PERIOD_KEY, period); } catch (e) {}
     const v2 = state.all.filter(isV2);
@@ -2141,7 +2141,7 @@
   state.period = savedPeriod;
   periodBtns.forEach(b => {
     b.classList.toggle("period-btn--active", b.dataset.period === savedPeriod);
-    b.setAttribute("aria-selected", b.dataset.period === savedPeriod ? "true" : "false");
+    b.setAttribute("aria-pressed", b.dataset.period === savedPeriod ? "true" : "false");
   });
   refresh();
 })();

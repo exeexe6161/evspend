@@ -49,16 +49,16 @@
 <body>
 <div class="top-controls" role="toolbar" aria-label="Settings">
   <div class="top-pill-wrap">
-    <button class="top-pill" id="marketSwitch" type="button" aria-haspopup="menu" aria-expanded="false">
+    <button class="top-pill" id="marketSwitch" type="button" aria-haspopup="true" aria-expanded="false">
       <span class="sr-only" data-i18n="marketSwitchSr">Change market, currently</span>
       <span class="top-pill-text" id="marketSwitchLabel">EU</span>
       <svg class="top-pill-caret" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="6 9 12 15 18 9"/></svg>
     </button>
-    <div class="top-menu" id="marketMenu" role="menu" hidden>
-      <button class="top-menu-item" type="button" role="menuitem" data-market="de"><span data-i18n="marketDe">DE · €</span></button>
-      <button class="top-menu-item" type="button" role="menuitem" data-market="eu"><span data-i18n="marketEu">EU · €</span></button>
-      <button class="top-menu-item" type="button" role="menuitem" data-market="us"><span data-i18n="marketUs">US · $</span></button>
-      <button class="top-menu-item" type="button" role="menuitem" data-market="tr"><span data-i18n="marketTr">TR · ₺</span></button>
+    <div class="top-menu" id="marketMenu" hidden>
+      <button class="top-menu-item" type="button" data-market="de"><span data-i18n="marketDe">DE · €</span></button>
+      <button class="top-menu-item" type="button" data-market="eu"><span data-i18n="marketEu">EU · €</span></button>
+      <button class="top-menu-item" type="button" data-market="us"><span data-i18n="marketUs">US · $</span></button>
+      <button class="top-menu-item" type="button" data-market="tr"><span data-i18n="marketTr">TR · ₺</span></button>
     </div>
   </div>
   <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle theme" title="Light / Dark"></button>
@@ -121,12 +121,12 @@
 <section class="hist-stats-section" aria-labelledby="histStatsHead">
 <h2 class="sh" id="histStatsHead" data-i18n="statsHeader">Statistics</h2>
 
-<div class="period-tabs" role="tablist" aria-label="Time period">
-  <button class="period-btn period-btn--active" role="tab" data-period="today" aria-selected="true" type="button" data-i18n="periodToday">Today</button>
-  <button class="period-btn" role="tab" data-period="week"  aria-selected="false" type="button" data-i18n="periodWeek">Week</button>
-  <button class="period-btn" role="tab" data-period="month" aria-selected="false" type="button" data-i18n="periodMonth">Month</button>
-  <button class="period-btn" role="tab" data-period="year"  aria-selected="false" type="button" data-i18n="periodYear">Year</button>
-  <button class="period-btn" role="tab" data-period="yearly" aria-selected="false" type="button" data-i18n="yearly">Years</button>
+<div class="period-tabs" role="group" aria-label="Time period">
+  <button class="period-btn period-btn--active" data-period="today" aria-pressed="true" type="button" data-i18n="periodToday">Today</button>
+  <button class="period-btn" data-period="week"  aria-pressed="false" type="button" data-i18n="periodWeek">Week</button>
+  <button class="period-btn" data-period="month" aria-pressed="false" type="button" data-i18n="periodMonth">Month</button>
+  <button class="period-btn" data-period="year"  aria-pressed="false" type="button" data-i18n="periodYear">Year</button>
+  <button class="period-btn" data-period="yearly" aria-pressed="false" type="button" data-i18n="yearly">Years</button>
 </div>
 
 <div class="list-card stats-card">
