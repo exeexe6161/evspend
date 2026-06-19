@@ -1,6 +1,6 @@
 {
   "name": "evspend",
-  "version": "1.3.0",
+  "version": "1.5.7",
   "private": true,
   "description": "EVSpend — EV vs ICE cost calculator (vanilla HTML/CSS/JS, self-hosted Inter font, Chart.js MIT, Lucide ISC).",
   "scripts": {
