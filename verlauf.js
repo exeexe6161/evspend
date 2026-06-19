@@ -864,7 +864,11 @@
   function _numCell(v, decimals) {
     var n = Number(v);
     if (!Number.isFinite(n)) return "";
-    return decimals == null ? String(n) : n.toFixed(decimals);
+    var s = decimals == null ? String(n) : n.toFixed(decimals);
+    // CSV-DEC: Dezimaltrenner an die Listen-Locale koppeln (de/tr Komma, en Punkt).
+    // Number/toFixed liefert keinen Tausendertrenner, daher ist nur der eine Punkt betroffen.
+    if (_listLocale().slice(0, 2) !== "en") s = s.replace(".", ",");
+    return s;
   }
   function exportHistoryCsv() {
     var v2 = loadAll().filter(function (e) {
@@ -1594,6 +1598,10 @@
       const market = _currentMarket();
       const cfg = MARKET_CONFIG[market] || MARKET_CONFIG.de;
       const locale = cfg.locale;
+      // CURR-EU: Zahl- und Geld-Locale aus derselben Quelle wie die Listenzeilen
+      // (Waehrungstabelle ueber _listLocale), damit der EU-Markt nicht en-IE im Chart
+      // und de-DE im Rest mischt. cfg/locale bleibt fuer Datum und Achsenbeschriftung.
+      const fmtLocale = _listLocale();
       const isUs = market === "us";
       const distLong = isUs ? _tv("tableHeaderDistanceImperial") : _tv("tableHeaderDistanceMetric");
       const currLong = _currencyLongform();
@@ -1605,13 +1613,13 @@
 
       // Locale-correct currency + number formatters (Intl handles symbol-position,
       // thousand-separators and decimal-separator per locale automatically).
-      const moneyFmt = new Intl.NumberFormat(locale, {
+      const moneyFmt = new Intl.NumberFormat(fmtLocale, {
         style: "currency", currency: cfg.currency,
         minimumFractionDigits: 2, maximumFractionDigits: 2
       });
-      const numFmt2 = new Intl.NumberFormat(locale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-      const numFmt1 = new Intl.NumberFormat(locale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
-      const intFmt  = new Intl.NumberFormat(locale);
+      const numFmt2 = new Intl.NumberFormat(fmtLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      const numFmt1 = new Intl.NumberFormat(fmtLocale, { minimumFractionDigits: 1, maximumFractionDigits: 1 });
+      const intFmt  = new Intl.NumberFormat(fmtLocale);
       const dOpts = { day: "2-digit", month: "2-digit", year: "numeric" };
 
       // Aggregates — skip entries without valid costPer100.
