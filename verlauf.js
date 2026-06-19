@@ -848,6 +848,9 @@
   function _csvEscape(v) {
     if (v == null) return "";
     var s = String(v);
+    // CSV-Formula-Injection-Schutz: fuehrendes = + - @ (auch nach Tab/CR) neutralisieren,
+    // echte (auch negative) Zahlen bleiben Zahl
+    if (/^[=+\-@\t\r]/.test(s) && isNaN(Number(s))) s = "'" + s;
     if (/[;\r\n"]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
     return s;
   }
