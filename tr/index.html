@@ -392,7 +392,7 @@
 <div id="chartSection" class="mode-compare-only chart-section" hidden>
   <div class="list-card chart-card-v2">
     <div class="chart-card-hdr" data-i18n="chartHeader">Energy/fuel cost comparison</div>
-    <canvas id="costChart" class="cost-chart" aria-label="Energy/fuel cost comparison EV vs ICE"></canvas>
+    <canvas id="costChart" class="cost-chart" aria-label="Energy/fuel cost comparison EV vs ICE" aria-describedby="compareResult"></canvas>
   </div>
 </div>
 
@@ -498,7 +498,7 @@
 </div>
 
 <!-- ── PWA Install Popup (stage 2, unified iOS / Android / Desktop) ───── -->
-<div id="pwaPopup" class="pwa-popup" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="pwaPopupTitle">
+<div id="pwaPopup" class="pwa-popup" inert role="dialog" aria-modal="true" aria-labelledby="pwaPopupTitle">
   <div class="pwa-popup-backdrop" id="pwaPopupBackdrop"></div>
   <div class="pwa-popup-card">
     <button class="pwa-popup-x" id="pwaPopupClose" type="button" data-i18n-aria="pwaClose" aria-label="Close">✕</button>

@@ -2356,6 +2356,7 @@ const _pwaVisits = (() => {
 let _deferredPrompt = null;
 let _pwaBarShown    = false;
 let _pwaPopupShown  = false;
+let _pwaLastFocus   = null;
 let _pwaWired       = false;
 let _pwaAutoFired   = false;
 
@@ -2444,11 +2445,14 @@ function pwaShowPopup() {
   const stepsEl = document.getElementById('pwaPopupSteps');
   if (!el || !stepsEl) return;
 
+  _pwaLastFocus = document.activeElement;
   stepsEl.replaceChildren(_pwaBuildSteps(PWA.platform));
 
   el.classList.add('visible');
   el.removeAttribute('inert');
   _pwaPopupShown = true;
+  var _f = document.getElementById('pwaPopupAdd');
+  if (_f) _f.focus();
 }
 
 function pwaHidePopup() {
@@ -2457,6 +2461,7 @@ function pwaHidePopup() {
   el.classList.remove('visible');
   el.setAttribute('inert', '');
   _pwaPopupShown = false;
+  if (_pwaLastFocus && _pwaLastFocus.focus) _pwaLastFocus.focus();
 }
 
 function pwaPopupLater() { _pwaSnooze(); pwaHidePopup(); }

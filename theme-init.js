@@ -47,7 +47,9 @@
     var btn = document.getElementById("themeBtn");
     function glyph() {
       if (!btn) return;
-      btn.innerHTML = html.getAttribute("data-theme") === "dark" ? SUN_SVG : MOON_SVG;
+      var dark = html.getAttribute("data-theme") === "dark";
+      btn.innerHTML = dark ? SUN_SVG : MOON_SVG;
+      btn.setAttribute("aria-pressed", String(dark));
     }
     glyph();
 
