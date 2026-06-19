@@ -55,7 +55,7 @@ The OFL permits use, modification, and redistribution including bundling and emb
 
 ## Code Ownership
 
-The following files are original work, authored by Hakan Guer with assistance from Anthropic Claude AI per the [Anthropic Terms of Service](https://www.anthropic.com/legal/consumer-terms). All output rights are retained by the user per Anthropic ToS, and the resulting work is the proprietary intellectual property of the project owner.
+The following files are original work, authored by Hakan Gür with assistance from Anthropic Claude AI per the [Anthropic Terms of Service](https://www.anthropic.com/legal/consumer-terms). All output rights are retained by the user per Anthropic ToS, and the resulting work is the proprietary intellectual property of the project owner.
 
 - `script.js`, `verlauf.js`, `theme-init.js`, `lang-switch.js`, `en-eu/init-eu.js`
 - `styles-app.css`, `styles-pages.css`, `en-eu/styles-en-eu.css`

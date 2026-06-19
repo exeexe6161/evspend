@@ -16,7 +16,7 @@
  * downloads or fresh-fetch semantics.
  */
 
-const CACHE_VERSION  = 'v1781875680969';
+const CACHE_VERSION  = 'v1781876173695';
 const STATIC_CACHE   = 'evspend-static-' + CACHE_VERSION;
 const RUNTIME_CACHE  = 'evspend-runtime-' + CACHE_VERSION;
 
@@ -36,6 +36,7 @@ const PRECACHE_URLS = [
   '/en-eu/verlauf.html',
   '/site.webmanifest',
   '/styles-app.min.css?v=20260601-audit-fix-2',
+  '/styles-pages.min.css?v=20260501-legal3',
   '/theme-init.js?v=20260501-legal3',
   '/script.min.js?v=20260609-block2',
   '/verlauf.min.js?v=20260609-block2',

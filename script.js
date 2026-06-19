@@ -262,8 +262,8 @@ try {
         ev:   { consumption: i.ev_consumption,   price: i.electricity_price, costPer100: r.ev_cost_per_100km },
         fuel: { consumption: i.fuel_consumption, price: i.fuel_price,        costPer100: r.fuel_cost_per_100km },
         result: {
-          yearlySaving:  Math.round(r.yearly_difference  ?? NaN),
-          monthlySaving: Math.round(r.monthly_difference ?? NaN),
+          yearlySaving:  Number.isFinite(r.yearly_difference)  ? Math.round(r.yearly_difference)  : 0,
+          monthlySaving: Number.isFinite(r.monthly_difference) ? Math.round(r.monthly_difference) : 0,
         },
       };
     });
@@ -2327,7 +2327,7 @@ const PWA = (() => {
   const isIPad    = /ipad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   const isCriOS   = /crios/i.test(ua);
   const isFxiOS   = /fxios/i.test(ua);
-  const isSafari  = /^((?!chrome|android|crios|fxios).)*safari/i.test(ua);
+  const isSafari  = /safari/i.test(ua) && !/chrome|android|crios|fxios/i.test(ua);
   const isAndroid = /android/i.test(ua);
   const isChrome  = /chrome/i.test(ua) && !/edg|opr\//i.test(ua);
   const isMobile  = isIOS || isIPad || isAndroid || /mobile/i.test(ua);

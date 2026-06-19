@@ -1466,7 +1466,11 @@
   }
 
   function deleteEntry(id) {
-    const next = state.all.filter(e => String(e.date ?? e.id) !== String(id));
+    const arr = state.all.slice();
+    const idx = arr.findIndex(e => String(e.date ?? e.id) === String(id));
+    if (idx === -1) return;
+    arr.splice(idx, 1);
+    const next = arr;
     saveAll(next);
     refresh();
   }
