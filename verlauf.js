@@ -363,6 +363,11 @@
       tableHeaderConsumption: "Verbrauch",
       tableHeaderPrice: "Preis",
       tableHeaderCostPer100: "Kosten pro 100",
+      csvHeaderCostTrip: "Kosten (Strecke)",
+      csvHeaderCostYear: "Kosten (Jahr, 12x Strecke)",
+      csvHeaderCurrency: "Währung",
+      csvHeaderMarket: "Markt",
+      csvHeaderLanguage: "Sprache",
       noteInlineLabel: "Notiz",
       footerBarrierefreiheit: "Barrierefreiheit"
     },
@@ -458,6 +463,11 @@
       tableHeaderConsumption: "Consumption",
       tableHeaderPrice: "Price",
       tableHeaderCostPer100: "Cost per 100",
+      csvHeaderCostTrip: "Cost (trip)",
+      csvHeaderCostYear: "Cost (year, 12x trip)",
+      csvHeaderCurrency: "Currency",
+      csvHeaderMarket: "Market",
+      csvHeaderLanguage: "Language",
       noteInlineLabel: "Note",
       footerBarrierefreiheit: "Accessibility"
     },
@@ -553,6 +563,11 @@
       tableHeaderConsumption: "Tüketim",
       tableHeaderPrice: "Fiyat",
       tableHeaderCostPer100: "100 başına maliyet",
+      csvHeaderCostTrip: "Maliyet (mesafe)",
+      csvHeaderCostYear: "Maliyet (yıl, 12x mesafe)",
+      csvHeaderCurrency: "Para birimi",
+      csvHeaderMarket: "Pazar",
+      csvHeaderLanguage: "Dil",
       noteInlineLabel: "Not",
       footerBarrierefreiheit: "Erişilebilirlik"
     }
@@ -878,9 +893,20 @@
       alert(_tv("exportEmpty"));
       return;
     }
-    var COL = ["Datum", "Typ", "Kilometer", "Verbrauch", "Preis",
-               "Kosten pro 100 km", "Kosten (Strecke)", "Kosten (12x Strecke)", "Notiz",
-               "Währung", "Markt", "Sprache"];
+    var COL = [
+      _tv("tableHeaderDate"),
+      _tv("tableHeaderType"),
+      _tv("tableHeaderDistanceMetric"),
+      _tv("tableHeaderConsumption"),
+      _tv("tableHeaderPrice"),
+      _tv("tableHeaderCostPer100"),
+      _tv("csvHeaderCostTrip"),
+      _tv("csvHeaderCostYear"),
+      _tv("noteInlineLabel"),
+      _tv("csvHeaderCurrency"),
+      _tv("csvHeaderMarket"),
+      _tv("csvHeaderLanguage")
+    ];
     var lines = [COL.map(_csvEscape).join(";")];
     for (var i = 0; i < v2.length; i++) {
       var e = v2[i];
