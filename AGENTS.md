@@ -42,4 +42,3 @@ Priorität 1:
 Priorität 2:
 Priorität 3:
 
-<!-- savei-test 2026-06-21 -->

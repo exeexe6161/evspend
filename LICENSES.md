@@ -126,4 +126,3 @@ No SDK, framework, or vendor design system is bundled or required to run the app
 
 If you spot an asset whose license seems mis-attributed, please open an issue at the project repository.
 
-<!-- savei-fulltest 2026-06-21 -->
