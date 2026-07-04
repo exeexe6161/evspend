@@ -58,6 +58,21 @@
   transform: scale(.97);
 }
 
+.err-cta:focus-visible {
+  outline: 3px solid var(--blue);
+  outline-offset: 3px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .err-cta {
+    transition: none;
+  }
+
+  .err-cta:active {
+    transform: none;
+  }
+}
+
 @media (max-width: 480px) {
   .err-code {
     font-size: 72px;
