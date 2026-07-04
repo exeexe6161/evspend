@@ -9,7 +9,7 @@
   font-size: 88px;
   font-weight: 800;
   letter-spacing: 0;
-  color: var(--blue);
+  color: var(--l3);
   line-height: 1;
   margin-bottom: 8px;
   font-variant-numeric: tabular-nums;
@@ -26,9 +26,9 @@
 
 .err-text {
   font-size: 15.5px;
-  color: var(--l3);
+  color: var(--l2);
   line-height: 1.6;
-  margin-bottom: 28px;
+  margin-bottom: 32px;
 }
 
 .err-cta {
