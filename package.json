@@ -4,6 +4,7 @@
   "private": true,
   "description": "EVSpend — EV vs ICE cost calculator (vanilla HTML/CSS/JS, self-hosted Inter font, Chart.js MIT, Lucide ISC).",
   "scripts": {
+    "test": "node --test tests/*.test.mjs",
     "build:css": "esbuild styles-app.css --minify --legal-comments=inline --target=es2020 > styles-app.min.css && esbuild styles-pages.css --minify --legal-comments=inline --target=es2020 > styles-pages.min.css",
     "build:js": "esbuild script.js --minify --legal-comments=inline --sourcemap=external --target=es2020 --outfile=script.min.js && esbuild verlauf.js --minify --legal-comments=inline --sourcemap=external --target=es2020 --outfile=verlauf.min.js",
     "build:sw": "node build-sw.mjs",

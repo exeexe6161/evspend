@@ -21,9 +21,15 @@
       ]
     },
     {
-      "source": "/(banner\\.png|banner\\.webp|fonts/.+|vendor/.+|styles-app\\.min\\.css|styles-pages\\.min\\.css|script\\.min\\.js|verlauf\\.min\\.js|theme-init\\.js|lang-switch\\.js|en-eu/init-eu\\.js|en-eu/styles-en-eu\\.css)",
+      "source": "/(banner\\.png|banner\\.webp|fonts/.+|vendor/.+)",
       "headers": [
         { "key": "Cache-Control", "value": "public, max-age=31536000, immutable" }
+      ]
+    },
+    {
+      "source": "/(styles-app\\.min\\.css|styles-pages\\.min\\.css|script\\.min\\.js|verlauf\\.min\\.js|theme-init\\.js|lang-switch\\.js|en-eu/init-eu\\.js|en-eu/styles-en-eu\\.css|tr/init-tr\\.js|tr/styles-tr\\.css)",
+      "headers": [
+        { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
       ]
     },
     {

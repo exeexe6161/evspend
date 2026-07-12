@@ -16,7 +16,7 @@
  * downloads or fresh-fetch semantics.
  */
 
-const CACHE_VERSION  = 'v1782685850005';
+const CACHE_VERSION  = 'v1783888908656';
 const STATIC_CACHE   = 'evspend-static-' + CACHE_VERSION;
 const RUNTIME_CACHE  = 'evspend-runtime-' + CACHE_VERSION;
 
@@ -30,16 +30,23 @@ const RUNTIME_CACHE  = 'evspend-runtime-' + CACHE_VERSION;
 const PRECACHE_URLS = [
   '/',
   '/en-eu/',
+  '/tr/',
   '/verlauf',
   '/en-eu/verlauf',
+  '/tr/verlauf',
   '/verlauf.html',
   '/en-eu/verlauf.html',
+  '/tr/verlauf.html',
   '/site.webmanifest',
   '/styles-app.min.css?v=20260601-audit-fix-2',
   '/styles-pages.min.css?v=20260501-legal3',
   '/theme-init.js?v=20260619-wfinal',
   '/script.min.js?v=20260619-wfinal',
   '/verlauf.min.js?v=20260619-wfinal',
+  '/en-eu/init-eu.js?v=20260501-legal3',
+  '/en-eu/styles-en-eu.css?v=20260501-legal3',
+  '/tr/init-tr.js?v=20260601-audit-3b2',
+  '/tr/styles-tr.css?v=20260601-audit-3b2',
   '/vendor/chart-4.4.6.umd.js',
   '/fonts/InterVariable.woff2',
   '/banner.webp?v=20260502-brand1',
@@ -154,6 +161,10 @@ function navigationFallback(url) {
     candidates.push('/en-eu/verlauf', '/en-eu/verlauf.html');
   } else if (path === '/en-eu') {
     candidates.push('/en-eu/');
+  } else if (path === '/tr/verlauf') {
+    candidates.push('/tr/verlauf', '/tr/verlauf.html');
+  } else if (path === '/tr') {
+    candidates.push('/tr/');
   }
   candidates.push('/');
   return candidates.reduce(

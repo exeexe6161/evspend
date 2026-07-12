@@ -719,7 +719,7 @@
   function loadAll() {
     let arr = [];
     try { arr = JSON.parse(localStorage.getItem(HIST_KEY) || "[]"); } catch (e) {}
-    return Array.isArray(arr) ? arr : [];
+    return Array.isArray(arr) ? arr.filter(_isPlainObject).slice(0, 50) : [];
   }
   function saveAll(arr) {
     try { localStorage.setItem(HIST_KEY, JSON.stringify(arr)); } catch (e) {}
@@ -752,6 +752,9 @@
     var n = Number(v);
     return Number.isFinite(n) && n >= 0 ? n : NaN;
   }
+  function _money(v) {
+    return Number.isFinite(v) ? Math.round(v * 100) / 100 : NaN;
+  }
   function _validateEnvelope(obj) {
     if (!_isPlainObject(obj)) return false;
     if (obj.app !== "evspend") return false;
@@ -771,9 +774,13 @@
     var consumption = _finitePos(raw.consumption);
     var price       = _finitePos(raw.price);
     if (!Number.isFinite(km) || !Number.isFinite(consumption) || !Number.isFinite(price)) return null;
-    var costPer100  = _finitePos(raw.costPer100);
-    var monthlyCost = _finitePos(raw.monthlyCost);
-    var yearlyCost  = _finitePos(raw.yearlyCost);
+    // Abgeleitete Kosten niemals aus einer Importdatei übernehmen. Sie werden
+    // aus den validierten Eingaben neu berechnet, damit manipulierte oder alte
+    // Exportwerte nicht als scheinbar gültige Ergebnisse angezeigt werden.
+    var costPer100  = _money(consumption * price);
+    var monthlyCost = _money(costPer100 * km / 100);
+    var yearlyCost  = _money(monthlyCost * 12);
+    if (![costPer100, monthlyCost, yearlyCost].every(Number.isFinite)) return null;
     var entry = {
       date:        date,
       schema:      "v2",
@@ -781,9 +788,9 @@
       km:          km,
       consumption: consumption,
       price:       price,
-      costPer100:  Number.isFinite(costPer100)  ? costPer100  : 0,
-      monthlyCost: Number.isFinite(monthlyCost) ? monthlyCost : 0,
-      yearlyCost:  Number.isFinite(yearlyCost)  ? yearlyCost  : 0,
+      costPer100:  costPer100,
+      monthlyCost: monthlyCost,
+      yearlyCost:  yearlyCost,
       ridesharing: !!raw.ridesharing,
       persons:     Math.max(1, Math.min(99, Math.round(Number(raw.persons)) || 1)),
       note:        _sanitizeNote(raw.note)

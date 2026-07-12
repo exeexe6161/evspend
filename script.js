@@ -468,14 +468,14 @@ function shareQuick() {
 function saveQuick() {
   if (appMode !== "single") {
     eafToast(_t("toastSaveSingleOnly"));
-    return;
+    return false;
   }
   const isEv = singleType === "ev";
   const km          = isEv ? n("kmEv")        : n("kmVb");
   const consumption = isEv ? n("evVerbrauch") : n("verbrauchVerbrenner");
   const price       = isEv ? n("strompreis")  : n("benzinpreis");
   if (![km, consumption, price].every(v => isFinite(v) && v > 0)) {
-    eafToast(_t("toastInvalidInput")); return;
+    eafToast(_t("toastInvalidInput")); return false;
   }
   const costPer100 = consumption * price;
   const yearlyCost = costPer100 * km * 12 / 100;
@@ -541,8 +541,10 @@ function saveQuick() {
     eafToast(_t("toastSaved"), "var(--green)");
     _flashVerlaufBtn();
     if (noteEl) noteEl.value = "";
+    return true;
   } catch(e) {
     eafToast(_t("toastSaveFailed"));
+    return false;
   }
 }
 
@@ -558,8 +560,9 @@ function saveEntrySafe() {
     eafToast(_t("saveCooldown"));
     return;
   }
-  saveQuick();
-  try { localStorage.setItem("lastSaveTime", String(Date.now())); } catch (_) {}
+  if (saveQuick()) {
+    try { localStorage.setItem("lastSaveTime", String(Date.now())); } catch (_) {}
+  }
 }
 
 function _flashVerlaufBtn() {
@@ -1026,10 +1029,13 @@ function applyLongterm() {
     ltSwitch.disabled = !(appMode === "compare" && longtermActive);
   }
   const disable = (id) => { const el = $(id); if (el) el.disabled = longtermActive; };
-  disable("qImgBtn");
-  disable("qTxtBtn");
+  // Langzeitergebnisse besitzen eigene, vollständige Share-Daten und können
+  // deshalb wie der direkte Vergleich als Text oder Bild geteilt werden.
+  ["qImgBtn", "qTxtBtn"].forEach(id => {
+    const el = $(id);
+    if (el) el.disabled = false;
+  });
   disable("qSaveBtn");
-  disable("qVerlaufBtn");
   disable("rideshareToggle");
   disable("modeSingleBtn");
   disable("modeCompareBtn");
@@ -1039,19 +1045,9 @@ function applyLongterm() {
 function setLongtermActive(v) {
   longtermActive = !!v;
   try { localStorage.setItem(LT_ACTIVE_KEY, longtermActive ? "1" : "0"); } catch (_) {}
-  // State-reset beim Wechsel: alte Werte des NICHT aktiven Modus auf Defaults setzen
-  if (longtermActive) {
-    // Einmalige Strecke auf Defaults zurücksetzen
-    const ks = $("kmShared"), ke = $("kmEv"), kv = $("kmVb");
-    if (ks) ks.value = "1000";
-    if (ke) ke.value = "50";
-    if (kv) kv.value = "50";
-  } else {
-    // Monatswerte zurücksetzen
-    kmMonat = 1000;
-    try { localStorage.setItem(LT_KM_MONAT_KEY, "1000"); } catch (_) {}
-    const km = $("kmMonat"); if (km) km.value = "1000";
-  }
+  // Beide Eingabesätze bleiben erhalten. Der aktive Modus entscheidet allein,
+  // welche Strecke in die Rechnung einfließt; ein Moduswechsel darf keine
+  // bereits eingegebenen Werte des anderen Modus überschreiben.
   refreshSliderValues();
   refreshSliderFills();
   saveInputs();
@@ -1144,16 +1140,54 @@ function confirmReset() {
 }
 
 function reset() {
-  const set = (id, v) => { const el = $(id); if (el) el.value = v; };  // BUG-02→audit-3b1-3: null-safe write
-  set("evVerbrauch", 17);
-  set("strompreis", 0.35);
-  set("benzinpreis", 1.85);
-  set("verbrauchVerbrenner", 7.0);
-  set("kmEv", 50);
-  set("kmVb", 50);
-  set("kmShared", 1000);
-  set("batteryKwh", 60);
-  if ($("kmMonat")) { $("kmMonat").value = 1000; kmMonat = 1000; try { localStorage.setItem(LT_KM_MONAT_KEY, "1000"); } catch(_) {} }
+  const market = (window.EAF_I18N && typeof window.EAF_I18N.getMarket === "function")
+    ? window.EAF_I18N.getMarket()
+    : null;
+  const defaults = market && market.defaults ? market.defaults : null;
+  if (defaults) {
+    Object.keys(defaults).forEach(id => {
+      const el = $(id);
+      const cfg = defaults[id];
+      if (!el || !cfg) return;
+      if (cfg.min != null) el.min = String(cfg.min);
+      if (cfg.max != null) el.max = String(cfg.max);
+      if (cfg.step != null) el.step = String(cfg.step);
+      if (cfg.value != null) el.value = String(cfg.value);
+    });
+  }
+
+  appMode = "compare";
+  singleType = "ev";
+  rideshareActive = false;
+  ridesharePersons = 1;
+  longtermActive = false;
+  longtermYears = 10;
+  longtermPremium = defaults && defaults.longtermPremium ? defaults.longtermPremium.value : 5000;
+  kmMonat = defaults && defaults.kmMonat ? defaults.kmMonat.value : 1000;
+
+  const note = $("noteInput");
+  if (note) note.value = "";
+  const rideshareToggle = $("rideshareToggle");
+  if (rideshareToggle) rideshareToggle.checked = false;
+  const rideshareSlider = $("ridesharePersons");
+  if (rideshareSlider) rideshareSlider.value = "1";
+  const longtermToggle = $("longtermToggle");
+  if (longtermToggle) longtermToggle.checked = false;
+
+  try {
+    localStorage.setItem(MODE_KEY, appMode);
+    localStorage.setItem(TYPE_KEY, singleType);
+    localStorage.removeItem(RIDESHARE_KEY);
+    localStorage.setItem(RIDESHARE_PERSONS_KEY, "1");
+    localStorage.removeItem(LT_ACTIVE_KEY);
+    localStorage.setItem(LT_YEARS_KEY, "10");
+    localStorage.setItem(LT_PREMIUM_KEY, String(longtermPremium));
+    localStorage.setItem(LT_KM_MONAT_KEY, String(kmMonat));
+    localStorage.removeItem("lastSaveTime");
+  } catch (_) {}
+
+  applyMode();
+  applyRideshare();
   refreshSliderValues();
   updateRangeDisplay();
   refreshSliderFills();
@@ -1332,8 +1366,13 @@ function renderLongterm({ yrEv, yrVb }) {
   const beEl = $("ltBreakeven");
 
   // ── Eingaben absichern ────────────────────────────────────────────────
-  const years   = Math.max(0, longtermYears);
-  const premium = Math.max(0, longtermPremium);
+  const summary = _getLongtermSummary({
+    yrEv,
+    yrVb,
+    kmJahr: Math.max(0, _rawToInternal("kmMonat", kmMonat)) * 12
+  });
+  const years   = summary.years;
+  const premium = summary.premium;
   const safeEv  = Math.max(0, isFinite(yrEv) ? yrEv : 0);   // jährliche Kosten EV
   const safeVb  = Math.max(0, isFinite(yrVb) ? yrVb : 0);   // jährliche Kosten Verbrenner
   const monat   = Math.max(0, kmMonat);
@@ -1352,9 +1391,9 @@ function renderLongterm({ yrEv, yrVb }) {
     restMehrpreis = premium;
     amortisiert = false;
   } else {
-    kostenEv = _money(safeEv * years);
-    kostenVb = _money(safeVb * years);
-    betriebErsparnis = _money(kostenVb - kostenEv);
+    kostenEv = summary.evEnergyCost;
+    kostenVb = summary.fuelCost;
+    betriebErsparnis = summary.operatingDifference;
     // STRENG: nur als amortisiert behandeln, wenn (a) ein Mehrpreis existiert,
     // (b) der EV operativ tatsächlich günstiger ist und (c) die operativen
     // Ersparnisse den Mehrpreis im gewählten Zeitraum decken.
@@ -1365,7 +1404,10 @@ function renderLongterm({ yrEv, yrVb }) {
     } else {
       amortisiert = false;
       gesamtErsparnis = 0;
-      restMehrpreis = _money(premium - Math.max(0, betriebErsparnis));
+      // Negative Betriebserparnis bedeutet zusätzliche Betriebskosten des
+      // E-Autos. Diese erhöhen den verbleibenden Gesamtnachteil und dürfen
+      // nicht auf null gekappt werden.
+      restMehrpreis = _money(Math.max(0, premium - betriebErsparnis));
     }
   }
 
@@ -1634,6 +1676,26 @@ const _getCompareData = () => {
   };
 };
 
+function _getLongtermSummary(d) {
+  if (!d) return null;
+  const years = Math.max(0, Math.round(Number(longtermYears) || 0));
+  const premium = _money(Math.max(0, Number(longtermPremium) || 0));
+  const evEnergyCost = _money(Math.max(0, Number(d.yrEv) || 0) * years);
+  const fuelCost = _money(Math.max(0, Number(d.yrVb) || 0) * years);
+  const operatingDifference = _money(fuelCost - evEnergyCost);
+  const netDifference = _money(operatingDifference - premium);
+  return {
+    years,
+    premium,
+    evEnergyCost,
+    fuelCost,
+    operatingDifference,
+    netDifference,
+    difference: _money(Math.abs(netDifference)),
+    distance: Math.max(0, Number(d.kmJahr) || 0) * years
+  };
+}
+
 // ── Text formatting ──────────────────────────────────────────────────────────
 const _fmtDE = (v, d = 2) => v.toLocaleString("de-DE", { minimumFractionDigits: d, maximumFractionDigits: d });
 
@@ -1702,6 +1764,7 @@ function _drawCompare9x16(ctx, d) {
     evCost, vbCost, eAutoTotal, verbrennerTotal, diffSig, savingsTotal, kmEv,
     ridesharing, persons, eAutoPerPerson, verbrennerPerPerson, savingsPerPerson
   } = d;
+  const lt = longtermActive ? _getLongtermSummary(d) : null;
 
   _drawBg(ctx, W, H);
   _drawGlowDual(ctx, W, H);
@@ -1718,10 +1781,12 @@ function _drawCompare9x16(ctx, d) {
 
   // ── MAIN VALUES ───────────────────────────────────────────────────────────
   const kmDisp = Math.round(Math.max(0, _kmToDist(kmEv))).toLocaleString(_currentLocale());
-  const kmLbl  = kmDisp + " " + unit;
-  const evMain = ridesharing ? eAutoPerPerson      : eAutoTotal;
-  const vbMain = ridesharing ? verbrennerPerPerson : verbrennerTotal;
-  const subTxt = ridesharing ? _t("shareImgPerPersonCtx", { km: kmLbl }) : kmLbl;
+  const kmLbl  = lt
+    ? `${lt.years} ${lt.years === 1 ? _t("yearOne") : _t("yearOther")}`
+    : kmDisp + " " + unit;
+  const evMain = lt ? lt.evEnergyCost : (ridesharing ? eAutoPerPerson : eAutoTotal);
+  const vbMain = lt ? lt.fuelCost : (ridesharing ? verbrennerPerPerson : verbrennerTotal);
+  const subTxt = !lt && ridesharing ? _t("shareImgPerPersonCtx", { km: kmLbl }) : kmLbl;
 
   _ct(ctx, _t("typeEv"),           W/2, 500, "rgba(10,132,255,.85)",   38, 600);
   _ct(ctx, _fmtMoney(evMain, 2),   W/2, 618, "#ffffff",                140, 800);
@@ -1732,17 +1797,18 @@ function _drawCompare9x16(ctx, d) {
   _ct(ctx, subTxt,                 W/2, 1016,"rgba(235,235,245,.50)",  26, 500);
 
   // ── DIFFERENCE ────────────────────────────────────────────────────────────
-  if (Math.abs(diffSig) > 0.005) {
-    const val = ridesharing ? savingsPerPerson : savingsTotal;
-    const label = diffSig >= 0 ? _t("shareImgSavings") : _t("shareImgDiff");
-    const suffix = ridesharing ? " " + _t("sharePerPersonSuffix") : "";
+  const displayDifference = lt ? lt.netDifference : diffSig;
+  if (Math.abs(displayDifference) > 0.005) {
+    const val = lt ? lt.difference : (ridesharing ? savingsPerPerson : savingsTotal);
+    const label = displayDifference >= 0 ? _t("shareImgSavings") : _t("shareImgDiff");
+    const suffix = !lt && ridesharing ? " " + _t("sharePerPersonSuffix") : "";
     _ct(ctx, `${label}: ${_fmtMoney(val, 2)}${suffix}`,
         W/2, 1150, "rgba(235,235,245,.82)", 34, 600);
   }
 
   // ── RIDESHARE CONTEXT ─────────────────────────────────────────────────────
   let ctxY = 1230;
-  if (ridesharing) {
+  if (!lt && ridesharing) {
     _ct(ctx, _t("rideshareLine", { n: persons }),
         W/2, ctxY, "rgba(235,235,245,.58)", 26, 500);
     _ct(ctx, _t("shareImgTotalCostsBoth", { ev: _fmtMoney(eAutoTotal, 2), vb: _fmtMoney(verbrennerTotal, 2) }),
@@ -1754,6 +1820,10 @@ function _drawCompare9x16(ctx, d) {
       W/2, 1430, "rgba(235,235,245,.65)", 26, 500);
   _ct(ctx, `${_t("typeVb")}: ${_fmtMoney(_costPer100ToMarket(vbCost), 2)} ${per100}`,
       W/2, 1474, "rgba(235,235,245,.65)", 26, 500);
+  if (lt) {
+    _ct(ctx, `${_t("longtermPremiumLabel")}: ${_fmtMoney(lt.premium, 2)}`,
+        W/2, 1520, "rgba(235,235,245,.58)", 22, 500);
+  }
 
   // ── QUALIFIED RESULT SENTENCE (single line, auto-shrink to fit) ───────────
   _ctFitLine(ctx, _resultSentence(d, "compare", "share"),
@@ -1761,7 +1831,7 @@ function _drawCompare9x16(ctx, d) {
 
   // ── DISCLAIMER + SITE (legally prominent) ─────────────────────────────────
   _drawDisclaimerPill(ctx, W, 1690, _t("shareImgDisclaimer"));
-  _ctWrap(ctx, _t("shareImgExclusions"),
+  _ctWrap(ctx, lt ? _t("longtermFootnote") : _t("shareImgExclusions"),
       W/2, 1755, "rgba(235,235,245,.55)", 18, 400, 980, 24);
   _drawShareSiteBadge(ctx, W, 390);
 }
@@ -1951,7 +2021,13 @@ function _resultSentence(d, mode, perspective) {
 
   // Long-term mode (compare only): use dedicated sentence, skip per-trip values.
   if (mode === "compare" && longtermActive) {
-    return _t(k("CompareLongterm"));
+    const summary = _getLongtermSummary(d);
+    const direction = summary.netDifference > 0.005
+      ? _t("shareLongtermEvAdvantage")
+      : summary.netDifference < -0.005
+        ? _t("shareLongtermEvDisadvantage")
+        : _t("costsEqual");
+    return `${_t("shareLongtermDifference")}: ${_fmtMoney(summary.difference, 2)} (${direction})`;
   }
 
   // Single + carpool: dedicated full sentence (no suffix appended).
@@ -2023,6 +2099,29 @@ function buildShareTextSingle(d) {
   return _injectShareDisclaimer(_injectRideshareLine(text, d, d.costPerPerson));
 }
 function buildShareTextCompare(d) {
+  if (longtermActive) {
+    const summary = _getLongtermSummary(d);
+    const yearsLabel = `${summary.years} ${summary.years === 1 ? _t("yearOne") : _t("yearOther")}`;
+    const distance = Math.round(_kmToDist(summary.distance)).toLocaleString(_currentLocale());
+    const direction = summary.netDifference > 0.005
+      ? _t("shareLongtermEvAdvantage")
+      : summary.netDifference < -0.005
+        ? _t("shareLongtermEvDisadvantage")
+        : _t("costsEqual");
+    const lines = [
+      _t("shareLongtermTitle"),
+      `${_t("longtermPeriod")}: ${yearsLabel} · ${distance} ${_distanceUnit()}`,
+      `${_t("longtermLblEv")}: ${_fmtMoney(summary.evEnergyCost, 2)}`,
+      `${_t("longtermLblVb")}: ${_fmtMoney(summary.fuelCost, 2)}`,
+      `${_t("longtermPremiumLabel")}: ${_fmtMoney(summary.premium, 2)}`,
+      `${_t("shareLongtermDifference")}: ${_fmtMoney(summary.difference, 2)} (${direction})`,
+      "",
+      _t("longtermFootnote"),
+      "",
+      _t("shareOwnValues")
+    ];
+    return lines.join("\n");
+  }
   const kmDisp = Math.round(Math.max(0, _kmToDist(d.kmEv))).toLocaleString(_currentLocale());
   const text = _t("shareTextCompare", {
     km: kmDisp,
@@ -2298,6 +2397,14 @@ document.addEventListener("visibilitychange", function () {
 // initApp() is called from the i18n IIFE's init() once applyTranslations()
 // has run — guarantees all _t() calls resolve on first paint.
 function initApp() {
+  // Native Capacitor splash explicitly release once the web UI is ready.
+  // Browser builds do not expose the plugin and simply skip this branch.
+  try {
+    const splash = window.Capacitor && window.Capacitor.Plugins && window.Capacitor.Plugins.SplashScreen;
+    if (splash && typeof splash.hide === "function") {
+      Promise.resolve(splash.hide()).catch(() => {});
+    }
+  } catch (_) {}
   try { applyMode(); } catch (_) {}
   try { applyRideshare(); } catch (_) {}
   try { applyLongterm(); } catch (_) {}
@@ -2515,9 +2622,27 @@ function _pwaWire() {
   bind('pwaPopupBackdrop', pwaPopupLater);
 
   document.addEventListener('keydown', e => {
-    if (e.key !== 'Escape') return;
-    if (_pwaPopupShown) pwaPopupLater();
-    else if (_pwaBarShown) pwaBarLater();
+    if (e.key === 'Escape') {
+      if (_pwaPopupShown) pwaPopupLater();
+      else if (_pwaBarShown) pwaBarLater();
+      return;
+    }
+    if (e.key !== 'Tab' || !_pwaPopupShown) return;
+    const popup = document.getElementById('pwaPopup');
+    if (!popup) return;
+    const focusable = Array.from(popup.querySelectorAll(
+      'button:not([disabled]), [href], input:not([disabled]), [tabindex]:not([tabindex="-1"])'
+    )).filter(el => !el.hasAttribute('inert') && el.offsetParent !== null);
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (e.shiftKey && document.activeElement === first) {
+      e.preventDefault();
+      last.focus();
+    } else if (!e.shiftKey && document.activeElement === last) {
+      e.preventDefault();
+      first.focus();
+    }
   });
 }
 _pwaWire();
@@ -2769,10 +2894,15 @@ setTimeout(() => {
       longtermPremiumExclHint: "Hinweis: Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.",
       longtermLblEv: "E-Auto Energiekosten",
       longtermLblVb: "Verbrenner Kraftstoffkosten",
-      longtermRemainingPremium: "Geschätzter verbleibender Mehrpreis",
+      shareLongtermTitle: "EVSpend Langzeitanalyse (Beispielrechnung)",
+      shareLongtermDifference: "Geschätzte Differenz nach Mehrpreis",
+      shareLongtermEvAdvantage: "E-Auto rechnerisch günstiger",
+      shareLongtermEvDisadvantage: "E-Auto rechnerisch teurer",
+      shareOwnValues: "Eigene Werte berechnen: www.evspend.com",
+      longtermRemainingPremium: "Geschätzter verbleibender Kostennachteil",
       longtermAmortized: "Break-Even im Zeitraum geschätzt erreicht",
       longtermBeHint: "Basierend auf deiner monatlichen Fahrleistung",
-      longtermLossHint: "Geschätzte Differenz nach Betriebskosten im gewählten Zeitraum",
+      longtermLossHint: "Mehrpreis einschließlich der Differenz der Energie-/Kraftstoffkosten im gewählten Zeitraum",
       longtermDoneHint: "Beispielrechnung auf Basis deiner Eingaben",
       longtermFootnote: "Beispielrechnung. Nur Energie-/Kraftstoffkosten. Anschaffung nur als Mehrpreis berücksichtigt; Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten. Tatsächliche Gesamtkosten können stark abweichen.",
       // Feedback-Toast-Hints (Inline-Divs unter CTAs)
@@ -2992,10 +3122,15 @@ setTimeout(() => {
       longtermPremiumExclHint: "Note: Maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.",
       longtermLblEv: "EV energy costs",
       longtermLblVb: "Combustion fuel costs",
-      longtermRemainingPremium: "Estimated remaining premium",
+      shareLongtermTitle: "EVSpend long-term analysis (example calculation)",
+      shareLongtermDifference: "Estimated difference after EV price premium",
+      shareLongtermEvAdvantage: "EV is lower in this calculation",
+      shareLongtermEvDisadvantage: "EV is higher in this calculation",
+      shareOwnValues: "Calculate with your own inputs: www.evspend.com",
+      longtermRemainingPremium: "Estimated remaining cost disadvantage",
       longtermAmortized: "Break-even reached within period (estimated)",
       longtermBeHint: "Based on your monthly mileage",
-      longtermLossHint: "Estimated difference after operating costs over the selected period",
+      longtermLossHint: "Price premium including the energy/fuel cost difference over the selected period",
       longtermDoneHint: "Example calculation based on your inputs",
       longtermFootnote: "Example calculation. Energy/fuel costs only. Purchase price is considered only as a price premium; maintenance, insurance, taxes, depreciation, charging losses and base fees are not included. Actual total costs may differ significantly.",
       // Feedback hints
@@ -3215,10 +3350,15 @@ setTimeout(() => {
       longtermPremiumExclHint: "Not: Bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
       longtermLblEv: "Elektrikli enerji maliyeti",
       longtermLblVb: "İçten yanmalı yakıt maliyeti",
-      longtermRemainingPremium: "Tahmini kalan ek maliyet",
+      shareLongtermTitle: "EVSpend uzun vadeli analiz (örnek hesaplama)",
+      shareLongtermDifference: "Elektrikli araç fiyat farkı sonrası tahmini fark",
+      shareLongtermEvAdvantage: "Bu hesaplamada elektrikli daha düşük",
+      shareLongtermEvDisadvantage: "Bu hesaplamada elektrikli daha yüksek",
+      shareOwnValues: "Kendi değerlerinle hesapla: www.evspend.com",
+      longtermRemainingPremium: "Tahmini kalan toplam maliyet dezavantajı",
       longtermAmortized: "Dönem içinde başabaş tahmini olarak ulaşıldı",
       longtermBeHint: "Aylık kilometrenize göre",
-      longtermLossHint: "Seçilen dönemdeki işletme maliyetlerinden sonra tahmini fark",
+      longtermLossHint: "Seçilen dönemde enerji/yakıt maliyeti farkı dahil araç fiyat farkı",
       longtermDoneHint: "Girdilerine göre örnek hesaplama",
       longtermFootnote: "Örnek hesaplama. Yalnızca enerji/yakıt maliyetleri. Satın alma bedeli yalnızca fiyat farkı olarak dikkate alınır; bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir. Gerçek toplam maliyetler önemli ölçüde farklı olabilir.",
       // Feedback
