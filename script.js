@@ -2896,7 +2896,7 @@ setTimeout(() => {
       longtermLblVb: "Verbrenner Kraftstoffkosten",
       shareLongtermTitle: "EVSpend Langzeitanalyse (Beispielrechnung)",
       shareLongtermDifference: "Geschätzte Differenz nach Mehrpreis",
-      shareLongtermEvAdvantage: "E-Auto rechnerisch günstiger",
+      shareLongtermEvAdvantage: "E-Auto rechnerisch niedriger",
       shareLongtermEvDisadvantage: "E-Auto rechnerisch teurer",
       shareOwnValues: "Eigene Werte berechnen: www.evspend.com",
       longtermRemainingPremium: "Geschätzter verbleibender Kostennachteil",
