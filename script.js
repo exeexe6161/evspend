@@ -1499,7 +1499,6 @@ function renderCostChart({ kmMax, ev, verb }) {
   const vbCost = verb * kmMax / 100;
   const maxC   = Math.max(evCost, vbCost) || 1;
 
-  const sym  = _currencySymbol();
   const evL  = (typeof _t === "function") ? _t("typeEv") : "E-Auto";
   const vbL  = (typeof _t === "function") ? _t("typeVb") : "Verbrenner";
 
@@ -1526,9 +1525,8 @@ function renderCostChart({ kmMax, ev, verb }) {
     ctx.fillText(label, padL, yLabel + 12);
     ctx.textAlign = "right";
     ctx.fillStyle = color;
-    const valStr = (value >= 100
-      ? Math.round(value).toLocaleString(_currentLocale())
-      : fmt(value, 2)) + " " + sym;
+    // Identische Präzision wie die Ergebniskarte (_fmtMoney, 2 Nachkommastellen)
+    const valStr = _fmtMoney(value);
     ctx.fillText(valStr, padL + plotW, yLabel + 12);
 
     // Track
@@ -2845,8 +2843,8 @@ setTimeout(() => {
       marketTr: "TR · ₺",
       marketSwitchSr: "Markt wechseln, aktuell",
       // Phase 7 — dynamische Ergebnis-/Aktionstexte (rechtlich vorsichtig formuliert)
-      evCheaper: "Niedrigerer geschätzter Betrag: E-Auto (laut deinen Eingaben)",
-      vbCheaper: "Niedrigerer geschätzter Betrag: Verbrenner (laut deinen Eingaben)",
+      evCheaper: "E-Auto geschätzt günstiger",
+      vbCheaper: "Verbrenner geschätzt günstiger",
       costsEqual: "Kosten ähnlich (laut Eingaben)",
       savingsFor: "Geschätzte Differenz auf {km}",
       extraCostFor: "Geschätzte Mehrkosten auf {km}",
@@ -3073,8 +3071,8 @@ setTimeout(() => {
       marketTr: "TR · ₺",
       marketSwitchSr: "Change market, currently",
       // Phase 7 — dynamic result/action texts (legally-careful wording)
-      evCheaper: "Lower estimated amount: EV (based on your inputs)",
-      vbCheaper: "Lower estimated amount: ICE (based on your inputs)",
+      evCheaper: "EV: lower estimated cost",
+      vbCheaper: "ICE: lower estimated cost",
       costsEqual: "Costs roughly equal (based on your inputs)",
       savingsFor: "Estimated difference over {km}",
       extraCostFor: "Estimated extra cost over {km}",
@@ -3301,8 +3299,8 @@ setTimeout(() => {
       marketTr: "TR · ₺",
       marketSwitchSr: "Pazar değiştir, şu an",
       // Phase 7 — dinamik sonuç/aksiyon metinleri (hukuki olarak temkinli)
-      evCheaper: "Daha düşük tahmini tutar: Elektrikli (girdilerine göre)",
-      vbCheaper: "Daha düşük tahmini tutar: Benzinli (girdilerine göre)",
+      evCheaper: "Elektrikli tahminen daha uygun",
+      vbCheaper: "Benzinli tahminen daha uygun",
       costsEqual: "Maliyetler benzer (girdilerine göre)",
       savingsFor: "{km} için tahmini fark",
       extraCostFor: "{km} için tahmini fazla maliyet",

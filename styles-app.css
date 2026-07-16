@@ -205,6 +205,11 @@ body::before{
   object-fit:cover;
   box-shadow:var(--shadow-1);
 }
+/* Auf Handybreite eigene Zeile für die fixen Top-Controls freihalten,
+   damit Markt-Pille und Theme-Button die Wortmarke nicht überdecken. */
+@media (max-width:640px){
+  .hero-banner{margin-top:calc(68px + var(--safe-top));}
+}
 [data-theme="dark"] .hero-banner{
   box-shadow:var(--shadow-3);
   filter:brightness(.92) contrast(1.05) saturate(.95);
@@ -990,7 +995,7 @@ button .ico,a .ico{margin-right:6px;}
   .longterm-wrap{padding:14px 16px;}
   .slider-row{padding:16px 18px 18px;}
   .list-row{padding:14px 16px;}
-  .hero-banner{width:calc(100% - 24px);margin-top:calc(16px + var(--safe-top));border-radius:8px;}
+  .hero-banner{width:calc(100% - 24px);margin-top:calc(68px + var(--safe-top));border-radius:8px;}
   .mode-toggle,
   .type-toggle{margin-left:var(--gutter);margin-right:var(--gutter);}
   .primary-cta-row{margin:16px var(--gutter) 0;}
@@ -1060,7 +1065,7 @@ button .ico,a .ico{margin-right:6px;}
   .trust-chip{font-size:11px;padding:4px 9px 4px 7px;gap:5px;letter-spacing:.1px;}
   .trust-chip-ico{width:11px;height:11px;}
   .disclaimer{padding:10px 16px 14px;font-size:11.5px;}
-  .hero-banner{width:calc(100% - 20px);margin-top:calc(14px + var(--safe-top));margin-bottom:14px;border-radius:8px;}
+  .hero-banner{width:calc(100% - 20px);margin-top:calc(64px + var(--safe-top));margin-bottom:14px;border-radius:8px;}
   .hero::before{height:200px;}
 
   .quick-compact{padding:12px 14px 10px;}
@@ -2517,6 +2522,13 @@ body[data-app-mode="single"][data-single-type="vb"] .qc-section--ev{
 @media(max-width:480px){
   .single-hdr{ margin:0 -18px 0; padding:10px 16px; }
 }
+/* Badge darf nie über die Karte hinauslaufen: bei Bedarf mehrzeilig, Pill-Form bleibt */
+.single-hdr .mode-badge{
+  max-width:100%;
+  white-space:normal;
+  text-align:center;
+  justify-content:center;
+}
 
 .single-hero{
   padding:24px 0 22px;
@@ -2598,6 +2610,8 @@ body[data-app-mode="single"][data-single-type="vb"] .qc-section--ev{
 .single-grid + .single-meta{ padding-top:14px; }
 
 /* ══ Per-Person Line (Fahrgemeinschaft Result) ══ */
+/* hidden-Attribut respektieren: keine leere Pill, wenn keine Personen-Berechnung aktiv ist */
+.per-person-line[hidden]{display:none;}
 .per-person-line{
   margin-top:10px;
   padding:7px 14px;
