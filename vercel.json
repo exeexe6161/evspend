@@ -1,6 +1,6 @@
 {
-  "buildCommand": "node build-licenses.mjs --check && node build-sw.mjs",
-  "outputDirectory": ".",
+  "buildCommand": "node build-licenses.mjs --check && node build-sw.mjs && node build-vercel.mjs",
+  "outputDirectory": ".vercel-static",
   "cleanUrls": true,
   "headers": [
     {

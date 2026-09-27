@@ -36,6 +36,5 @@ styles-pages.css
 # accompanying .map files are excluded.
 *.map
 
-# Build metadata - not served publicly
-package.json
-package-lock.json
+# Build metadata stays available to the build. The isolated outputDirectory in
+# vercel.json prevents these files from becoming public static resources.

@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { ROOT, START, END, checkLicenses, generatedSection } from '../build-licenses.mjs';
+import { PUBLIC_FILES, buildStaticOutput } from '../build-vercel.mjs';
 
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'evspend-license-test-'));
@@ -74,13 +75,39 @@ test('EVS-053 dev tooling does not become a runtime notice; new runtime dependen
 test('EVS-053 canonical public path is included and bypasses geo redirects', async () => {
   const ignore = fs.readFileSync(path.join(ROOT, '.vercelignore'), 'utf8').split('\n').filter(s => s && !s.startsWith('#'));
   assert.ok(!ignore.includes('LICENSES.md'));
+  assert.ok(!ignore.includes('package.json'));
+  assert.ok(!ignore.includes('package-lock.json'));
   const config = JSON.parse(fs.readFileSync(path.join(ROOT, 'vercel.json')));
-  assert.equal(config.outputDirectory, '.');
-  assert.match(config.buildCommand, /^node build-licenses\.mjs --check && node build-sw\.mjs$/);
+  assert.equal(config.outputDirectory, '.vercel-static');
+  assert.match(config.buildCommand, /^node build-licenses\.mjs --check && node build-sw\.mjs && node build-vercel\.mjs$/);
+  assert.ok(PUBLIC_FILES.includes('LICENSES.md'));
+  assert.ok(!PUBLIC_FILES.includes('package.json'));
+  assert.ok(!PUBLIC_FILES.includes('package-lock.json'));
   const source = fs.readFileSync(path.join(ROOT, 'middleware.js'), 'utf8');
   const { default: middleware } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
   for (const country of ['DE', 'TR', 'FR', 'US']) {
     const response = middleware(new Request('https://www.evspend.com/LICENSES.md', { headers: { 'x-vercel-ip-country': country } }));
     assert.equal(response, undefined);
+  }
+});
+
+test('Vercel packaging separates build inputs from the public static output', t => {
+  const temp = fs.mkdtempSync(path.join(os.tmpdir(), 'evspend-vercel-package-'));
+  const output = path.join(temp, '.vercel-static');
+  t.after(() => fs.rmSync(temp, { recursive: true, force: true }));
+  const result = buildStaticOutput(ROOT, output);
+  assert.equal(result.files.length, PUBLIC_FILES.length);
+  const inventory = JSON.parse(fs.readFileSync(path.join(ROOT, 'vendor/license-inventory.json')));
+  for (const relative of inventory.release.references) {
+    assert.ok(fs.existsSync(path.join(output, relative)), relative);
+  }
+  for (const component of inventory.components) {
+    assert.ok(fs.existsSync(path.join(output, component.licenseFile)), component.licenseFile);
+  }
+  for (const relative of ['LICENSES.md', 'vendor/chartjs-4.4.6.LICENSE.txt', 'index.html']) {
+    assert.ok(fs.existsSync(path.join(output, relative)), relative);
+  }
+  for (const relative of ['package.json', 'package-lock.json', 'script.js', 'script.min.js.map', 'build-licenses.mjs']) {
+    assert.equal(fs.existsSync(path.join(output, relative)), false, relative);
   }
 });
