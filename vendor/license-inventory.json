@@ -1,0 +1,94 @@
+{
+  "schemaVersion": 1,
+  "components": [
+    {
+      "name": "Chart.js",
+      "version": "4.4.6",
+      "license": "MIT",
+      "material": "vendor/chart-4.4.6.umd.js",
+      "source": "https://raw.githubusercontent.com/chartjs/Chart.js/v4.4.6/LICENSE.md",
+      "licenseFile": "vendor/chartjs-4.4.6.LICENSE.txt",
+      "licenseSha256": "41a84aa2caba645f966a18d9c2056b73e6d3a81d80bc0046bc0011a2634d4cce"
+    },
+    {
+      "name": "@kurkle/color",
+      "version": "0.3.2",
+      "license": "MIT",
+      "material": "embedded in vendor/chart-4.4.6.umd.js; original 2023 banner retained",
+      "source": "https://raw.githubusercontent.com/kurkle/color/v0.3.2/LICENSE.md",
+      "licenseFile": "vendor/kurkle-color-0.3.2.LICENSE.txt",
+      "licenseSha256": "2859c50313bad2ba77b081410c477beaf92b60ca13a77a248d89859a6dd6ac81"
+    },
+    {
+      "name": "Lucide",
+      "version": "0.511.0 verified historical library; current inline subsets include unverified variants",
+      "license": "ISC",
+      "material": "inline SVG in root, en-eu and tr HTML; no Lucide runtime library",
+      "source": "https://raw.githubusercontent.com/lucide-icons/lucide/0.511.0/LICENSE",
+      "licenseFile": "vendor/lucide-0.511.0.LICENSE.txt",
+      "licenseSha256": "1e7290b35280a048667bbf0ebabac1c7fd52a75300e8b2946ac165715997f2bc"
+    },
+    {
+      "name": "Feather portions",
+      "version": "not independently versioned in EVSpend; 4.28.0 is a matching source reference, not a shipped package claim",
+      "license": "MIT",
+      "material": "inline SVG subsets and inherited portions named in the Lucide copyright notice",
+      "source": "https://registry.npmjs.org/feather-icons/-/feather-icons-4.28.0.tgz (package/LICENSE)",
+      "licenseFile": "vendor/feather-portions.LICENSE.txt",
+      "licenseSha256": "afcab584f9ecaf796069d8b3cd2a02e3135d89743a2cf17def2e7935dad91e5d"
+    },
+    {
+      "name": "Inter Variable",
+      "version": "4.001;git-9221beed3 (both local WOFF2 name tables)",
+      "license": "OFL-1.1",
+      "material": "fonts/InterVariable.woff2 and fonts/InterVariable-Italic.woff2",
+      "source": "local fonts/LICENSE.txt; embedded font name tables",
+      "licenseFile": "fonts/LICENSE.txt",
+      "licenseSha256": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a"
+    }
+  ],
+  "release": {
+    "svgFingerprint": "9c8d7cd367b85f608b1301b975eb5ee571fb1e3ff42750613dcae94ed8b7fdae",
+    "references": [
+      "404.css",
+      "404.js",
+      "android-chrome-192x192.png",
+      "android-chrome-512x512.png",
+      "apple-touch-icon.png",
+      "banner.png",
+      "en-eu/init-eu.js",
+      "en-eu/styles-en-eu.css",
+      "favicon-16x16.png",
+      "favicon-32x32.png",
+      "fonts/InterVariable-Italic.woff2",
+      "fonts/InterVariable.woff2",
+      "history-store.js",
+      "lang-switch.js",
+      "script.min.js",
+      "site.webmanifest",
+      "styles-app.min.css",
+      "styles-pages.min.css",
+      "theme-init.js",
+      "tr/init-tr.js",
+      "tr/styles-tr.css",
+      "vendor/chart-4.4.6.umd.js",
+      "verlauf.min.js"
+    ],
+    "material": {
+      "android-chrome-192x192.png": "c494e14268dc96990ff158951b13bf0d114d293cee9f5d6e8f38e57d91c6a305",
+      "android-chrome-512x512.png": "81e862fa41dc91e682397a2da3f8f55f83b2c4c6ea7c793fa1c60e9ee6318a8d",
+      "apple-touch-icon.png": "3cedfaaa4c7da7701306f4f849c02573b4030e135f02a629ddbc7d5254c9e936",
+      "banner.png": "5fc721da8d4d4505441f59c934eb19fc84419f660921ab99ea6cf4424efa0ba7",
+      "banner.webp": "f9dddaeefc477e85a451d26a166a9d45a0ecf00e3926fbc328add702fd56afc3",
+      "favicon-16x16.png": "50c8d4580196722fd65b608e841e72807a9066f959e5cad06cb18cfe561e7956",
+      "favicon-32x32.png": "59b3920932f45689f4ee645929a4ca6859d627ea3c9eeee964eee323a5e808cf",
+      "favicon.ico": "65d69bfb540bee1d5f46aba5a978724c12bc9905621f02d79de930a26e0a459b",
+      "fonts/InterVariable-Italic.woff2": "e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a",
+      "fonts/InterVariable.woff2": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
+      "og-image-de.png": "8e73102717b4938bcaabae4aacb2e40a3cc73936a49094ca277ac81673531773",
+      "og-image-en.png": "74e14564bf75e8150f81ac683cdfb571c19a2f97737178f31987f02f3280d18a",
+      "og-image-tr.png": "eb6bc90e671c3bbe613ac43af64f571f41e73d641e4594a664f95308e2395502",
+      "vendor/chart-4.4.6.umd.js": "3850656abbdc319141e6e8ce8eacde2622fc767c30e20d81704af2bf3159f92d"
+    }
+  }
+}

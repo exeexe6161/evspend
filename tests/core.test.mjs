@@ -2,10 +2,13 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 import vm from "node:vm";
+import { webcrypto } from "node:crypto";
+import { createLockManager } from "./history-locks.mjs";
 
-function createRuntime() {
+function createRuntime(options = {}) {
   const elements = new Map();
-  const storage = new Map();
+  const storage = new Map(Object.entries(options.storage || {}));
+  const domEvents = new Map();
   const localStorage = {
     getItem: key => storage.has(key) ? storage.get(key) : null,
     setItem: (key, value) => storage.set(key, String(value)),
@@ -55,15 +58,20 @@ function createRuntime() {
     getElementById: id => elements.get(id) || null,
     querySelector: () => null,
     querySelectorAll: () => [],
-    addEventListener() {}, removeEventListener() {}, dispatchEvent() {},
+    addEventListener(name, fn) { domEvents.set(name, [...(domEvents.get(name) || []), fn]); },
+    removeEventListener() {},
+    dispatchEvent(event) { for (const fn of domEvents.get(event.type) || []) fn(event); },
     createElement: tag => element(`created-${tag}-${elements.size}`),
     createDocumentFragment: () => element(`fragment-${elements.size}`),
     execCommand() { return true; },
   };
-  const navigator = { userAgent: "test", platform: "MacIntel", maxTouchPoints: 0 };
+  const navigator = {
+    locks: createLockManager(), userAgent: "test", platform: "MacIntel", maxTouchPoints: 0,
+    language: options.language || "de-DE", languages: options.languages || [options.language || "de-DE"]
+  };
   const windowObject = {
-    document, localStorage, sessionStorage: localStorage, navigator,
-    location: { search: "", pathname: "/", href: "https://www.evspend.com/" },
+    document, localStorage, sessionStorage: localStorage, navigator, crypto: webcrypto,
+    location: { search: options.search || "", pathname: options.pathname || "/", href: "https://www.evspend.com/" },
     history: { replaceState() {} },
     addEventListener() {}, removeEventListener() {},
     requestAnimationFrame: () => 1, cancelAnimationFrame() {},
@@ -75,7 +83,7 @@ function createRuntime() {
     window: windowObject, document, localStorage, sessionStorage: localStorage,
     location: windowObject.location, history: windowObject.history, navigator,
     URL, URLSearchParams, Blob, Intl, Date, Math, JSON, Number, String, Object,
-    Array, Map, Set, Promise, console,
+    Array, Map, Set, Promise, console, Uint8Array,
     File: class File {}, FileReader: class FileReader {},
     MutationObserver: class MutationObserver { observe() {} disconnect() {} },
     ResizeObserver: class ResizeObserver { observe() {} disconnect() {} },
@@ -84,7 +92,10 @@ function createRuntime() {
     cancelAnimationFrame() {}, performance: { now: () => 0 },
     alert() {}, confirm: () => true,
   });
-  vm.runInContext(fs.readFileSync(new URL("../script.js", import.meta.url), "utf8"), context);
+  for (const [id, value] of Object.entries(options.inputs || {})) element(id, value);
+  const script = process.env.EVSPEND_TEST_MINIFIED === "1" ? "script.min.js" : "script.js";
+  vm.runInContext(fs.readFileSync(new URL("../history-store.js", import.meta.url), "utf8"), context);
+  vm.runInContext(fs.readFileSync(new URL(`../${script}`, import.meta.url), "utf8"), context);
   const run = expression => vm.runInContext(expression, context);
   const setInputs = values => {
     for (const [id, value] of Object.entries(values)) {
@@ -92,7 +103,10 @@ function createRuntime() {
       el.value = String(value);
     }
   };
-  return { context, elements, element, localStorage, navigator, run, setInputs };
+  return {
+    context, elements, element, localStorage, navigator, run, setInputs,
+    dispatchDom(name) { for (const fn of domEvents.get(name) || []) fn({type: name}); }
+  };
 }
 
 function metricInputs(rt, overrides = {}) {
@@ -150,16 +164,18 @@ test("US Einheiten ergeben unabhängige Kontrollwerte", () => {
   assert.equal(rt.run("_costPer100ToMarket(_getCompareData().evCost).toFixed(2)"), "4.80");
   assert.equal(rt.run("_costPer100ToMarket(_getCompareData().vbCost).toFixed(2)"), "12.31");
   assert.equal(rt.run("_kmToDist(_getCompareData().kmEv)"), 600);
-  assert.equal(d.savingsTotal, 45.09);
+  assert.ok(Math.abs(d.savingsTotal - (600 / 26 * 3.2 - 28.8)) < 1e-10);
+  assert.equal(rt.run("fmt(_getCompareData().savingsTotal)"), "45.05");
 });
 
-test("Geldwerte werden konsistent auf Cent gerundet", () => {
+test("EVS-001 Geldwerte behalten Präzision bis zur Ausgabe", () => {
   const rt = createRuntime();
   metricInputs(rt, { evVerbrauch: 17, strompreis: 0.37, kmEv: 50 });
   const d = rt.run("singleType='ev'; _getSingleData()");
   assert.equal(d.costPer100, 6.29);
-  assert.equal(d.totalCost, 3.15);
-  assert.equal(d.yearlyCost, 37.8);
+  assert.equal(d.totalCost, 3.145);
+  assert.equal(d.yearlyCost, 37.74);
+  assert.equal(rt.run("fmt(_getSingleData().totalCost)"), "3,15");
 });
 
 test("große zulässige Werte bleiben endlich", () => {
@@ -300,12 +316,11 @@ test("Share Fallback kopiert bei technischem Fehler", async () => {
   assert.equal(clipboardCalls, 1);
 });
 
-function loadHistoryTest() {
-  const rt = createRuntime();
+function loadHistoryTest(rt = createRuntime()) {
   let source = fs.readFileSync(new URL("../verlauf.js", import.meta.url), "utf8");
-  const needle = "  refresh();\n})();";
+  const needle = "  if (migrationPending) migration.then(() => { refresh(); if (migrationError) mutationFailure(migrationError); });\n  else { refresh(); if (migrationError) mutationFailure(migrationError); }\n})();";
   assert.ok(source.includes(needle));
-  source = source.replace(needle, "  window.__historyTest = { sanitize: _sanitizeImportEntry, loadAll: loadAll };\n})();");
+  source = source.replace(needle, "  window.__historyTest = { sanitize: _sanitizeImportEntry, loadAll, fmtMoneyEntry, numCell: _numCell };\n})();");
   vm.runInContext(source, rt.context, { filename: "verlauf.js" });
   return rt;
 }
@@ -327,4 +342,321 @@ test("Verlauf verwirft ungültige Einträge und begrenzt beschädigten Speicher"
   const entries = Array.from({ length: 80 }, (_, i) => ({ schema: "v2", type: "ev", date: i + 1 }));
   rt.localStorage.setItem("eautofakten_history", JSON.stringify(entries));
   assert.equal(rt.context.window.__historyTest.loadAll().length, 50);
+});
+
+test("EVS-009 Reichweite konvertiert erst für die Ausgabe und übersteht Eingabespeicherung", () => {
+  for (const market of ["de", "eu", "tr", "us"]) {
+    const rt = createRuntime();
+    metricInputs(rt, { batteryKwh: 75, evVerbrauch: 30 });
+    rt.element("rangeDisplay");
+    rt.run(`window.EAF_I18N.getMarketCode=()=> '${market}'; saveInputs(); updateRangeDisplay()`);
+    const first = rt.elements.get("rangeDisplay").textContent;
+    assert.match(first, market === "us" ? /250 mi/ : /250 km/);
+    const stored = rt.localStorage.getItem("eaf.inputs.v2");
+    assert.equal(JSON.parse(stored).evVerbrauch, "30");
+    assert.equal(JSON.parse(stored).batteryKwh, "75");
+    metricInputs(rt, { batteryKwh: 1, evVerbrauch: 1 });
+    rt.run("loadInputs(); updateRangeDisplay()");
+    assert.equal(rt.elements.get("rangeDisplay").textContent, first);
+    assert.equal(rt.localStorage.getItem("eaf.inputs.v2"), stored);
+    assert.ok(Math.abs(rt.run("computeRange(n('batteryKwh'), n('evVerbrauch'))") -
+      (market === "us" ? 402.336 : 250)) < 1e-10);
+    metricInputs(rt, { batteryKwh: 75, evVerbrauch: 0 });
+    rt.run("updateRangeDisplay()");
+    assert.equal(rt.elements.get("rangeDisplay").hidden, true);
+  }
+});
+
+test("EVS-001 Auditfälle A und B bleiben unverändert korrekt", () => {
+  const rt = createRuntime();
+  metricInputs(rt, { evVerbrauch: 18, strompreis: .3, verbrauchVerbrenner: 6.5, benzinpreis: 1.8 });
+  const a = rt.run("longtermActive=true; kmMonat=1250; _getCompareData()");
+  for (const [key, expected] of Object.entries({evCost: 5.4, vbCost: 11.7, yrEv: 810, yrVb: 1755, diff: 945, kmJahr: 15000})) {
+    assert.ok(Math.abs(a[key] - expected) < 1e-10, key);
+  }
+  metricInputs(rt, { evVerbrauch: 25, strompreis: .8, verbrauchVerbrenner: 6.5, benzinpreis: 1.8 });
+  const b = rt.run("_getCompareData()");
+  assert.equal(b.yrEv, 3000);
+  assert.ok(Math.abs(b.diff - (-1245)) < 1e-10);
+  assert.equal(rt.run("fmt(_getCompareData().diff)"), "-1.245,00");
+});
+
+test("EVS-001 Auditfall verwendet 971,25 pro Jahr und ungerundete Mehrjahreswerte", () => {
+  const rt = createRuntime();
+  metricInputs(rt, { evVerbrauch: 17.5, strompreis: .37, kmEv: 500, kmShared: 500 });
+  const single = rt.run("_getSingleData()");
+  const compare = rt.run("_getCompareData()");
+  assert.equal(single.costPer100, 6.475);
+  assert.equal(single.totalCost, 32.375);
+  assert.equal(compare.eAutoTotal, single.totalCost);
+  assert.equal(rt.run("fmt(_getSingleData().totalCost)"), "32,38");
+  const annual = rt.run("longtermActive=true; kmMonat=1250; longtermYears=3; longtermPremium=1000; _getCompareData()");
+  assert.equal(annual.yrEv, 971.25);
+  assert.equal(rt.run("_getLongtermSummary(_getCompareData()).evEnergyCost"), 2913.75);
+  assert.match(rt.run("buildShareTextCompare(_getCompareData())"), /2\.913,75/);
+  rt.run("longtermActive=false; rideshareActive=true; ridesharePersons=3");
+  assert.equal(rt.run("_getSingleData().costPerPerson"), 32.375 / 3);
+});
+
+test("EVS-001 Speichern Laden und Import erhalten rohe Kosten und v2 Kompatibilität", async () => {
+  for (const market of ["de", "eu", "tr", "us"]) {
+    for (const type of ["ev", "vb"]) {
+      const rt = createRuntime();
+      metricInputs(rt, { evVerbrauch: 17.5, strompreis: .37, kmEv: 500, kmVb: 500 });
+      rt.run(`window.EAF_I18N.getMarketCode=()=> '${market}'; window.EAF_I18N.getCurrency=()=> '${market === "us" ? "USD" : market === "tr" ? "TRY" : "EUR"}'; appMode='single'; singleType='${type}'`);
+      const data = rt.run("_getSingleData()");
+      assert.equal(await rt.run("saveQuick()"), true);
+      const storage = rt.localStorage.getItem("eautofakten_history");
+      const saved = JSON.parse(storage)[0];
+      loadHistoryTest(rt);
+      const history = rt.context.window.__historyTest;
+      const imported = history.sanitize(saved);
+      const loaded = history.loadAll()[0];
+      for (const key of ["km", "consumption", "price", "costPer100", "monthlyCost", "yearlyCost"]) {
+        assert.equal(saved[key], data[key], `${market}/${type}/${key}: saved`);
+        assert.equal(imported[key], data[key], `${market}/${type}/${key}: imported`);
+        assert.equal(loaded[key], data[key], `${market}/${type}/${key}: loaded`);
+      }
+      assert.equal(saved.schema, "v2");
+      assert.equal(rt.localStorage.getItem("eautofakten_history"), storage);
+      assert.equal(history.fmtMoneyEntry(imported.monthlyCost, imported), rt.run("_fmtMoney(_getSingleData().totalCost)"));
+      // Previously rounded and metadata-free entries remain readable, without a rewrite.
+      const legacy = JSON.stringify([{schema: "v2", type, date: 1, km: 500, consumption: 17.5, price: .37, costPer100: 6.48, monthlyCost: 32.4, yearlyCost: 388.8}]);
+      rt.localStorage.setItem("eautofakten_history", legacy);
+      assert.equal(history.loadAll()[0].monthlyCost, 32.4);
+      assert.equal(history.fmtMoneyEntry(history.loadAll()[0].monthlyCost, history.loadAll()[0]), "32,40 €");
+      assert.equal(rt.localStorage.getItem("eautofakten_history"), legacy);
+    }
+  }
+});
+
+test("EVS-001 Halbcentgrenzen sind in Rechner Verlauf und CSV identisch", () => {
+  const rt = loadHistoryTest();
+  const history = rt.context.window.__historyTest;
+  for (const [value, expected] of [[23 * .35 * 50 / 100, "4,03"], [8.5 * .29, "2,47"], [8.5 * .35, "2,98"], [4.024999999, "4,02"], [4.025000001, "4,03"], [-4.025, "-4,03"], [-.0001, "0,00"]]) {
+    rt.context.roundingInput = value;
+    assert.equal(rt.run("fmt(roundingInput)"), expected);
+    assert.equal(rt.run("_fmtMoney(roundingInput)"), expected + " €");
+    assert.equal(history.fmtMoneyEntry(value), expected + " €");
+    assert.equal(history.numCell(value, 2), expected);
+  }
+  assert.equal(rt.run("fmt(4.499999999999999, 0)"), "5");
+  assert.equal(rt.run("fmt(1.23445, 4)"), "1,2345");
+  assert.equal(rt.run("_roundForDisplay(Number.MAX_VALUE)"), Number.MAX_VALUE);
+  assert.equal(rt.run("Object.is(_roundForDisplay(-.0001), -0)"), false);
+});
+
+test("EVS-001 US mpg Halbcentbetrag nutzt den vollständigen Umrechnungsfaktor", () => {
+  const rt = createRuntime();
+  metricInputs(rt, { verbrauchVerbrenner: 16, benzinpreis: 3, kmVb: 50 });
+  rt.run("window.EAF_I18N.getMarketCode=()=> 'us'; window.EAF_I18N.getCurrency=()=> 'USD'; singleType='vb'");
+  assert.ok(Math.abs(rt.run("_getSingleData().totalCost") - 9.375) < 1e-12);
+  assert.equal(rt.run("_fmtMoney(_getSingleData().totalCost)"), "$9.38");
+  assert.ok(Math.abs(rt.run("_iceConsumptionToMarket(n('verbrauchVerbrenner'))") - 16) < 1e-12);
+});
+
+test("EVS-001 Centdarstellung bestimmt Gleichstand und Vorzeichen der Ergebnistexte", () => {
+  const rt = createRuntime();
+  metricInputs(rt, { evVerbrauch: 20, strompreis: .3, verbrauchVerbrenner: 5, benzinpreis: 1.2, kmShared: 1 });
+  rt.element("compareBadge");
+  for (const [delta, equal] of [[.004, true], [.005, false], [-.005, false]]) {
+    rt.elements.get("benzinpreis").value = String((6 + delta * 100) / 5);
+    rt.run("calcCompare()");
+    const badge = rt.elements.get("compareBadge").textContent;
+    const sentence = rt.run("_resultSentence(_getCompareData(), 'compare', 'user')");
+    assert.equal(badge === rt.run("_t('costsEqual')"), equal);
+    if (!equal) assert.match(sentence, /0,01/);
+  }
+});
+
+test("EVS-001 Dezimalreferenzmatrix prüft echte Produktionskosten ohne Zwischenrundung", () => {
+  // Independent decimal-rational oracle from the audit, using integer arithmetic.
+  const rational = value => {
+    const [whole, fraction = ""] = String(value).split(".");
+    return [BigInt(whole + fraction), 10n ** BigInt(fraction.length)];
+  };
+  const rt = createRuntime();
+  for (let i = 1; i <= 20; i++) {
+    const consumption = 8 + i * .5, price = (10 + i * 3) / 100, km = 17 * i;
+    const [num, den] = [consumption, price, km].map(rational).reduce(([a,b],[c,d]) => [a*c,b*d], [1n,100n]);
+    const cents = (2n * num * 100n + den) / (2n * den);
+    const expected = `${cents / 100n},${String(cents % 100n).padStart(2, "0")}`;
+    metricInputs(rt, { evVerbrauch: consumption, strompreis: price, kmEv: km });
+    assert.equal(rt.run("fmt(_getSingleData().totalCost)"), expected, `case ${i}`);
+  }
+});
+
+test("EVS-001 Halbcentdifferenzen berücksichtigen die Genauigkeit der Kostenoperanden", () => {
+  const rt = createRuntime();
+  metricInputs(rt, { evVerbrauch: 20, strompreis: .5, verbrauchVerbrenner: 7, benzinpreis: 1.43, kmShared: 50 });
+  rt.element("compareBadge");
+  rt.run("calcCompare()");
+  assert.equal(rt.run("_compareDifferenceForDisplay(_getCompareData())"), .01);
+  assert.equal(rt.elements.get("compareBadge").textContent, rt.run("_t('evCheaper')"));
+  assert.match(rt.run("_resultSentence(_getCompareData(), 'compare', 'user')"), /0,01/);
+  assert.match(rt.run("buildShareTextCompare(_getCompareData())"), /0,01/);
+  rt.run("rideshareActive=true; ridesharePersons=2");
+  rt.elements.get("kmShared").value = "100";
+  assert.equal(rt.run("_compareDifferenceForDisplay(_getCompareData(), true)"), .01);
+  assert.match(rt.run("_resultSentence(_getCompareData(), 'compare', 'share')"), /0,01/);
+  // The subtraction correction must not promote an actually lower difference.
+  rt.elements.get("benzinpreis").value = "1.42999999";
+  assert.equal(rt.run("_compareDifferenceForDisplay(_getCompareData(), true)"), 0);
+  metricInputs(rt, { evVerbrauch: 20, strompreis: .5, verbrauchVerbrenner: 7, benzinpreis: 1.43 });
+  rt.run("longtermActive=true; kmMonat=1250; longtermYears=1; longtermPremium=1.495");
+  assert.equal(rt.run("_longtermDifferenceForDisplay(_getLongtermSummary(_getCompareData()))"), .01);
+  assert.match(rt.run("buildShareTextCompare(_getCompareData())"), /0,01/);
+});
+
+test("EVS-001 exakter Mehrpreisausgleich toleriert ausschließlich Gleitkommafehler", async () => {
+  const rt = createRuntime();
+  metricInputs(rt, { evVerbrauch: 17, strompreis: .4, verbrauchVerbrenner: 6, benzinpreis: 1.8 });
+  for (const id of ["longtermWrap", "ltBlockLoss", "ltBlockDone", "ltBreakeven"]) rt.element(id);
+  rt.run("longtermActive=true; kmMonat=1250; longtermYears=1; longtermPremium=600; renderLongterm(_getCompareData())");
+  assert.equal(rt.elements.get("ltBlockDone").hidden, false);
+  assert.equal(rt.elements.get("ltBlockLoss").hidden, true);
+  assert.notEqual(rt.elements.get("ltBreakeven").textContent, rt.run("_t('noBreakeven')"));
+  // A real remaining deficit, even below one cent, does not reach break even.
+  rt.run("longtermPremium=600.000001; renderLongterm(_getCompareData())");
+  assert.equal(rt.elements.get("ltBlockDone").hidden, true);
+  assert.equal(rt.elements.get("ltBlockLoss").hidden, false);
+});
+
+const restoreInputDefaults = {
+  evVerbrauch: 18, strompreis: .3, benzinpreis: 1.8,
+  verbrauchVerbrenner: 6.5, kmEv: 50, kmVb: 50,
+  kmShared: 1000, batteryKwh: 60, noteInput: "", marketSwitchLabel: ""
+};
+
+function reopenHistory(entries, id, market = "de", currency = "EUR") {
+  const historyJson = JSON.stringify(entries);
+  const rt = createRuntime({
+    inputs: restoreInputDefaults,
+    search: `?id=${id}`,
+    storage: {
+      "eaf.appVersion": "20260428-1",
+      "eaf.market": market,
+      "eaf.currency": currency,
+      "eaf.language": market === "tr" ? "tr" : market === "de" ? "de" : "en",
+      "eaf.inputs.v2": JSON.stringify(restoreInputDefaults),
+      eautofakten_history: historyJson
+    }
+  });
+  rt.dispatchDom("DOMContentLoaded");
+  return {rt, historyJson};
+}
+
+async function saveScenario({market, type, values, note = "", persons = 1}) {
+  const rt = createRuntime({inputs: restoreInputDefaults, storage: {"eaf.appVersion": "20260428-1"}});
+  rt.dispatchDom("DOMContentLoaded");
+  rt.run(`window.EAF_I18N.setMarket('${market}')`);
+  rt.setInputs({...values, noteInput: note});
+  rt.run(`appMode='single'; singleType='${type}'; ridesharePersons=${persons}; rideshareActive=${persons > 1}`);
+  assert.equal(await rt.run("saveQuick()"), true);
+  return JSON.parse(rt.localStorage.getItem("eautofakten_history"))[0];
+}
+
+test("EVS-002/003 gespeicherte DE und US Szenarien öffnen nach Neustart mit eigenen Einheiten und Währungen", async () => {
+  const cases = [
+    {market: "de", currency: "EUR", type: "ev", values: {kmEv: 100, evVerbrauch: 18, strompreis: .3}, expected: {km: 100, consumption: 18, price: .3}},
+    {market: "us", currency: "USD", type: "ev", values: {kmEv: 100, evVerbrauch: 30, strompreis: .16}, expected: {km: 100, consumption: 30, price: .16}},
+    {market: "us", currency: "USD", type: "vb", values: {kmVb: 100, verbrauchVerbrenner: 26, benzinpreis: 3.2}, expected: {km: 100, consumption: 26, price: 3.2}}
+  ];
+  for (const c of cases) {
+    const entry = await saveScenario({market: c.market, type: c.type, values: c.values, note: `${c.market}-${c.type}`, persons: 3});
+    const otherMarket = c.market === "us" ? "tr" : "us";
+    const otherCurrency = c.market === "us" ? "TRY" : "USD";
+    for (const [startingMarket, startingCurrency] of [[c.market, c.currency], [otherMarket, otherCurrency]]) {
+      const {rt, historyJson} = reopenHistory([entry], entry.date, startingMarket, startingCurrency);
+      assert.equal(rt.run("window.EAF_I18N.getMarketCode()"), c.market);
+      assert.equal(rt.run("window.EAF_I18N.getCurrency()"), c.currency);
+      assert.equal(rt.run("appMode"), "single");
+      assert.equal(rt.run("singleType"), c.type);
+      const prefix = c.type === "ev"
+        ? {km: "kmEv", consumption: "evVerbrauch", price: "strompreis"}
+        : {km: "kmVb", consumption: "verbrauchVerbrenner", price: "benzinpreis"};
+      assert.ok(Math.abs(Number(rt.elements.get(prefix.km).value) - c.expected.km) < 1e-9);
+      assert.ok(Math.abs(Number(rt.elements.get(prefix.consumption).value) - c.expected.consumption) < 1e-9);
+      assert.ok(Math.abs(Number(rt.elements.get(prefix.price).value) - c.expected.price) < 1e-9);
+      assert.equal(rt.run("rideshareActive"), true);
+      assert.equal(rt.run("ridesharePersons"), 3);
+      assert.equal(rt.elements.get("noteInput").value, `${c.market}-${c.type}`);
+      assert.equal(rt.elements.get("documentElement").getAttribute("lang"), c.market === "de" ? "de" : "en");
+      assert.equal(rt.elements.get("marketSwitchLabel").textContent, `${c.market.toUpperCase()} · ${c.currency === "USD" ? "$" : "€"}`);
+      assert.equal(rt.localStorage.getItem("eaf.market"), c.market);
+      assert.equal(rt.localStorage.getItem("eaf.currency"), c.currency);
+      assert.equal(rt.localStorage.getItem("eautofakten_history"), historyJson);
+    }
+  }
+});
+
+test("EVS-002/003 mehrere Szenarien behalten jeweils ihren eigenen Markt und ihre Währung", async () => {
+  const scenarios = [
+    await saveScenario({market: "de", type: "ev", values: {kmEv: 111, evVerbrauch: 18, strompreis: .3}, note: "DE"}),
+    await saveScenario({market: "eu", type: "ev", values: {kmEv: 222, evVerbrauch: 19, strompreis: .31}, note: "EU"}),
+    await saveScenario({market: "us", type: "ev", values: {kmEv: 123, evVerbrauch: 29, strompreis: .17}, note: "US"}),
+    await saveScenario({market: "tr", type: "ev", values: {kmEv: 333, evVerbrauch: 20, strompreis: 2.7}, note: "TR"})
+  ];
+  scenarios.forEach((entry, index) => { entry.date = 400 + index; });
+  const expected = {
+    de: {currency: "EUR", language: "de", km: 111, note: "DE"},
+    eu: {currency: "EUR", language: "en", km: 222, note: "EU"},
+    us: {currency: "USD", language: "en", km: 123, note: "US"},
+    tr: {currency: "TRY", language: "tr", km: 333, note: "TR"}
+  };
+  for (const entry of scenarios) {
+    const {rt, historyJson} = reopenHistory(scenarios, entry.date, entry.marketCode === "tr" ? "us" : "tr", entry.marketCode === "tr" ? "USD" : "TRY");
+    const exp = expected[entry.marketCode];
+    assert.equal(rt.run("window.EAF_I18N.getMarketCode()"), entry.marketCode);
+    assert.equal(rt.run("window.EAF_I18N.getCurrency()"), exp.currency);
+    assert.equal(rt.run("window.EAF_I18N.getLanguage()"), exp.language);
+    assert.ok(Math.abs(Number(rt.elements.get("kmEv").value) - exp.km) < 1e-9);
+    assert.equal(rt.elements.get("noteInput").value, exp.note);
+    assert.equal(rt.localStorage.getItem("eautofakten_history"), historyJson);
+  }
+});
+
+test("EVS-003 gespeicherte Metadaten schlagen spätere globale Markt und Währungswahl", async () => {
+  const eur = await saveScenario({market: "de", type: "ev", values: {kmEv: 100, evVerbrauch: 18, strompreis: .3}});
+  const usd = await saveScenario({market: "us", type: "ev", values: {kmEv: 100, evVerbrauch: 30, strompreis: .16}});
+  eur.date = 501;
+  usd.date = 502;
+  let opened = reopenHistory([eur, usd], eur.date, "tr", "TRY").rt;
+  assert.equal(opened.run("window.EAF_I18N.getMarketCode()+':'+window.EAF_I18N.getCurrency()"), "de:EUR");
+  assert.equal(opened.run("_fmtMoney(_getSingleData().totalCost)"), "5,40 €");
+  opened = reopenHistory([eur, usd], usd.date, "de", "EUR").rt;
+  assert.equal(opened.run("window.EAF_I18N.getMarketCode()+':'+window.EAF_I18N.getCurrency()"), "us:USD");
+  assert.equal(opened.run("_fmtMoney(_getSingleData().totalCost)"), "$4.80");
+});
+
+test("EVS-002/003 ältere v2 Metadaten werden ohne Migration deterministisch aufgelöst", () => {
+  const oldWithMarket = {schema: "v2", type: "ev", date: 301, km: 160.9344, consumption: 30 / 1.609344, price: .16, marketCode: "us"};
+  const oldWithCurrency = {schema: "v2", type: "ev", date: 302, km: 100, consumption: 18, price: 2.7, currencyMetadata: {code: "TRY", symbol: "₺", locale: "tr-TR"}};
+  const oldWithoutMetadata = {schema: "v2", type: "ev", date: 303, km: 100, consumption: 18, price: .3};
+  const entries = [oldWithMarket, oldWithCurrency, oldWithoutMetadata];
+  for (const [entry, market, currency, km] of [[oldWithMarket, "us", "USD", 100], [oldWithCurrency, "tr", "TRY", 100], [oldWithoutMetadata, "de", "EUR", 100]]) {
+    const {rt, historyJson} = reopenHistory(entries, entry.date, "us", "USD");
+    assert.equal(rt.run("window.EAF_I18N.getMarketCode()"), market);
+    assert.equal(rt.run("window.EAF_I18N.getCurrency()"), currency);
+    assert.ok(Math.abs(Number(rt.elements.get("kmEv").value) - km) < 1e-9);
+    assert.equal(rt.localStorage.getItem("eautofakten_history"), historyJson);
+  }
+});
+
+test("EVS-003 altes Vergleichsschema bleibt metrisch und EUR statt den globalen Markt zu übernehmen", () => {
+  const legacy = {
+    date: 304, km: 100,
+    ev: {consumption: 18, price: .3},
+    fuel: {consumption: 6.5, price: 1.8},
+    result: {yearlySaving: 100}
+  };
+  const {rt, historyJson} = reopenHistory([legacy], legacy.date, "us", "USD");
+  assert.equal(rt.run("window.EAF_I18N.getMarketCode()+':'+window.EAF_I18N.getCurrency()"), "de:EUR");
+  assert.equal(rt.run("appMode"), "compare");
+  assert.equal(Number(rt.elements.get("kmShared").value), 100);
+  assert.equal(Number(rt.elements.get("evVerbrauch").value), 18);
+  assert.equal(Number(rt.elements.get("strompreis").value), .3);
+  assert.equal(Number(rt.elements.get("verbrauchVerbrenner").value), 6.5);
+  assert.equal(Number(rt.elements.get("benzinpreis").value), 1.8);
+  assert.equal(rt.localStorage.getItem("eautofakten_history"), historyJson);
 });

@@ -9,10 +9,9 @@
 // the UI back to their stored market preference.
 
 export const config = {
-  matcher: [
-    '/',
-    '/((?!en-eu|tr|api|_next|_vercel|fonts|favicon|robots.txt|sitemap.xml|manifest|.*\\..*).*)'
-  ],
+  // Only the base calculator and history have matching regional shells.
+  // Legal pages already link to their own canonical language destinations.
+  matcher: ['/', '/verlauf'],
 };
 
 const DOMESTIC_COUNTRIES = ['DE', 'AT', 'CH', 'LI', 'US', 'CA', 'MX', 'TR'];
@@ -20,6 +19,9 @@ const BOT_UA_REGEX = /bot|crawler|spider|googlebot|bingbot|yandex|duckduckgo|bai
 
 export default function middleware(request) {
   const url = new URL(request.url);
+  // Use the same allowlist even if the host invokes us on another path.
+  if (!config.matcher.includes(url.pathname)) return;
+
   const country = request.headers.get('x-vercel-ip-country') || '';
   const ua = request.headers.get('user-agent') || '';
 
@@ -30,21 +32,16 @@ export default function middleware(request) {
 
   // 2. Turkish IP → dedicated /tr/ market shell (parity with /en-eu/). Runs
   //    BEFORE the generic branch; TR stays in DOMESTIC_COUNTRIES so that branch
-  //    can never grab it. /tr/* is also matcher-excluded, so this fires only
-  //    off-shell (no loop). Guard mirrors the /en-eu/ branch (startsWith) —
-  //    the matcher already gates /tr/*.
-  if (country === 'TR' && !url.pathname.startsWith('/tr')) {
-    return Response.redirect(
-      new URL('/tr' + url.pathname, request.url),
-      302
-    );
+  //    can never grab it. Regional destinations are outside the allowlist.
+  if (country === 'TR') {
+    url.pathname = '/tr' + url.pathname;
+    return Response.redirect(url, 302);
   }
 
   // 3. Other non-domestic country → redirect to /en-eu/.
-  if (!DOMESTIC_COUNTRIES.includes(country) && !url.pathname.startsWith('/en-eu')) {
-    return Response.redirect(
-      new URL('/en-eu' + url.pathname, request.url),
-      302
-    );
+  if (!DOMESTIC_COUNTRIES.includes(country)) {
+    // Change only the path so history parameters and URL fragments survive.
+    url.pathname = '/en-eu' + url.pathname;
+    return Response.redirect(url, 302);
   }
 }

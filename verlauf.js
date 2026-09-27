@@ -46,7 +46,7 @@
   const UNIT_CONV = {
     MI_TO_KM: 1.609344,
     GAL_TO_L: 3.785411784,
-    l100kmToMpg: (l) => (isFinite(l) && l > 0) ? 235.214583 / l : NaN
+    l100kmToMpg: (l) => (isFinite(l) && l > 0) ? (100 * UNIT_CONV.GAL_TO_L / UNIT_CONV.MI_TO_KM) / l : NaN
   };
   function _entryIsUs(entry) { return !!(entry && entry.marketCode === "us"); }
   function _entryDistanceUnit(entry)  { return _entryIsUs(entry) ? "mi"           : "km"; }
@@ -166,6 +166,7 @@
   function fmtMoneyEntry(value, entry, decimals) {
     if (!isFinite(value)) return "—";
     if (decimals == null) decimals = 2;
+    value = _roundForDisplay(value, decimals);
     const fromEntry = _pickEntryCurrency(entry);
     const cur = fromEntry || (entry ? CURRENCY_TABLE.EUR : getCurrentCurrency());
     try {
@@ -322,6 +323,10 @@
       importTooLarge: "Datei zu groß (max. 2 MB).",
       importVersionMismatch: "Datei stammt aus einer anderen Version und ist nicht kompatibel.",
       importMerged: "{new} neue Einträge importiert, {skipped} übersprungen.",
+      historyCoordination: "Verlauf konnte nicht geändert werden. Bitte in einem aktuellen Browser über HTTPS öffnen und erneut versuchen.",
+      historyMutationFailed: "Verlauf konnte nicht geändert werden. Bitte Speicher und aktuelle Auswahl prüfen und erneut versuchen.",
+      importSaveFailed: "Import konnte nicht gespeichert werden. Vorhandene Daten bleiben erhalten. Bitte Gerätespeicher prüfen und erneut versuchen.",
+      importRefreshFailed: "Die Daten sind gespeichert, aber die Ansicht konnte nicht aktualisiert werden. Bitte Seite neu laden.",
       exportEmpty: "Verlauf ist leer, nichts zu exportieren.",
       histEmptyNone: "Dein Verlauf ist leer. Starte mit deiner ersten Berechnung.",
       histEmptyCta: "Erste Fahrt berechnen",
@@ -422,6 +427,10 @@
       importTooLarge: "File too large (max 2 MB).",
       importVersionMismatch: "File is from a different version and not compatible.",
       importMerged: "{new} new entries imported, {skipped} skipped.",
+      historyCoordination: "History could not be changed. Open in an up to date browser over HTTPS and try again.",
+      historyMutationFailed: "History could not be changed. Check storage and the current selection, then try again.",
+      importSaveFailed: "Import could not be saved. Existing data is preserved. Check device storage and try again.",
+      importRefreshFailed: "The data is saved, but the view could not be updated. Please reload the page.",
       exportEmpty: "History is empty, nothing to export.",
       histEmptyNone: "Nothing saved yet. Start with your first calculation.",
       histEmptyCta: "Calculate first trip",
@@ -522,6 +531,10 @@
       importTooLarge: "Dosya çok büyük (en fazla 2 MB).",
       importVersionMismatch: "Dosya farklı bir sürümden ve uyumlu değil.",
       importMerged: "{new} yeni kayıt içe aktarıldı, {skipped} atlandı.",
+      historyCoordination: "Geçmiş değiştirilemedi. Güncel bir tarayıcıda HTTPS üzerinden açıp tekrar deneyin.",
+      historyMutationFailed: "Geçmiş değiştirilemedi. Depolamayı ve mevcut seçimi kontrol edip tekrar deneyin.",
+      importSaveFailed: "İçe aktarma kaydedilemedi. Mevcut veriler korunur. Cihaz depolamasını kontrol edip tekrar deneyin.",
+      importRefreshFailed: "Veriler kaydedildi, ancak görünüm güncellenemedi. Lütfen sayfayı yeniden yükleyin.",
       exportEmpty: "Geçmiş boş, dışa aktarılacak bir şey yok.",
       histEmptyNone: "Geçmişin boş. İlk hesabını kaydet ve takibe başla.",
       histEmptyCta: "İlk yolculuğu hesapla",
@@ -621,15 +634,13 @@
   }
 
   // One-time migration from the legacy key used before v2.
-  (function migrate() {
+  let migrationPending = false;
+  let migrationError = null;
+  const migration = (function () {
     try {
-      const cur = localStorage.getItem(HIST_KEY);
-      if (cur && cur !== "[]") return;
-      const old = localStorage.getItem("eaf.history.v1");
-      if (!old) return;
-      const legacy = JSON.parse(old);
-      if (!Array.isArray(legacy) || !legacy.length) { localStorage.removeItem("eaf.history.v1"); return; }
-      const migrated = legacy.map(e => {
+      if (!localStorage.getItem("eaf.history.v1")) return Promise.resolve();
+      migrationPending = true;
+      return window.EAF_HISTORY.migrate(e => {
         const i = e.inputs || {}, r = e.results || {};
         const ts = e.id || (e.timestamp ? new Date(e.timestamp).getTime() : Date.now());
         return {
@@ -642,10 +653,9 @@
             monthlySaving: Math.round(r.monthly_difference ?? NaN),
           },
         };
-      });
-      localStorage.setItem(HIST_KEY, JSON.stringify(migrated.slice(0, 50)));
-      localStorage.removeItem("eaf.history.v1");
-    } catch (e) {}
+      }).catch(error => { migrationError = error; })
+        .finally(() => { migrationPending = false; });
+    } catch (error) { migrationPending = false; migrationError = error; return Promise.resolve(); }
   })();
 
   const ITEMS_PER_PAGE = 10;
@@ -716,13 +726,21 @@
   // Legacy entries are the old compare snapshots (both ev + fuel keys).
   const isLegacy = e => e && !isV2(e);
 
-  function loadAll() {
+  function loadAll(strict = false) {
     let arr = [];
-    try { arr = JSON.parse(localStorage.getItem(HIST_KEY) || "[]"); } catch (e) {}
+    try {
+      arr = JSON.parse(localStorage.getItem(HIST_KEY) || "[]");
+      if (strict && (!Array.isArray(arr) || !arr.every(_isPlainObject))) throw new Error("Invalid stored history");
+    } catch (e) { if (strict) throw e; }
     return Array.isArray(arr) ? arr.filter(_isPlainObject).slice(0, 50) : [];
   }
-  function saveAll(arr) {
-    try { localStorage.setItem(HIST_KEY, JSON.stringify(arr)); } catch (e) {}
+  async function mutateHistory(transform) {
+    await migration;
+    if (migrationError) throw migrationError;
+    return window.EAF_HISTORY.mutate(transform);
+  }
+  function mutationFailure(error, fallback = "historyMutationFailed") {
+    alert(_tv(error && error.code === "HISTORY_COORDINATION_UNAVAILABLE" ? "historyCoordination" : fallback));
   }
 
   // ── Export / Import (v1) ───────────────────────────────────────────────────
@@ -749,11 +767,20 @@
     return cleaned;
   }
   function _finitePos(v) {
-    var n = Number(v);
-    return Number.isFinite(n) && n >= 0 ? n : NaN;
+    return typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : NaN;
   }
-  function _money(v) {
-    return Number.isFinite(v) ? Math.round(v * 100) / 100 : NaN;
+  // Output-only rounding, matching script.js. Stored/calculated values stay raw.
+  function _roundForDisplay(v, decimals = 2, magnitude = Math.abs(v)) {
+    if (!isFinite(v)) return v;
+    const scale = 10 ** decimals;
+    let scaled = Math.abs(v) * scale;
+    if (!Number.isFinite(scale) || !Number.isFinite(scaled) || scaled > Number.MAX_SAFE_INTEGER) return v;
+    const half = Math.round(scaled - 0.5) + 0.5;
+    const operandScale = magnitude * scale;
+    const tolerance = 4 * Number.EPSILON * Math.max(1, scaled, Number.isFinite(operandScale) ? operandScale : scaled);
+    if (Math.abs(scaled - half) <= tolerance) scaled = half;
+    const rounded = Math.round(scaled) / scale;
+    return rounded === 0 ? 0 : Math.sign(v) * rounded;
   }
   function _validateEnvelope(obj) {
     if (!_isPlainObject(obj)) return false;
@@ -768,8 +795,25 @@
     if (!_isPlainObject(raw)) return null;
     if (raw.schema !== "v2") return null;                 // strict v2 only
     if (raw.type !== "ev" && raw.type !== "vb") return null;
-    var date = Number(raw.date);
-    if (!Number.isFinite(date) || date <= 0) return null;
+    var date = raw.date;
+    if (typeof date !== "number" || !Number.isFinite(date) || date <= 0
+     || !Number.isFinite(new Date(date).getTime())) return null;
+    // Optional fields may be absent in older v2 exports. Present malformed
+    // values are errors, rather than defaults that change their meaning.
+    if (raw.id !== undefined && (typeof raw.id !== "string" || !/^eaf_[0-9a-f]{32}$/.test(raw.id))) return null;
+    if (raw.ridesharing !== undefined && typeof raw.ridesharing !== "boolean") return null;
+    if (raw.persons !== undefined && (!Number.isInteger(raw.persons) || raw.persons < 1 || raw.persons > 99)) return null;
+    if (raw.note !== undefined && typeof raw.note !== "string") return null;
+    if (raw.language !== undefined && !_allowed(ALLOWED_LANG, raw.language)) return null;
+    if (raw.marketCode !== undefined && !_allowed(ALLOWED_MARKET, raw.marketCode)) return null;
+    if (raw.currencyMetadata !== undefined) {
+      var cm = raw.currencyMetadata;
+      if (!_isPlainObject(cm) || !_allowed(ALLOWED_CURRENCY, cm.code)
+       || typeof cm.symbol !== "string" || !cm.symbol.length || cm.symbol.length > 4
+       || !_validLocale(cm.locale)) return null;
+      if (raw.marketCode && MARKET_CONFIG[raw.marketCode].currency !== cm.code) return null;
+    }
+    if (raw.sourceLocale !== undefined && !_validLocale(raw.sourceLocale)) return null;
     var km          = _finitePos(raw.km);
     var consumption = _finitePos(raw.consumption);
     var price       = _finitePos(raw.price);
@@ -777,9 +821,9 @@
     // Abgeleitete Kosten niemals aus einer Importdatei übernehmen. Sie werden
     // aus den validierten Eingaben neu berechnet, damit manipulierte oder alte
     // Exportwerte nicht als scheinbar gültige Ergebnisse angezeigt werden.
-    var costPer100  = _money(consumption * price);
-    var monthlyCost = _money(costPer100 * km / 100);
-    var yearlyCost  = _money(monthlyCost * 12);
+    var costPer100  = consumption * price;
+    var monthlyCost = costPer100 * km / 100;
+    var yearlyCost  = monthlyCost * 12;
     if (![costPer100, monthlyCost, yearlyCost].every(Number.isFinite)) return null;
     var entry = {
       date:        date,
@@ -791,37 +835,69 @@
       costPer100:  costPer100,
       monthlyCost: monthlyCost,
       yearlyCost:  yearlyCost,
-      ridesharing: !!raw.ridesharing,
-      persons:     Math.max(1, Math.min(99, Math.round(Number(raw.persons)) || 1)),
+      ridesharing: raw.ridesharing ?? false,
+      persons:     raw.persons ?? 1,
       note:        _sanitizeNote(raw.note)
     };
-    if (typeof raw.language === "string" && ALLOWED_LANG[raw.language]) {
-      entry.language = raw.language;
+    if (raw.id !== undefined) entry.id = raw.id;
+    if (raw.language !== undefined) entry.language = raw.language;
+    if (raw.marketCode !== undefined) entry.marketCode = raw.marketCode;
+    if (raw.currencyMetadata !== undefined) {
+      entry.currencyMetadata = { code: cm.code, symbol: cm.symbol, locale: cm.locale };
     }
-    if (typeof raw.marketCode === "string" && ALLOWED_MARKET[raw.marketCode]) {
-      entry.marketCode = raw.marketCode;
-    }
-    if (_isPlainObject(raw.currencyMetadata)) {
-      var cm = raw.currencyMetadata;
-      if (typeof cm.code === "string" && ALLOWED_CURRENCY[cm.code]
-       && typeof cm.symbol === "string" && cm.symbol.length <= 4
-       && typeof cm.locale === "string" && cm.locale.length <= 16) {
-        entry.currencyMetadata = { code: cm.code, symbol: cm.symbol, locale: cm.locale };
-      }
-    }
-    if (typeof raw.sourceLocale === "string" && raw.sourceLocale.length <= 16) {
-      entry.sourceLocale = raw.sourceLocale;
+    if (raw.sourceLocale !== undefined) entry.sourceLocale = raw.sourceLocale;
+    // Partial old market metadata has the same deterministic interpretation
+    // as calculator restoration. Complete only missing counterparts on import.
+    if (entry.marketCode && !entry.currencyMetadata) {
+      const currency = CURRENCY_TABLE[MARKET_CONFIG[entry.marketCode].currency];
+      entry.currencyMetadata = { code: currency.code, symbol: currency.symbol, locale: currency.locale };
+    } else if (!entry.marketCode && entry.currencyMetadata) {
+      const code = entry.currencyMetadata.code;
+      entry.marketCode = code === "USD" ? "us" : code === "TRY" ? "tr" : entry.language === "en" ? "eu" : "de";
     }
     return entry;
   }
+  function _allowed(table, value) {
+    return typeof value === "string" && Object.prototype.hasOwnProperty.call(table, value);
+  }
+  function _validLocale(value) {
+    if (typeof value !== "string" || !value.length || value.length > 16) return false;
+    try { return Intl.getCanonicalLocales(value).length === 1; }
+    catch (_) { return false; }
+  }
+  function _entryFingerprint(e) {
+    const normalized = _sanitizeImportEntry(e);
+    if (!normalized) return JSON.stringify(e);
+    // Calculated costs and unknown fields are not identity inputs. Old rounded
+    // exports normalize to the same immutable scenario on every reimport.
+    return JSON.stringify([
+      normalized.date, normalized.schema, normalized.type, normalized.km,
+      normalized.consumption, normalized.price, normalized.ridesharing,
+      normalized.persons, normalized.note, normalized.language ?? null,
+      normalized.marketCode ?? null, normalized.currencyMetadata ?? null,
+      normalized.sourceLocale ?? null
+    ]);
+  }
   function _dedupKey(e) {
-    return [
-      e && e.date,
-      (e && e.type) || "",
-      Number(e && e.km) || 0,
-      Number(e && e.consumption) || 0,
-      Number(e && e.price) || 0
-    ].join("|");
+    return e && typeof e.id === "string" && /^eaf_[0-9a-f]{32}$/.test(e.id)
+      ? "id:" + e.id : "snapshot:" + _entryFingerprint(e);
+  }
+  function _historyLegacyKey(entry) {
+    // A locator for unchanged old snapshots, never a persisted replacement ID.
+    // Ambiguous matches are rejected by the caller; the key exposes no inputs.
+    const text = JSON.stringify(entry);
+    let a = 2166136261, b = 3339675911;
+    for (let i = 0; i < text.length; i++) {
+      a = Math.imul(a ^ text.charCodeAt(i), 16777619);
+      b = Math.imul(b ^ text.charCodeAt(i), 2246822519);
+    }
+    return (a >>> 0).toString(16).padStart(8, "0") + (b >>> 0).toString(16).padStart(8, "0");
+  }
+
+  function _historyEntryUrl(e) {
+    if (typeof e.id === "string" && /^eaf_[0-9a-f]{32}$/.test(e.id)) return "./?id=" + encodeURIComponent(e.id);
+    return "./?id=" + encodeURIComponent(e.date ?? e.id)
+      + "&entryKey=" + _historyLegacyKey(e) + "&entryIndex=" + state.all.indexOf(e);
   }
   function _todayIsoDate() {
     var d = new Date();
@@ -830,12 +906,9 @@
     var day = String(d.getDate()).padStart(2, "0");
     return y + "-" + m + "-" + day;
   }
-  function exportHistory() {
-    var all = loadAll();
-    if (!all.length) {
-      alert(_tv("exportEmpty"));
-      return;
-    }
+  function serializeHistoryJson(strict = false) {
+    var all = loadAll(strict);
+    if (!all.length) return null;
     var envelope = {
       app: "evspend",
       kind: "history-export",
@@ -844,14 +917,18 @@
       entryCount: all.length,
       entries: all
     };
+    var pat = _tv("historyExportFilename") || "evspend-verlauf-{date}.json";
+    return {filename: pat.replace("{date}", _todayIsoDate()), data: JSON.stringify(envelope, null, 2)};
+  }
+  function exportHistory() {
     try {
-      var json = JSON.stringify(envelope, null, 2);
-      var blob = new Blob([json], { type: "application/json" });
+      var file = serializeHistoryJson();
+      if (!file) { alert(_tv("exportEmpty")); return; }
+      var blob = new Blob([file.data], { type: "application/json" });
       var url  = URL.createObjectURL(blob);
       var a    = document.createElement("a");
-      var pat  = _tv("historyExportFilename") || "evspend-verlauf-{date}.json";
       a.href     = url;
-      a.download = pat.replace("{date}", _todayIsoDate());
+      a.download = file.filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -886,20 +963,17 @@
   function _numCell(v, decimals) {
     var n = Number(v);
     if (!Number.isFinite(n)) return "";
-    var s = decimals == null ? String(n) : n.toFixed(decimals);
+    var s = decimals == null ? String(n) : _roundForDisplay(n, decimals).toFixed(decimals);
     // CSV-DEC: Dezimaltrenner an die Listen-Locale koppeln (de/tr Komma, en Punkt).
     // Number/toFixed liefert keinen Tausendertrenner, daher ist nur der eine Punkt betroffen.
     if (_listLocale().slice(0, 2) !== "en") s = s.replace(".", ",");
     return s;
   }
-  function exportHistoryCsv() {
-    var v2 = loadAll().filter(function (e) {
+  function serializeHistoryCsv(strict = false) {
+    var v2 = loadAll(strict).filter(function (e) {
       return e && e.schema === "v2" && (e.type === "ev" || e.type === "vb");
     });
-    if (!v2.length) {
-      alert(_tv("exportEmpty"));
-      return;
-    }
+    if (!v2.length) return null;
     var COL = [
       _tv("tableHeaderDate"),
       _tv("tableHeaderType"),
@@ -935,13 +1009,24 @@
     }
     var BOM = "\uFEFF";
     var csv = BOM + lines.join("\r\n") + "\r\n";
+    var pat = _tv("historyCsvFilename") || "evspend-verlauf-{date}.csv";
+    return {filename: pat.replace("{date}", _todayIsoDate()), data: csv};
+  }
+  // Native changes the file transport only. Serialization, display rounding
+  // and language/market conventions remain the shared production functions.
+  window.EAF_HISTORY_EXPORT = Object.freeze({
+    json: () => serializeHistoryJson(true),
+    csv: () => serializeHistoryCsv(true)
+  });
+  function exportHistoryCsv() {
     try {
-      var blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+      var file = serializeHistoryCsv();
+      if (!file) { alert(_tv("exportEmpty")); return; }
+      var blob = new Blob([file.data], { type: "text/csv;charset=utf-8" });
       var url  = URL.createObjectURL(blob);
       var a    = document.createElement("a");
-      var pat  = _tv("historyCsvFilename") || "evspend-verlauf-{date}.csv";
       a.href     = url;
-      a.download = pat.replace("{date}", _todayIsoDate());
+      a.download = file.filename;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
@@ -1008,77 +1093,103 @@
       alert(_tv("importTooLarge"));
       return;
     }
-    var reader = new FileReader();
-    reader.onload = function () {
-      var text = String(reader.result || "");
-      var obj;
-      try { obj = JSON.parse(text); } catch (_) {
-        alert(_tv("importInvalid"));
-        return;
-      }
-      if (!_validateEnvelope(obj)) {
-        if (_isPlainObject(obj) && obj.app === "evspend" && obj.kind === "history-export"
-         && typeof obj.schemaVersion === "number" && obj.schemaVersion !== 1) {
-          alert(_tv("importVersionMismatch"));
-        } else {
+    var reader;
+    try { reader = new FileReader(); }
+    catch (_) { alert(_tv("importInvalid")); return; }
+    reader.onload = async function () {
+      try {
+        var text = String(reader.result || "");
+        var obj;
+        try { obj = JSON.parse(text); } catch (_) {
           alert(_tv("importInvalid"));
+          return;
         }
-        return;
-      }
-      // Validate + sanitize each import entry. Invalid ones are silently
-      // dropped and counted toward the user-visible "skipped" total.
-      var validImports = [];
-      for (var i = 0; i < obj.entries.length; i++) {
-        var ev = _sanitizeImportEntry(obj.entries[i]);
-        if (ev) validImports.push(ev);
-      }
-      var invalidCount = obj.entries.length - validImports.length;
-
-      // Dedupe against existing storage AND against earlier imports in the
-      // same file (a malformed export could repeat the same tuple).
-      var existing = loadAll();
-      var seen = Object.create(null);
-      for (var ex = 0; ex < existing.length; ex++) {
-        seen[_dedupKey(existing[ex])] = 1;
-      }
-      var freshImports = [];
-      var dupCount = 0;
-      for (var v = 0; v < validImports.length; v++) {
-        var ck = _dedupKey(validImports[v]);
-        if (seen[ck]) {
-          dupCount++;
-        } else {
-          seen[ck] = 1;
-          freshImports.push(validImports[v]);
+        if (!_validateEnvelope(obj)) {
+          if (_isPlainObject(obj) && obj.app === "evspend" && obj.kind === "history-export"
+           && typeof obj.schemaVersion === "number" && obj.schemaVersion !== 1) {
+            alert(_tv("importVersionMismatch"));
+          } else {
+            alert(_tv("importInvalid"));
+          }
+          return;
         }
-      }
+        // Validate the entire file before reading or mutating local history.
+        // One invalid entry rejects the whole file, including valid siblings.
+        var validImports = [];
+        for (var i = 0; i < obj.entries.length; i++) {
+          var ev = _sanitizeImportEntry(obj.entries[i]);
+          if (ev) validImports.push(ev);
+        }
+        var invalidCount = obj.entries.length - validImports.length;
+        if (invalidCount) {
+          alert(_tv("importInvalid"));
+          return;
+        }
 
-      // Sort merged list by date desc, cap at HIST_MAX_LOCAL. Only count
-      // freshImports that actually survived the cap as "new" — ones pushed
-      // off the end count toward "skipped".
-      var freshKeys = Object.create(null);
-      for (var fk = 0; fk < freshImports.length; fk++) {
-        freshKeys[_dedupKey(freshImports[fk])] = 1;
-      }
-      var merged = existing.concat(freshImports);
-      merged.sort(function (a, b) { return (Number(b && b.date) || 0) - (Number(a && a.date) || 0); });
-      if (merged.length > HIST_MAX_LOCAL) merged.length = HIST_MAX_LOCAL;
-      var newCount = 0;
-      for (var m = 0; m < merged.length; m++) {
-        if (freshKeys[_dedupKey(merged[m])]) newCount++;
-      }
-      var capDropped = Math.max(0, freshImports.length - newCount);
-      saveAll(merged);
+        // Dedupe against existing storage AND against earlier imports in the
+        // same file (a malformed export could repeat the same tuple).
+        var counts;
+        try {
+          counts = await mutateHistory(existing => {
+            var seen = Object.create(null);
+            for (var ex = 0; ex < existing.length; ex++) {
+              seen[_dedupKey(existing[ex])] = _entryFingerprint(existing[ex]);
+            }
+            var freshImports = [];
+            var dupCount = 0;
+            for (var v = 0; v < validImports.length; v++) {
+              var ck = _dedupKey(validImports[v]);
+              if (Object.prototype.hasOwnProperty.call(seen, ck)) {
+                if (seen[ck] !== _entryFingerprint(validImports[v])) {
+                  const error = new Error("Conflicting imported identity");
+                  error.code = "HISTORY_IMPORT_CONFLICT";
+                  throw error;
+                }
+                dupCount++;
+              } else {
+                seen[ck] = _entryFingerprint(validImports[v]);
+                freshImports.push(validImports[v]);
+              }
+            }
 
-      var skipped = invalidCount + dupCount + capDropped;
-      var msg = (_tv("importMerged") || "{new} new entries imported, {skipped} skipped.")
-        .replace("{new}", String(newCount))
-        .replace("{skipped}", String(skipped));
-      alert(msg);
-      try { refresh(); } catch (_) {}
+            // Sort merged list by date desc, cap at HIST_MAX_LOCAL. Only count
+            // freshImports that actually survived the cap as "new" — ones pushed
+            // off the end count toward "skipped".
+            var freshKeys = Object.create(null);
+            for (var fk = 0; fk < freshImports.length; fk++) {
+              freshKeys[_dedupKey(freshImports[fk])] = 1;
+            }
+            var merged = existing.concat(freshImports);
+            merged.sort(function (a, b) { return (Number(b && b.date) || 0) - (Number(a && a.date) || 0); });
+            if (merged.length > HIST_MAX_LOCAL) merged.length = HIST_MAX_LOCAL;
+            var newCount = 0;
+            for (var m = 0; m < merged.length; m++) {
+              if (freshKeys[_dedupKey(merged[m])]) newCount++;
+            }
+            var capDropped = Math.max(0, freshImports.length - newCount);
+            // One setItem is the commit boundary. Do not touch state/UI before it.
+            // A duplicate-only import needs no write and must not reorder old data.
+            if (!newCount) merged = existing;
+            return {entries: merged, write: newCount > 0,
+              result: {newCount, skipped: invalidCount + dupCount + capDropped}};
+          });
+        } catch (error) {
+          mutationFailure(error, error && error.code === "HISTORY_IMPORT_CONFLICT" ? "importInvalid" : "importSaveFailed");
+          return;
+        }
+        try { refresh(); }
+        catch (_) { alert(_tv("importRefreshFailed")); return; }
+        var newCount = counts.newCount;
+        var skipped = counts.skipped;
+        var msg = (_tv("importMerged") || "{new} new entries imported, {skipped} skipped.")
+          .replace("{new}", String(newCount))
+          .replace("{skipped}", String(skipped));
+        alert(msg);
+      } catch (_) { alert(_tv("importInvalid")); }
     };
-    reader.onerror = function () { alert(_tv("importInvalid")); };
-    reader.readAsText(file);
+    reader.onerror = reader.onabort = function () { alert(_tv("importInvalid")); };
+    try { reader.readAsText(file); }
+    catch (_) { alert(_tv("importInvalid")); }
   }
 
   // ── Period filter ──────────────────────────────────────────────────────────
@@ -1221,7 +1332,7 @@
     body.type = "button";
     body.className = "hist-item-body";
     body.addEventListener("click", () => {
-      location.href = "./?id=" + encodeURIComponent(e.date);
+      location.href = _historyEntryUrl(e);
     });
 
     const row = document.createElement("div");
@@ -1288,7 +1399,7 @@
     del.textContent = "×";
     del.addEventListener("click", ev => {
       ev.stopPropagation();
-      deleteEntry(e.date);
+      return deleteEntry(e);
     });
 
     wrap.appendChild(body);
@@ -1305,7 +1416,7 @@
     body.type = "button";
     body.className = "hist-item-body";
     body.addEventListener("click", () => {
-      location.href = "./?id=" + encodeURIComponent(e.date ?? e.id);
+      location.href = _historyEntryUrl(e);
     });
 
     const row = document.createElement("div");
@@ -1361,7 +1472,7 @@
     del.textContent = "×";
     del.addEventListener("click", ev => {
       ev.stopPropagation();
-      deleteEntry(e.date ?? e.id);
+      return deleteEntry(e);
     });
 
     wrap.appendChild(body);
@@ -1463,8 +1574,8 @@
   // ── State ──────────────────────────────────────────────────────────────────
   let state = { period: "today", all: [], search: "", page: 1 };
 
-  function refresh() {
-    state.all = loadAll();
+  function refresh(all = loadAll()) {
+    state.all = all;
     const v2     = state.all.filter(isV2).sort((a, b) => (b.date || 0) - (a.date || 0));
     const legacy = state.all.filter(isLegacy).sort((a, b) => ((b.date ?? b.id) || 0) - ((a.date ?? a.id) || 0));
     renderStats(v2, state.period);
@@ -1472,14 +1583,41 @@
     renderHistoryCostChart(v2, state.period);
   }
 
-  function deleteEntry(id) {
-    const arr = state.all.slice();
-    const idx = arr.findIndex(e => String(e.date ?? e.id) === String(id));
-    if (idx === -1) return;
-    arr.splice(idx, 1);
-    const next = arr;
-    saveAll(next);
-    refresh();
+  // Capture the confirmed selection, never the array to write back.
+  function selection(entries) {
+    return entries.map(entry => {
+      if (typeof entry.id === "string" && /^eaf_[0-9a-f]{32}$/.test(entry.id)) return {id: entry.id};
+      const snapshot = JSON.stringify(entry);
+      const matches = state.all.filter(item => JSON.stringify(item) === snapshot);
+      return {snapshot, count: matches.length, ordinal: matches.indexOf(entry)};
+    });
+  }
+  async function removeSelection(selected) {
+    try {
+      await mutateHistory(current => {
+        const removed = new Set();
+        for (const target of selected) {
+          const indices = [];
+          current.forEach((entry, index) => {
+            if (target.id ? entry.id === target.id : JSON.stringify(entry) === target.snapshot) indices.push(index);
+          });
+          if (!indices.length) continue; // Already deleted, never delete a neighbour.
+          if (target.id) {
+            if (indices.length !== 1) throw new Error("Ambiguous stored identity");
+            removed.add(indices[0]);
+          } else {
+            if (indices.length !== target.count || target.ordinal < 0) throw new Error("Ambiguous legacy selection");
+            removed.add(indices[target.ordinal]);
+          }
+        }
+        return {entries: current.filter((_, index) => !removed.has(index)), write: removed.size > 0};
+      });
+      refresh();
+    } catch (error) { mutationFailure(error); }
+  }
+  function deleteEntry(entry) {
+    if (!state.all.includes(entry)) return;
+    return removeSelection(selection([entry]));
   }
 
   // Fade the chart out slightly, swap content, fade back in. Only runs when
@@ -1690,8 +1828,8 @@
         count: entries.length,
         start: startStr,
         end: endStr,
-        evCost: isFinite(evAvg) ? numFmt2.format(evAvg) : "—",
-        vbCost: isFinite(vbAvg) ? numFmt2.format(vbAvg) : "—",
+        evCost: isFinite(evAvg) ? numFmt2.format(_roundForDisplay(evAvg)) : "—",
+        vbCost: isFinite(vbAvg) ? numFmt2.format(_roundForDisplay(vbAvg)) : "—",
         currency: currLong,
         unit: distLong
       });
@@ -1732,16 +1870,16 @@
         if (isFinite(Number(e.price))) {
           const price = Number(e.price);
           if (e.type === "ev") {
-            priceStr = moneyFmt.format(price) + "/kWh";
+            priceStr = moneyFmt.format(_roundForDisplay(price)) + "/kWh";
           } else {
             const p = isUs ? price * UNIT_CONV.GAL_TO_L : price;
-            priceStr = moneyFmt.format(p) + "/" + fuelAbbrev;
+            priceStr = moneyFmt.format(_roundForDisplay(p)) + "/" + fuelAbbrev;
           }
         }
 
         let costStr = "—";
         if (isFinite(Number(e.costPer100))) {
-          costStr = moneyFmt.format(Number(e.costPer100) * conv);
+          costStr = moneyFmt.format(_roundForDisplay(Number(e.costPer100) * conv));
         }
 
         return "<tr><td>" + escHtml(dStr) + "</td><td>" + escHtml(distStr) + "</td><td>"
@@ -1904,7 +2042,7 @@
               label: function (c) {
                 var v = Number(c.raw);
                 if (!isFinite(v)) return "—";
-                return v.toFixed(2) + (currencySym ? " " + currencySym : "");
+                return _roundForDisplay(v).toFixed(2) + (currencySym ? " " + currencySym : "");
               }
             }
           }
@@ -2002,18 +2140,14 @@
   if (clearBtn) {
     clearBtn.addEventListener("click", () => {
       if (!confirm(_tv("confirmClearAll"))) return;
-      const remaining = state.all.filter(isLegacy);     // keep legacy
-      saveAll(remaining);
-      refresh();
+      return removeSelection(selection(state.all.filter(isV2)));
     });
   }
 
   if (legacyClear) {
     legacyClear.addEventListener("click", () => {
       if (!confirm(_tv("confirmClearLegacy"))) return;
-      const remaining = state.all.filter(isV2);         // keep v2
-      saveAll(remaining);
-      refresh();
+      return removeSelection(selection(state.all.filter(isLegacy)));
     });
   }
 
@@ -2077,12 +2211,13 @@
     const menu = document.getElementById("marketMenu");
     if (!btn || !menu) return;
     let isOpen = false;
-    function closeAll() {
+    function closeAll(restoreFocus) {
       if (!isOpen) return;
       isOpen = false;
       menu.hidden = true;
       menu.style.display = "none";
       btn.setAttribute("aria-expanded", "false");
+      if (restoreFocus) btn.focus();
     }
     function openMarket() {
       if (isOpen) return;
@@ -2101,7 +2236,7 @@
 
     btn.addEventListener("click", (e) => {
       e.stopPropagation();
-      if (isOpen) closeAll(); else openMarket();
+      if (isOpen) closeAll(true); else openMarket();
     });
 
     // CONS-01b (Option Y): analog script.js — TR/EU navigieren zu den
@@ -2117,10 +2252,11 @@
       item.addEventListener("click", (e) => {
         e.stopPropagation();
         const code = item.getAttribute("data-market");
-        closeAll();
         const p = location.pathname;
         const inTr = (p === "/tr" || p.indexOf("/tr/") === 0);
         const inEu = (p === "/en-eu" || p.indexOf("/en-eu/") === 0);
+        const navigates = (code === "tr" && !inTr) || (code === "eu" && !inEu);
+        closeAll(!navigates);
         if (code === "tr" && !inTr) return gotoLocaleVerlauf("tr", "/tr/verlauf");
         if (code === "eu" && !inEu) return gotoLocaleVerlauf("eu", "/en-eu/verlauf");
         _setMarketVerlauf(code);
@@ -2129,18 +2265,18 @@
 
     document.addEventListener("click", (e) => {
       if (!isOpen) return;
-      if (!e.target.closest(".top-pill-wrap")) closeAll();
+      if (!e.target.closest(".top-pill-wrap")) closeAll(false);
     });
 
     // Touch-Outside deckt iOS-Edge-Cases ab, wo `click` auf Non-Interactive
     // Elementen nicht zuverlässig feuert.
     document.addEventListener("touchstart", (e) => {
       if (!isOpen) return;
-      if (!e.target.closest(".top-pill-wrap")) closeAll();
+      if (!e.target.closest(".top-pill-wrap")) closeAll(false);
     }, { passive: true });
 
     document.addEventListener("keydown", (e) => {
-      if (e.key === "Escape" && isOpen) closeAll();
+      if (e.key === "Escape" && isOpen) closeAll(true);
     });
   })();
 
@@ -2188,5 +2324,6 @@
     b.classList.toggle("period-btn--active", b.dataset.period === savedPeriod);
     b.setAttribute("aria-pressed", b.dataset.period === savedPeriod ? "true" : "false");
   });
-  refresh();
+  if (migrationPending) migration.then(() => { refresh(); if (migrationError) mutationFailure(migrationError); });
+  else { refresh(); if (migrationError) mutationFailure(migrationError); }
 })();
