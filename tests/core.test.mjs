@@ -168,6 +168,38 @@ test("US Einheiten ergeben unabhängige Kontrollwerte", () => {
   assert.equal(rt.run("fmt(_getCompareData().savingsTotal)"), "45.05");
 });
 
+test("L1 US Formelhinweis entspricht den sichtbaren Einheiten und der Produktionsformel", () => {
+  const rt = createRuntime();
+  const notice = rt.element("calculationNotice");
+  notice.setAttribute("data-i18n-html", "calcInfoBlock");
+  rt.context.document.querySelectorAll = selector => selector === "[data-i18n-html]" ? [notice] : [];
+  rt.run("window.EAF_I18N.setMarket('us')");
+
+  const formulas = {
+    de: "E-Auto: Kosten = (Verbrauch in kWh/100 mi × Strompreis pro kWh × Strecke in mi) ÷ 100<br>Verbrenner: Kosten = (Strecke in mi ÷ Effizienz in mpg) × Preis pro US-Gallone",
+    en: "EV cost = (consumption in kWh/100 mi × electricity price per kWh × distance in mi) ÷ 100<br>Combustion cost = (distance in mi ÷ efficiency in mpg) × fuel price per US gallon",
+    tr: "Elektrikli maliyeti = (kWh/100 mi cinsinden tüketim × kWh başına elektrik fiyatı × mi cinsinden mesafe) ÷ 100<br>İçten yanmalı maliyeti = (mi cinsinden mesafe ÷ mpg cinsinden verimlilik) × ABD galonu başına yakıt fiyatı"
+  };
+  for (const language of ["de", "en", "tr"]) {
+    rt.run(`window.EAF_I18N.setLanguage('${language}')`);
+    assert.ok(notice.innerHTML.includes(formulas[language]), language);
+    const dict = rt.context.window.EAF_I18N.translations[language];
+    const formula = /<br>(.*?)<\/p>/;
+    assert.equal(notice.innerHTML.replace(formula, "<br>FORMULA</p>"), dict.calcInfoBlock.replace(formula, "<br>FORMULA</p>"), `${language}: existing qualifications preserved`);
+  }
+
+  rt.setInputs({evVerbrauch: 30, strompreis: 0.16, benzinpreis: 3.2, verbrauchVerbrenner: 26, kmEv: 100, kmVb: 100});
+  assert.ok(Math.abs(rt.run("singleType='ev'; _getSingleData().totalCost") - (30 * 0.16 * 100 / 100)) < 1e-10);
+  assert.ok(Math.abs(rt.run("singleType='vb'; _getSingleData().totalCost") - (100 / 26 * 3.2)) < 1e-10);
+
+  for (const market of ["de", "eu", "tr"]) {
+    rt.run(`window.EAF_I18N.setMarket('${market}')`);
+    const dict = rt.context.window.EAF_I18N.translations[rt.context.window.EAF_I18N.getLanguage()];
+    assert.equal(notice.innerHTML, dict.calcInfoBlock, `${market}: metric notice unchanged`);
+    assert.doesNotMatch(notice.innerHTML, /mpg|US.gallon|US-Gallone|ABD galonu/);
+  }
+});
+
 test("EVS-001 Geldwerte behalten Präzision bis zur Ausgabe", () => {
   const rt = createRuntime();
   metricInputs(rt, { evVerbrauch: 17, strompreis: 0.37, kmEv: 50 });

@@ -70,7 +70,7 @@
     E-posta: <a href="mailto:g.uer@aol.com">g.uer@aol.com</a></p>
 
     <p><strong>2. Kişisel Veri İşleme Amacı</strong><br>
-    Hesaplayıcıya girilen değerler (tüketim, fiyat, kilometre vb.) yalnızca kullanıcının tarayıcısının yerel depolamasında (LocalStorage) saklanır, cihazdan dışarı çıkmaz ve işletici tarafından işlenmez. Bunun yanında, web sitesinin teknik olarak sunulabilmesi ve güvenliğinin sağlanması için barındırma sağlayıcısı (Vercel Inc.) tarafından IP adresi, tarayıcı bilgisi (User-Agent), zaman damgası ve istek URL'si gibi teknik olarak gerekli bağlantı verileri işlenir.</p>
+    Web sitesinde hesaplayıcıya girilen değerler (tüketim, fiyat, kilometre vb.) kullanıcının tarayıcısının yerel depolamasında (LocalStorage) saklanır ve işleticiye otomatik olarak aktarılmaz. Kullanıcının başlattığı paylaşım ve dışa aktarma işlemleri aşağıda açıklanmıştır. Bunun yanında, web sitesinin teknik olarak sunulabilmesi ve güvenliğinin sağlanması için barındırma sağlayıcısı (Vercel Inc.) tarafından IP adresi, tarayıcı bilgisi (User-Agent), zaman damgası ve istek URL'si gibi teknik olarak gerekli bağlantı verileri işlenir.</p>
 
     <p><strong>3. İşlenen Kişisel Veri Kategorileri</strong><br>
     İşletici tarafından doğrudan işlenen kişisel veri kategorisi yoktur. Barındırma sağlayıcısı tarafından dolaylı olarak işlenebilen veriler:</p>
@@ -112,7 +112,8 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     </div>
     <h2>Genel</h2>
-    <p>İşletici, hesaplayıcıya girilen değerleri kendisi işlemez; bu değerler yalnızca kullanıcının tarayıcısında kalır. Kayıt veya giriş gerekli değildir. Web sitesi yüklendiğinde ise teknik olarak gerekli bağlantı verileri barındırma sağlayıcısı (Vercel Inc.) tarafından işlenir. Ayrıntılar için aşağıdaki „Barındırma“ bölümüne bakın. Bu bağlantı verilerini işletici kişiselleştirilmiş şekilde değerlendirmez.</p>
+    <p>Hesaplamalar cihazda yerel olarak yapılır. Hesaplayıcı girdileri işleticiye otomatik olarak aktarılmaz. Kayıt veya giriş gerekli değildir. Web sitesi yüklendiğinde ise teknik olarak gerekli bağlantı verileri barındırma sağlayıcısı (Vercel Inc.) tarafından işlenir. Ayrıntılar için aşağıdaki „Barındırma“ bölümüne bakın. Bu bağlantı verilerini işletici kişiselleştirilmiş şekilde değerlendirmez.</p>
+    <p>Tarayıcı depolaması, Service Worker, barındırma ve ülkeye göre yönlendirme açıklamaları web sitesi ve yüklü PWA için geçerlidir. Yerel iOS uygulamasındaki yerel saklama ve dışa aktarma işlemleri „Yerel iOS Uygulaması“ bölümünde açıklanmıştır.</p>
   </div>
 
   <div class="card">
@@ -120,8 +121,15 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="2" y1="12" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" x2="6.01" y1="16" y2="16"/><line x1="10" x2="10.01" y1="16" y2="16"/></svg>
     </div>
     <h2>Yerel Veri Saklama</h2>
-    <p>Hesaplayıcıya girilen değerler (tüketim, fiyatlar, kilometre ve kaydedilen geçmiş gibi) <strong>yalnızca tarayıcının yerel depolamasında (LocalStorage)</strong> saklanır. Bu veriler cihazı terk etmez ve işletici tarafından işlenmez.</p>
-    <p>Girdiğiniz veriler yalnızca kendi cihazınızda saklanır ve bize aktarılmaz. Bu saklama, kullandığınız işlevler için teknik olarak gereklidir ve bu nedenle onay istenmez.</p>
+    <p>Web sitesinde ve yüklü PWA'da girilen değerler (tüketim, fiyatlar ve kilometre gibi) ve kaydedilmiş hesaplamalar <strong>tarayıcının yerel depolamasında (LocalStorage)</strong> saklanır. Bu içerikler işleticiye otomatik olarak aktarılmaz.</p>
+    <p>Bir hesaplamayı paylaştığınızda veya geçmişi dışa aktardığınızda içerikler metin, görsel veya dosya olarak seçtiğiniz bir alıcıya veya saklama konumuna ulaşabilir. Geçmiş yedeği kaydedilmiş notları da içerir. Bu işlem sizin tarafınızdan başlatılır.</p>
+    <p>Girdiğiniz veriler kendi cihazınızda saklanır ve bize otomatik olarak aktarılmaz. Bu saklama, kullandığınız işlevler için teknik olarak gereklidir ve bu nedenle onay istenmez.</p>
+  </div>
+
+  <div class="card" id="native-ios-privacy">
+    <h2>Yerel iOS Uygulaması</h2>
+    <p>Yerel iOS uygulaması, paketindeki sayfaları ve kaynakları bir WebView içinde yerel olarak yükler. Kaydedilmiş hesaplamalar, notlar ve ayarlar uygulama kapsayıcısındaki yerel WebView depolamasında tutulur ve tarayıcının web sitesi verilerinden ayrıdır. Bu yerel içerikleri başlatmak için web sitesinin Vercel barındırması, Service Worker'ı veya ülkeye göre yönlendirmesi kullanılmaz. Harici bağlantılar ve seçtiğiniz paylaşım hedefleri ağ bağlantısı kullanabilir.</p>
+    <p>İçe aktarılan JSON yedekleri yerel olarak işlenir. JSON veya CSV dışa aktarımı için uygulama önbellek dizinine (<code>CACHE</code>) geçici bir dosya yazar ve yerel paylaşım penceresini açar. Alıcıyı veya saklama konumunu siz seçersiniz. Paylaşım denemesinden sonra uygulama kendi geçici dosyasını silmeye çalışır. Temizleme kesilir veya başarısız olursa dosya kalabilir. Önceden paylaşılmış veya başka yerde saklanmış kopyalar bu temizleme ya da uygulama geçmişinin silinmesiyle kaldırılmaz.</p>
   </div>
 
   <div class="card">
@@ -130,7 +138,7 @@
     </div>
     <h2>Service Worker / Çevrimdışı Önbellek</h2>
     <p>Bu web sitesi, HTML sayfalarını ve statik kaynakları (CSS, JavaScript, yazı tipleri, görseller) tarayıcıda önbelleğe alan standart bir <strong>Service Worker</strong> kullanır. Tek amaç, daha hızlı yeniden ziyaret ve uygulamanın çevrimdışı erişilebilirliğidir.</p>
-    <p>Service-Worker önbelleğinde yalnızca statik dosyalar saklanır (HTML, CSS, JavaScript, yazı tipleri, görseller), hesaplama girdileri saklanmaz. Barındırma sağlayıcısının bu dosyalar ilk kez talep edildiğinde zaten işlediği bağlantı verileri dışında, önbelleğin kendisi hiçbir şey aktarmaz. Önbellek tamamen kullanıcının tarayıcısında kalır ve istediğiniz zaman tarayıcı ayarlarından temizlenebilir („Tarayıcı verilerini temizle“ veya benzer seçenek). Tek etkisi, bir sonraki ziyaretin önbelleğe alınmış dosyalardan yararlanamamasıdır.</p>
+    <p>Service-Worker önbelleğinde yalnızca statik dosyalar saklanır (HTML, CSS, JavaScript, yazı tipleri, görseller), hesaplama girdileri saklanmaz. Barındırma sağlayıcısının bu dosyalar ilk kez talep edildiğinde zaten işlediği bağlantı verileri dışında, önbelleğin kendisi hiçbir şey aktarmaz. Önbellek kullanıcının tarayıcısında tutulur. Yalnızca bu önbelleği temizlemek, önbelleğe alınmış dosyaları kaldırır. Tüm web sitesi verilerini silmek, kaydedilmiş hesaplamaları, notları ve ayarları içeren LocalStorage'ı da silebilir.</p>
   </div>
 
   <div class="card">
@@ -185,10 +193,10 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></svg>
     </div>
     <h2>Çerez Yok</h2>
-    <p>EVSpend <strong>hiçbir çerez kullanmaz</strong>. İşlevsel durum (seçilen pazar, tema, kaydedilmiş hesaplamalar ve benzeri tercihler) yalnızca tarayıcının <code>localStorage</code> alanında tutulur. Sunucularımıza herhangi bir tanımlayıcı iletilmez ve hiçbir değer HTTP isteğinin parçası olmaz.</p>
-    <p>İlk ziyarette, sunucu tarafı bir ara katman (middleware), Vercel tarafından sağlanan ülke başlığına (<code>x-vercel-ip-country</code>) göre uygun bir dil sürümüne yönlendirebilir: Türkiye'den gelen ziyaretçiler <code>/tr/</code> yoluna, diğer çoğu ülkeden gelen ziyaretçiler <code>/en-eu/</code> yoluna. Almanya, Avusturya, İsviçre ve birkaç ülkeden gelen ziyaretçiler varsayılan rotada kalır. Bu adımda çerez ayarlanmaz ve yerel olarak kaydedilmiş hesaplayıcı girdileri sunucuda okunmaz veya işlenmez.</p>
+    <p>EVSpend <strong>hiçbir çerez kullanmaz</strong>. İşlevsel durum (seçilen pazar, tema, kaydedilmiş hesaplamalar ve benzeri tercihler) tarayıcının <code>localStorage</code> alanında tutulur. Bir geçmiş bağlantısı açıldığında <code>id</code>, <code>entryKey</code> veya <code>entryIndex</code> gibi kayıt tanımlayıcıları istenen URL içinde barındırma sağlayıcısına ulaşabilir. Bu bağlantılar hesaplayıcı değerlerini veya notları URL'ye eklemez.</p>
+    <p>Web sitesine ilk ziyarette, sunucu tarafı bir ara katman (middleware), Vercel tarafından sağlanan ülke başlığına (<code>x-vercel-ip-country</code>) göre uygun bir dil sürümüne yönlendirebilir: Türkiye'den gelen ziyaretçiler <code>/tr/</code> yoluna, diğer çoğu ülkeden gelen ziyaretçiler <code>/en-eu/</code> yoluna. Almanya, Avusturya, İsviçre ve birkaç ülkeden gelen ziyaretçiler varsayılan rotada kalır. Bu adımda çerez ayarlanmaz ve yerel olarak kaydedilmiş hesaplayıcı girdileri sunucuda okunmaz veya işlenmez.</p>
     <p>Pazar ve dil seçimi daha sonra tarayıcıda gerçekleşir, sayfa yolu, tarayıcı dili ve uygulama içi pazar seçicisinden yerel olarak kaydedilmiş bir seçim temel alınarak. Seçim yalnızca tarayıcının <code>localStorage</code> alanında tutulur.</p>
-    <p>localStorage istediğiniz zaman tarayıcı ayarlarından silinebilir. Bu yalnızca uygulamanın başlangıç durumunu sıfırlar; sunucuya ek veri iletilmez.</p>
+    <p>Web sitesinin localStorage alanı tarayıcı ayarlarından silinebilir. Bu işlem orada saklanan hesaplamaları, notları ve ayarları da kaldırır. Bu silme işlemi sunuculara ek hesaplayıcı içeriği aktarmaz.</p>
   </div>
 
   <div class="card">

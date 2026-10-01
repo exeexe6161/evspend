@@ -1,8 +1,8 @@
 # Third-Party Licenses & Attributions
 
-EVSpend (`evspend.com`) is a static web app. The application code itself is proprietary, but it bundles a small number of third-party assets — each one is licensed permissively for commercial use. This document lists every third-party asset, its source, its license, and the attribution required (if any).
+EVSpend (`evspend.com`) is a static web app. This document records the confirmed third-party components and their original license texts. It does not establish the origin or usage rights of every asset; unresolved SVG and branding provenance requires separate review.
 
-Last updated: 1 May 2026.
+Attribution summary updated: 1 October 2026.
 
 ---
 
@@ -48,14 +48,14 @@ The OFL permits use, modification, and redistribution including bundling and emb
   This source code is licensed under the ISC license.
   ```
 
-- **Inline `<svg>` provenance:** Every `<svg>` in `index.html`, `en-eu/index.html` and all legal pages (`impressum`, `datenschutz`, `terms`, `hinweise`, `barrierefreiheit`, plus their language variants) follows the Lucide stroke-style convention (`viewBox="0 0 24 24"`, `fill="none"`, `stroke="currentColor"`, `stroke-width="2"`, `stroke-linecap="round"`, `stroke-linejoin="round"`). The path data is copied verbatim from Lucide v0.511.0 — `users`, `line-chart`, `arrow-left`, `image-down`, `message-square-text`, `save`, `clock`, `rotate-ccw`, `check`, `chevron-down`, `cookie`, `shield`, `globe`, `mail`, `lock`, `eye-off`, `file-text`, `alert-triangle`, `accessibility`, etc.
-- **ISC compliance:** The ISC license requires the copyright notice be preserved "in all copies or substantial portions of the Software." The notice above (and this entire entry) preserves the attribution at the project level, which is the conventional way to attribute icon path-data after de-bundling. No header-comment per inline `<svg>` is required by ISC; one is added for clarity above the first SVG block on the calculator pages.
+- **Inline `<svg>` provenance:** The historical Lucide v0.511.0 library and matching current inline subsets are confirmed. Other forms match Feather source references; some variants remain unresolved. Shared stroke style does not establish that every current path was copied verbatim from Lucide v0.511.0.
+- **Original notices:** Complete ISC and Feather MIT texts are included below for the confirmed portions. Their inclusion does not establish the origin or license assignment of the unresolved variants.
 
 ---
 
 ## Code Ownership
 
-The following files are original work, authored by Hakan Gür with assistance from Anthropic Claude AI per the [Anthropic Terms of Service](https://www.anthropic.com/legal/consumer-terms). All output rights are retained by the user per Anthropic ToS, and the resulting work is the proprietary intellectual property of the project owner.
+The following files are EVSpend project sources. Project history records development with AI assistance. This list does not establish authorship or exclusive rights for every fragment. Confirmed third-party material remains subject to its original license; unresolved provenance and applicable usage rights require separate review.
 
 - `script.js`, `verlauf.js`, `theme-init.js`, `lang-switch.js`, `en-eu/init-eu.js`
 - `styles-app.css`, `styles-pages.css`, `en-eu/styles-en-eu.css`
@@ -66,7 +66,7 @@ The following files are original work, authored by Hakan Gür with assistance fr
 
 ## Images & Branding
 
-No third-party stock photography, paid icon sets, or commercial brand marks are bundled in the application. All branding assets are described in detail in the **Brand Assets** section below.
+The branding assets are listed below. Their original inputs and usage rights are not fully documented. The confirmed notices for libraries, fonts and icon portions do not resolve these branding questions.
 
 ---
 
@@ -74,12 +74,12 @@ No third-party stock photography, paid icon sets, or commercial brand marks are 
 
 ### Banner & Favicons
 
-- **Source:** AI-generated via Claude (Anthropic)
-- **Creation Date:** April 2026
-- **License:** User retains rights per Anthropic Terms of Service
-- **Commercial Use:** Permitted per Anthropic ToS
+- **Origin status:** PROVENANCE_UNRESOLVED for the original inputs and export chain of the current raster files.
+- **Project history:** The current branding set was introduced in May 2026; this does not establish its original creation date.
+- **Usage rights:** Not established by this document. Original creation evidence and applicable terms require review.
 - **Files included:**
   - `banner.png`
+  - `banner.webp`
   - `favicon-16x16.png`
   - `favicon-32x32.png`
   - `favicon.ico` (multi-size)
@@ -92,15 +92,15 @@ No third-party stock photography, paid icon sets, or commercial brand marks are 
 
 - **Name:** "EVSpend"
 - **Design:** Chevron symbol + wordmark
-- **Source:** AI-generated via Claude (Anthropic, April 2026)
-- **License:** User retains rights per Anthropic ToS
-- **Trademark Status:** Not registered (future consideration)
+- **Source evidence:** Readable SVG masters and project history document local design development and adaptation. They do not establish exclusive rights or the original export chain of every raster variant.
+- **Usage rights:** Original creation evidence and applicable terms require review.
+- **Trademark status:** TRADEMARK_REVIEW_REQUIRED. Availability and registration status are not established by this document.
 
 ---
 
 ## License Compliance Notes
 
-- All bundled third-party code is permissively licensed (OFL, MIT, ISC). None requires copyleft, source disclosure, or restricts commercial use.
+- The confirmed third-party components listed in the generated section use OFL, MIT or ISC. Their original terms are reproduced below. This statement does not assign a license to unresolved material.
 - Font stack uses Inter (self-hosted, OFL) with `system-ui` as a neutral OS-agnostic fallback. No vendor-specific font keywords (`-apple-system`, `BlinkMacSystemFont`, `Helvetica Neue`, `Segoe UI`, etc.) are present in the codebase.
 - All visual effects use W3C-standard CSS only (borders, single-layer shadows, solid backgrounds, custom-styled form controls). No proprietary OS or vendor visual frameworks are required. Glassmorphism / `backdrop-filter: blur` is intentionally absent (per Phase L.2 architecture decision) so the app does not lean on the Apple Aqua / Big Sur visual language.
 - The `apple-mobile-web-app-*` HTML meta tags and the `apple-touch-icon` link `rel` are W3C de-facto standards (Apple-introduced, adopted by Android Chrome, Microsoft Edge, Firefox). Their use here is purely functional — required for iOS Safari "Add to Home Screen" PWA support — and does not constitute Apple branding or trademark use.
@@ -114,11 +114,11 @@ EVSpend is independent of any operating-system vendor or design framework:
 
 - **Visual design** — independent. Custom CSS-only implementation aligned with the Linear / Stripe / GitHub tool aesthetic.
 - **Color palette** — chosen from the Tailwind CSS palette family (`#2563eb` = `blue-600`, `#22c55e` = `green-500`, `#f59e0b` = `amber-500`, `#16a34a` = `green-600`, `#15803d` = `green-700`, `#b45309` = `amber-700`, …). RGB hex values are factual data and are not subject to copyright; Tailwind CSS itself (the framework) is MIT-licensed but is not bundled here — only individual color values are referenced. Verified that **no Apple System Colors** (e.g., `#34C759`, `#0A84FF`, `#FF3B30`), **no Material Design 3 default colors**, and **no Microsoft Fluent palette values** are used.
-- **Iconography** — Lucide (ISC license, see above) — community open-source icon set.
+- **Iconography** — confirmed Lucide and Feather portions are attributed above; unresolved variants require separate review.
 - **Typography** — Inter (OFL license) self-hosted; `system-ui` neutral fallback.
-- **Components** — original implementations: custom range sliders (WebKit + Mozilla), custom buttons, custom toggles, custom tabs.
+- **Components** — custom implementations in this project: range sliders (WebKit + Mozilla), buttons, toggles and tabs. This description does not establish exclusive rights or authorship of every fragment.
 
-No SDK, framework, or vendor design system is bundled or required to run the application.
+The web application does not bundle a native SDK or framework. This web statement does not describe the iOS runtime, which uses Capacitor/Cordova and native plugins with a separate notice scope.
 
 ---
 

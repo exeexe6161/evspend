@@ -75,7 +75,8 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     </div>
     <h2>Allgemeines</h2>
-    <p>Der Betreiber selbst verarbeitet die Eingaben in den Rechner nicht; sie verbleiben ausschließlich im Browser des Nutzers. Eine Registrierung oder Anmeldung ist nicht erforderlich. Beim Aufruf der Website werden allerdings technisch notwendige Verbindungsdaten durch den Hosting-Anbieter (Vercel Inc.) verarbeitet. Details siehe Abschnitt „Hosting" weiter unten. Eine personenbezogene Auswertung dieser Verbindungsdaten durch den Betreiber findet nicht statt.</p>
+    <p>Die Berechnungen erfolgen lokal auf dem Gerät. Rechner-Eingaben werden nicht automatisch an den Betreiber übertragen. Eine Registrierung oder Anmeldung ist nicht erforderlich. Beim Aufruf der Website werden allerdings technisch notwendige Verbindungsdaten durch den Hosting-Anbieter (Vercel Inc.) verarbeitet. Details siehe Abschnitt „Hosting" weiter unten. Eine personenbezogene Auswertung dieser Verbindungsdaten durch den Betreiber findet nicht statt.</p>
+    <p>Die Beschreibungen zu Browser-Speicherung, Service Worker, Hosting und Länderweiterleitung beziehen sich auf die Website und die installierte PWA. Die lokale Speicherung und der Export in der nativen iOS-App sind im Abschnitt „Native iOS-App“ beschrieben.</p>
   </div>
 
   <div class="card">
@@ -83,8 +84,15 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="2" y1="12" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" x2="6.01" y1="16" y2="16"/><line x1="10" x2="10.01" y1="16" y2="16"/></svg>
     </div>
     <h2>Lokale Datenspeicherung</h2>
-    <p>Eingegebene Werte wie Verbrauch, Preise und Fahrleistung werden <strong>ausschließlich lokal im Browser</strong> des Nutzers gespeichert (LocalStorage). Diese Daten verlassen das Gerät nicht und werden zu keinem Zeitpunkt an den Betreiber übertragen oder verarbeitet.</p>
+    <p>In der Website und der installierten PWA werden eingegebene Werte wie Verbrauch, Preise und Fahrleistung sowie gespeicherte Berechnungen <strong>lokal im Browser</strong> des Nutzers gespeichert (LocalStorage). Diese Inhalte werden nicht automatisch an den Betreiber übertragen.</p>
+    <p>Wenn Sie eine Berechnung teilen oder den Verlauf exportieren, können Inhalte als Text, Bild oder Datei an einen von Ihnen gewählten Empfänger oder Speicherort gelangen. Ein Verlaufs-Backup enthält auch gespeicherte Notizen. Das ist eine von Ihnen ausgelöste Aktion.</p>
     <p>Rechtsgrundlage für die ausschließlich technisch erforderliche Speicherung im Endgerät (LocalStorage, Cache des Service Workers) ist Paragraf 25 Absatz 2 Nummer 2 TDDDG in Verbindung mit Artikel 6 Absatz 1 Buchstabe f DSGVO. Eine Einwilligung ist nicht erforderlich, da die Speicherung für die vom Nutzer ausdrücklich gewünschte Funktion unbedingt erforderlich ist.</p>
+  </div>
+
+  <div class="card" id="native-ios-privacy">
+    <h2>Native iOS-App</h2>
+    <p>Die native iOS-App lädt ihre gebündelten Seiten und Ressourcen lokal in einer WebView. Gespeicherte Berechnungen, Notizen und Einstellungen liegen im lokalen WebView-Speicher im Appcontainer, getrennt von den Websitedaten des Browsers. Für den Start dieser lokalen Inhalte werden weder das Vercel-Hosting noch der Service Worker oder die Länderweiterleitung der Website verwendet. Beim Öffnen externer Links oder beim Teilen können Netzwerkverbindungen verwendet werden.</p>
+    <p>Importierte JSON-Backups werden lokal verarbeitet. Für einen JSON- oder CSV-Export schreibt die App eine temporäre Datei in ihren Cachebereich (<code>CACHE</code>) und öffnet den nativen Teilen-Dialog. Sie wählen den Empfänger oder Speicherort. Nach dem Teilenversuch versucht die App, ihre temporäre Datei zu löschen. Wenn die Bereinigung unterbrochen wird oder fehlschlägt, kann die Datei zurückbleiben. Bereits geteilte oder anderweitig gespeicherte Kopien werden dadurch oder durch das Löschen des App-Verlaufs nicht entfernt.</p>
   </div>
 
   <div class="card">
@@ -93,7 +101,7 @@
     </div>
     <h2>Service Worker / Offline-Cache</h2>
     <p>Diese Website verwendet einen <strong>Service Worker</strong>, eine standardisierte Browser-Funktion, die HTML-Seiten und statische Ressourcen (CSS, JavaScript, Schriftarten, Bilder) im Cache des Browsers ablegt. Ziel ist ausschließlich der schnellere Wiederbesuch und die Verfügbarkeit der App ohne aktive Internet­verbindung.</p>
-    <p>Im Service-Worker-Cache werden nur statische Dateien gespeichert (HTML, CSS, JavaScript, Schriften, Bilder), keine Rechner-Eingaben. Abgesehen von den Verbindungsdaten, die der Hosting-Anbieter beim ursprünglichen Abruf dieser Dateien ohnehin verarbeitet, überträgt der Cache selbst nichts. Er lebt vollständig im Browser des Nutzers und kann jederzeit über die Browser-Einstellungen geleert werden („Browserdaten löschen“ oder ähnlich). Der einzige Effekt ist, dass der nächste Besuch nicht mehr von den zwischengespeicherten Dateien profitiert.</p>
+    <p>Im Service-Worker-Cache werden nur statische Dateien gespeichert (HTML, CSS, JavaScript, Schriften, Bilder), keine Rechner-Eingaben. Abgesehen von den Verbindungsdaten, die der Hosting-Anbieter beim ursprünglichen Abruf dieser Dateien ohnehin verarbeitet, überträgt der Cache selbst nichts. Er liegt im Browser des Nutzers. Das gezielte Leeren dieses Caches entfernt die zwischengespeicherten Dateien. Das Löschen sämtlicher Websitedaten kann zusätzlich den LocalStorage mit gespeicherten Berechnungen, Notizen und Einstellungen löschen.</p>
   </div>
 
   <div class="card">
@@ -148,10 +156,10 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></svg>
     </div>
     <h2>Keine Cookies</h2>
-    <p>EVSpend setzt <strong>keinerlei Cookies</strong>. Funktionaler Zustand (gewählter Markt, Theme, gespeicherte Berechnungen und ähnliche Präferenzen) wird ausschließlich im <code>localStorage</code> des Browsers gehalten. Es wird keine Kennung an unsere Server übertragen und kein Wert verlässt das HTTP-Request.</p>
-    <p>Beim ersten Aufruf kann eine Server-Middleware anhand des von Vercel bereitgestellten Länder-Headers (<code>x-vercel-ip-country</code>) auf eine passende Sprachfassung weiterleiten: Besucher aus der Türkei nach <code>/tr/</code>, Besucher aus den meisten anderen Ländern nach <code>/en-eu/</code>. Besucher aus Deutschland, Österreich, der Schweiz und einigen weiteren Ländern bleiben auf dem Standardpfad. Dabei werden keine Cookies gesetzt, und keine lokal gespeicherten Rechner-Eingaben werden serverseitig gelesen oder ausgewertet.</p>
+    <p>EVSpend setzt <strong>keinerlei Cookies</strong>. Funktionaler Zustand (gewählter Markt, Theme, gespeicherte Berechnungen und ähnliche Präferenzen) wird im <code>localStorage</code> des Browsers gehalten. Beim Öffnen eines Verlaufslinks können Eintragskennungen wie <code>id</code>, <code>entryKey</code> oder <code>entryIndex</code> in der angeforderten URL beim Hosting-Anbieter ankommen. Diese Links betten keine Rechnerwerte oder Notizen in die URL ein.</p>
+    <p>Beim ersten Aufruf der Website kann eine Server-Middleware anhand des von Vercel bereitgestellten Länder-Headers (<code>x-vercel-ip-country</code>) auf eine passende Sprachfassung weiterleiten: Besucher aus der Türkei nach <code>/tr/</code>, Besucher aus den meisten anderen Ländern nach <code>/en-eu/</code>. Besucher aus Deutschland, Österreich, der Schweiz und einigen weiteren Ländern bleiben auf dem Standardpfad. Dabei werden keine Cookies gesetzt, und keine lokal gespeicherten Rechner-Eingaben werden serverseitig gelesen oder ausgewertet.</p>
     <p>Markt- und Sprachauswahl erfolgen anschließend im Browser, anhand des Seitenpfads, der Browsersprache und ggf. einer lokal gespeicherten Auswahl aus dem In-App-Marktwähler. Die Auswahl wird ausschließlich im <code>localStorage</code> gehalten.</p>
-    <p>Der localStorage kann jederzeit über die Browser-Einstellungen gelöscht werden. Damit wird lediglich der Initialzustand der App zurückgesetzt; an die Server werden keine zusätzlichen Daten übermittelt.</p>
+    <p>Der localStorage der Website kann über die Browser-Einstellungen gelöscht werden. Dadurch werden auch die dort gespeicherten Berechnungen, Notizen und Einstellungen entfernt. Diese Löschung übermittelt keine zusätzlichen Rechnerinhalte an die Server.</p>
   </div>
 
   <div class="card">

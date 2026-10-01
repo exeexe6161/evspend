@@ -34,6 +34,17 @@ test('EVS-053 every notice has real release material and unchanged local origina
   assert.doesNotMatch(generated, /### (?:esbuild|@esbuild|node:test)/);
 });
 
+test('L1 attribution separates confirmed original notices from unresolved branding provenance', () => {
+  const doc = fs.readFileSync(path.join(ROOT, 'LICENSES.md'), 'utf8');
+  const prefix = doc.slice(0, doc.indexOf(START));
+  assert.match(prefix, /PROVENANCE_UNRESOLVED/);
+  assert.match(prefix, /TRADEMARK_REVIEW_REQUIRED/);
+  assert.match(prefix, /confirmed third-party components/i);
+  assert.doesNotMatch(prefix, /All bundled third-party code is permissively licensed|Commercial Use:\*\* Permitted per Anthropic|The path data is copied verbatim from Lucide/);
+  // The factual limitation must not truncate or rewrite the original notices.
+  assert.equal(doc.slice(doc.indexOf(START), doc.indexOf(END) + END.length), generatedSection(ROOT));
+});
+
 test('EVS-053 stale public document fails; generation is deterministic', t => {
   const root = fixture(t);
   assert.equal(generatedSection(root), generatedSection(root));

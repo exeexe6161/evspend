@@ -57,8 +57,16 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="2" y1="12" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></svg>
     </div>
     <h2>Data Collection</h2>
-    <p>The operator does not itself process the calculator inputs (vehicle consumption, prices, mileage, saved history), they are stored locally in the browser's storage and never leave the device. This storage is technically necessary for the features you use, so no consent is requested. When the website is loaded, technically necessary connection data (IP address, user agent, timestamp, request URL, referrer) is processed by the hosting provider. See "Hosting" below.</p>
+    <p>Calculations take place locally on the device. In the website and installed PWA, calculator inputs (vehicle consumption, prices, mileage, saved history) are stored in the browser's local storage and are not automatically transmitted to the operator. This storage is technically necessary for the features you use, so no consent is requested. When the website is loaded, technically necessary connection data (IP address, user agent, timestamp, request URL, referrer) is processed by the hosting provider. See "Hosting" below.</p>
+    <p>When you share a calculation or export the history, contents may reach a recipient or storage location you choose as text, an image or a file. A history backup also includes saved notes. This is an action you initiate. Website history links may include entry identifiers (<code>id</code>, <code>entryKey</code> or <code>entryIndex</code>) in request URLs sent to the hosting provider. These links do not embed calculator values or notes in the URL.</p>
+    <p>The website and installed PWA use a Service Worker to cache static resources. Clearing that cache alone removes cached assets. Clearing all website data may also delete localStorage containing saved calculations, notes and settings. The hosting and country-based redirects described in the full policy apply to the website and installed PWA. Native iOS storage and export are described below.</p>
     <p>No registration, no sign-in, no user accounts. The app is usable anonymously.</p>
+  </div>
+
+  <div class="card" id="native-ios-privacy">
+    <h2>Native iOS App</h2>
+    <p>The native iOS app loads its bundled pages and resources locally in a WebView. Saved calculations, notes and settings are held in local WebView storage in the app container, separately from the browser's website data. Starting these local contents does not use the website's Vercel hosting, Service Worker or country-based redirect. External links and sharing destinations you choose may use network connections.</p>
+    <p>Imported JSON backups are processed locally. For a JSON or CSV export, the app writes a temporary file to its cache directory (<code>CACHE</code>) and opens the native share dialog. You choose the recipient or storage location. After the sharing attempt, the app tries to delete its temporary file. If cleanup is interrupted or fails, the file may remain. Copies already shared or saved elsewhere are not removed by this cleanup or by deleting the app's history.</p>
   </div>
 
   <div class="card">

@@ -76,7 +76,8 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     </div>
     <h2>General</h2>
-    <p>The operator itself does not process the values entered into the calculator; they remain exclusively in the user's browser. No registration or sign-in is required. When the website is loaded, however, technically necessary connection data is processed by the hosting provider (Vercel Inc.). See the "Hosting" section below for details. The operator does not perform any personal evaluation of these connection data.</p>
+    <p>Calculations take place locally on the device. Calculator inputs are not automatically transmitted to the operator. No registration or sign-in is required. When the website is loaded, however, technically necessary connection data is processed by the hosting provider (Vercel Inc.). See the "Hosting" section below for details. The operator does not perform any personal evaluation of these connection data.</p>
+    <p>The descriptions of browser storage, the Service Worker, hosting and country-based redirects refer to the website and installed PWA. Local storage and export in the native iOS app are described in the "Native iOS App" section.</p>
   </div>
 
   <div class="card">
@@ -84,8 +85,15 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="2" y1="12" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" x2="6.01" y1="16" y2="16"/><line x1="10" x2="10.01" y1="16" y2="16"/></svg>
     </div>
     <h2>Local Data Storage</h2>
-    <p>Values entered by the user (such as consumption, prices, and mileage) are stored <strong>exclusively in the browser's local storage</strong>. This data does not leave the device and is not transmitted to or processed by the operator at any time.</p>
+    <p>In the website and installed PWA, values entered by the user (such as consumption, prices, and mileage) and saved calculations are stored <strong>locally in the browser's storage</strong> (LocalStorage). These contents are not automatically transmitted to the operator.</p>
+    <p>When you share a calculation or export the history, contents may reach a recipient or storage location you choose as text, an image or a file. A history backup also includes saved notes. This is an action you initiate.</p>
     <p>The legal basis for storing strictly necessary data on your device (local storage and the service worker cache) is Article 6(1)(f) GDPR. No consent is required because this storage is essential for the functionality you actively request, in line with the ePrivacy rules on strictly necessary storage.</p>
+  </div>
+
+  <div class="card" id="native-ios-privacy">
+    <h2>Native iOS App</h2>
+    <p>The native iOS app loads its bundled pages and resources locally in a WebView. Saved calculations, notes and settings are held in local WebView storage in the app container, separately from the browser's website data. Starting these local contents does not use the website's Vercel hosting, Service Worker or country-based redirect. External links and sharing destinations you choose may use network connections.</p>
+    <p>Imported JSON backups are processed locally. For a JSON or CSV export, the app writes a temporary file to its cache directory (<code>CACHE</code>) and opens the native share dialog. You choose the recipient or storage location. After the sharing attempt, the app tries to delete its temporary file. If cleanup is interrupted or fails, the file may remain. Copies already shared or saved elsewhere are not removed by this cleanup or by deleting the app's history.</p>
   </div>
 
   <div class="card">
@@ -94,7 +102,7 @@
     </div>
     <h2>Service Worker / Offline Cache</h2>
     <p>This website uses a <strong>Service Worker</strong>, a standardised browser feature that caches HTML pages and static resources (CSS, JavaScript, fonts, images) in the user's browser. The sole purpose is faster revisits and offline availability of the app.</p>
-    <p>The Service-Worker cache holds only static assets (HTML, CSS, JavaScript, fonts, images) and does not store calculator inputs. Beyond the connection data already processed by the hosting provider when those assets are originally requested, the cache itself does not transmit anything; it lives in the user's browser and can be cleared at any time via the browser's site settings ("Clear browsing data" or similar), the only effect is that the next visit no longer benefits from cached assets.</p>
+    <p>The Service-Worker cache holds only static assets (HTML, CSS, JavaScript, fonts, images) and does not store calculator inputs. Beyond the connection data already processed by the hosting provider when those assets are originally requested, the cache itself does not transmit anything. It is held in the user's browser. Clearing this cache alone removes the cached assets. Clearing all website data may also delete LocalStorage containing saved calculations, notes and settings.</p>
   </div>
 
   <div class="card">
@@ -149,10 +157,10 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></svg>
     </div>
     <h2>No Cookies</h2>
-    <p>EVSpend does <strong>not set any cookies</strong>. Functional state (your selected market, theme, saved calculations and similar preferences) is held purely in your browser's <code>localStorage</code>. No identifier is transmitted to our servers and no value crosses an HTTP request.</p>
-    <p>On first visit, a server-side middleware may use the country header provided by Vercel (<code>x-vercel-ip-country</code>) to redirect to a matching language version: visitors from Türkiye to <code>/tr/</code>, visitors from most other countries to <code>/en-eu/</code>. Visitors from Germany, Austria, Switzerland and a few other countries stay on the default path. No cookies are set in this step, and no locally stored calculator inputs are read or processed on the server.</p>
+    <p>EVSpend does <strong>not set any cookies</strong>. Functional state (your selected market, theme, saved calculations and similar preferences) is held in your browser's <code>localStorage</code>. When you open a history link, entry identifiers such as <code>id</code>, <code>entryKey</code> or <code>entryIndex</code> may reach the hosting provider in the requested URL. These links do not embed calculator values or notes in the URL.</p>
+    <p>On first visit to the website, a server-side middleware may use the country header provided by Vercel (<code>x-vercel-ip-country</code>) to redirect to a matching language version: visitors from Türkiye to <code>/tr/</code>, visitors from most other countries to <code>/en-eu/</code>. Visitors from Germany, Austria, Switzerland and a few other countries stay on the default path. No cookies are set in this step, and no locally stored calculator inputs are read or processed on the server.</p>
     <p>Market and language selection then happen in the browser, based on the page path, browser language and any locally stored choice from the in-app market selector. The selection is held only in <code>localStorage</code>.</p>
-    <p>You can clear localStorage at any time via your browser's site settings. Doing so only resets the app to its initial state; no additional data is transmitted to the servers.</p>
+    <p>You can clear the website's localStorage via your browser's site settings. This also removes the calculations, notes and settings stored there. This deletion does not transmit additional calculator contents to the servers.</p>
   </div>
 
   <div class="card">
