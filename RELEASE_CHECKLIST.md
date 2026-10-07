@@ -134,9 +134,6 @@ Stattdessen müssen vorkommen:
 
 ## Notiz zur Sichtbarkeit dieser Datei
 
-`RELEASE_CHECKLIST.md` ist standardmäßig **nicht** in `.vercelignore` aufgeführt und würde bei einem Deploy unter `https://www.evspend.com/RELEASE_CHECKLIST.md` öffentlich erreichbar werden. Falls das nicht gewünscht ist:
+`RELEASE_CHECKLIST.md` ist in `.vercelignore` ausgeschlossen und gehört nicht zur öffentlichen Dateiliste (`PUBLIC_FILES`) in `build-vercel.mjs`. Vercel liefert nur das separate Ausgabeverzeichnis `.vercel-static` aus.
 
-1. `RELEASE_CHECKLIST.md` als eigenen Eintrag in `.vercelignore` ergänzen, **oder**
-2. die bestehende Audit-Zeile auf `*_CHECKLIST.md` / `RELEASE_*.md` erweitern, falls auch zukünftige Checklisten privat bleiben sollen.
-
-Diese Datei ist reines Hilfsmittel, kein Bestandteil der Live-Site und sollte vor dem nächsten Deploy entweder geblockt oder bewusst freigegeben sein.
+Diese Datei bleibt ein internes Hilfsmittel im Repository. Der URL-Check in Abschnitt 9 muss nach jedem Deployment weiterhin 404 ergeben.
