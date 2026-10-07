@@ -2,7 +2,7 @@
 
 EVSpend (`evspend.com`) is a static web app. This document records the confirmed third-party components and their original license texts. It does not establish the origin or usage rights of every asset; unresolved SVG and branding provenance requires separate review.
 
-Attribution summary updated: 1 October 2026.
+Attribution summary updated: 7 October 2026.
 
 ---
 
@@ -41,7 +41,7 @@ The OFL permits use, modification, and redistribution including bundling and emb
 
 - **Source:** https://lucide.dev (fork of Feather Icons)
 - **License:** ISC License
-- **Original library file:** `vendor/lucide-0.511.0.min.js` was bundled until Phase P Sprint 2 (commit `9177e70`, April 2026). At that point the library was removed and the same icon path data was copied directly into the HTML as inline `<svg>` elements (rationale: −348 KB per page load). Lucide's License notice from the original file:
+- **Original library file:** `vendor/lucide-0.511.0.min.js` was bundled until Phase P Sprint 2 (commit `9177e70`, April 2026). At that point the library was removed and UI icons were inlined in the HTML (rationale: −348 KB per page load). This history does not establish the source of every current SVG variant. Lucide's License notice from the original file:
 
   ```
   @license lucide v0.511.0 - ISC
@@ -51,11 +51,52 @@ The OFL permits use, modification, and redistribution including bundling and emb
 - **Inline `<svg>` provenance:** The historical Lucide v0.511.0 library and matching current inline subsets are confirmed. Other forms match Feather source references; some variants remain unresolved. Shared stroke style does not establish that every current path was copied verbatim from Lucide v0.511.0.
 - **Original notices:** Complete ISC and Feather MIT texts are included below for the confirmed portions. Their inclusion does not establish the origin or license assignment of the unresolved variants.
 
+### SVG provenance inventory
+
+This document is the canonical provenance summary. The audit of commit `95ae88b05b806b114fb22aa40501809f08ecee7d` identified 45 UI shape variants with 245 occurrences in HTML and `theme-init.js`, separate from the branding SVGs. Counts group identical shape data across language versions and repeated uses; they do not count styling differences as new variants.
+
+- **VERIFIED_THIRD_PARTY:** 26 UI variants, 168 occurrences, structurally matched to Lucide 0.511.0 or Feather 4.28.0 reference material. The match establishes the referenced material, not the original download or editing history of every occurrence. Feather 4.28.0 is a matching source reference, not a claim that this package was installed in EVSpend.
+- **UNGEPRÜFT:** 19 UI variants, 77 occurrences (EVS-RG-004A). No license or authorship is assigned to these unresolved variants by the notices for the confirmed subsets.
+
+| Verified reference | Matching UI shapes |
+|---|---|
+| Lucide 0.511.0 | `circle-check`, `user`, `hard-drive`, `cookie`, `megaphone`, `scale`, `accessibility`, `arrow-left`, `message-square-text`, `rotate-ccw`, `sun` |
+| Feather 4.28.0 | `check`, `file-text`, `shield`, `wifi`, `user`, `zap`, `type`, `chevron-down`, `moon` |
+| Both references | Lucide `chart-no-axes-column` / Feather `bar-chart-2`; Lucide `circle-alert` / Feather `alert-circle`; `lock`; Lucide `wrench` / Feather `tool`; `link`; Lucide `clock` / `clock-4` / Feather `clock` |
+
+The verified Lucide `user` form appears in the privacy pages; the distinct verified Feather `user` form appears in the notices, imprint and terms pages. The dynamically inserted moon and sun in `theme-init.js` match Feather `moon` and Lucide `sun`, respectively, and are included in the totals above. The license checker fingerprints HTML SVG material; it does not fingerprint SVG strings in JavaScript.
+
+All rows below remain **UNGEPRÜFT**. Motif labels identify the audited variants and do not attribute them to a library. Each path is a representative occurrence; counts include matching occurrences in other pages and language versions.
+
+| Unresolved UI motif | Occurrences | Representative file |
+|---|---:|---|
+| Mail | 13 | `barrierefreiheit.en.html` |
+| Square inside square | 4 | `barrierefreiheit.en.html` |
+| Message box | 4 | `datenschutz.en.html` |
+| Globe | 5 | `datenschutz.en.html` |
+| Settings | 5 | `datenschutz.en.html` |
+| Activity line | 2 | `datenschutz.en.html` |
+| Authority building | 4 | `datenschutz.en.html` |
+| Warning triangle | 8 | `en-eu/hinweise.html` |
+| Information circle | 4 | `en-eu/hinweise.html` |
+| Copyright symbol | 4 | `en-eu/impressum.html` |
+| People | 3 | `en-eu/index.html` |
+| Line chart | 3 | `en-eu/index.html` |
+| Image export | 3 | `en-eu/index.html` |
+| Save | 3 | `en-eu/index.html` |
+| Refresh | 4 | `en-eu/terms.html` |
+| Chart | 3 | `en-eu/verlauf.html` |
+| Search | 3 | `en-eu/verlauf.html` |
+| Storage device | 1 | `privacy-policy.html` |
+| Document | 1 | `privacy-policy.html` |
+
 ---
 
 ## Code Ownership
 
 The following files are EVSpend project sources. Project history records development with AI assistance. This list does not establish authorship or exclusive rights for every fragment. Confirmed third-party material remains subject to its original license; unresolved provenance and applicable usage rights require separate review.
+
+EVS-RG-004C remains **UNGEPRÜFT**: the complete provenance chain of all project code portions has not been established.
 
 - `script.js`, `verlauf.js`, `theme-init.js`, `lang-switch.js`, `en-eu/init-eu.js`
 - `styles-app.css`, `styles-pages.css`, `en-eu/styles-en-eu.css`
@@ -96,6 +137,19 @@ The branding assets are listed below. Their original inputs and usage rights are
 - **Usage rights:** Original creation evidence and applicable terms require review.
 - **Trademark status:** TRADEMARK_REVIEW_REQUIRED. Availability and registration status are not established by this document.
 
+### Branding provenance references
+
+| Group | Files / use | Provenance status and evidence limit |
+|---|---|---|
+| EVSpend SVG masters | `brand/EVSpend-symbol-final.svg`, `brand/EVSpend-symbol-final-transparent.svg` | **UNGEPRÜFT**. Introduced in `c3fefd0`; original inputs and usage rights are not established. |
+| Branding raster variants | Banner, favicon and app icon files listed above; `brand/EVSpend-final-brand-preview.png` | **UNGEPRÜFT**. The current set shares the branding commit `c3fefd0`, but the complete export chain from the masters is not established. |
+| Splash SVG variants | Inline branding in `index.html`, `en-eu/index.html`, `tr/index.html` | **UNGEPRÜFT**. Shared master geometry and the adaptation in `445a6f8` are documented; original rights remain unresolved. |
+| Social preview images | `og-image-de.png`, `og-image-en.png`, `og-image-tr.png` | **UNGEPRÜFT**. Commit `5344305` describes generation with Pillow and Inter, but the stated generation script is absent from the current repository. Verified font licensing does not establish all image inputs or rights. |
+
+EVS-RG-003A (branding origin, original inputs and export chain) and EVS-RG-003B (wordmark, symbol and trademark availability) remain **UNGEPRÜFT**. Git authorship and a local adaptation do not establish original authorship or usage rights. These references grant no trademark clearance.
+
+**CURRENT_FREE_RIGHTS=UNGEPRÜFT** and **FUTURE_COMMERCIAL_RIGHTS=UNGEPRÜFT**. Free use does not resolve missing usage rights. The overall findings **EVS_RG_003=UNGEPRÜFT** and **EVS_RG_004=UNGEPRÜFT** remain open.
+
 ---
 
 ## License Compliance Notes
@@ -113,7 +167,7 @@ The branding assets are listed below. Their original inputs and usage rights are
 EVSpend is independent of any operating-system vendor or design framework:
 
 - **Visual design** — independent. Custom CSS-only implementation aligned with the Linear / Stripe / GitHub tool aesthetic.
-- **Color palette** — chosen from the Tailwind CSS palette family (`#2563eb` = `blue-600`, `#22c55e` = `green-500`, `#f59e0b` = `amber-500`, `#16a34a` = `green-600`, `#15803d` = `green-700`, `#b45309` = `amber-700`, …). RGB hex values are factual data and are not subject to copyright; Tailwind CSS itself (the framework) is MIT-licensed but is not bundled here — only individual color values are referenced. Verified that **no Apple System Colors** (e.g., `#34C759`, `#0A84FF`, `#FF3B30`), **no Material Design 3 default colors**, and **no Microsoft Fluent palette values** are used.
+- **Color palette** — chosen from the Tailwind CSS palette family (`#2563eb` = `blue-600`, `#22c55e` = `green-500`, `#f59e0b` = `amber-500`, `#16a34a` = `green-600`, `#15803d` = `green-700`, `#b45309` = `amber-700`, …). RGB hex values are factual data and are not subject to copyright; Tailwind CSS itself (the framework) is MIT-licensed but is not bundled here — only individual color values are referenced.
 - **Iconography** — confirmed Lucide and Feather portions are attributed above; unresolved variants require separate review.
 - **Typography** — Inter (OFL license) self-hosted; `system-ui` neutral fallback.
 - **Components** — custom implementations in this project: range sliders (WebKit + Mozilla), buttons, toggles and tabs. This description does not establish exclusive rights or authorship of every fragment.
