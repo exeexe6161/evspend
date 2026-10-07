@@ -48,7 +48,7 @@ The OFL permits use, modification, and redistribution including bundling and emb
   This source code is licensed under the ISC license.
   ```
 
-- **Inline `<svg>` provenance:** The historical Lucide v0.511.0 library and matching current inline subsets are confirmed. Other forms match Feather source references; some variants remain unresolved. Shared stroke style does not establish that every current path was copied verbatim from Lucide v0.511.0.
+- **Inline `<svg>` provenance:** The historical Lucide v0.511.0 library and matching current inline subsets are confirmed. Other forms match Feather source references. The 19 formerly unresolved UI variants were replaced with official geometries in Batches A and B below; branding SVG provenance remains unresolved. Shared stroke style does not establish that every current path was copied verbatim from Lucide v0.511.0.
 - **Original notices:** Complete ISC and Feather MIT texts are included below for the confirmed portions. Their inclusion does not establish the origin or license assignment of the unresolved variants.
 
 ### SVG provenance inventory
@@ -57,7 +57,7 @@ This document is the canonical provenance summary. Before Batch A replacement, t
 
 - **VERIFIED_THIRD_PARTY:** The initial audit confirmed 26 UI variants, 168 occurrences, structurally matched to Lucide 0.511.0 or Feather 4.28.0 reference material. The match establishes the referenced material, not the original download or editing history of every occurrence. Feather 4.28.0 is a matching source reference, not a claim that this package was installed in EVSpend.
 - **VERIFIED_THIRD_PARTY after Batch A:** 56 formerly unresolved occurrences have now been completely replaced by the official geometries documented below, bringing the confirmed UI occurrence count to 224. This does not establish the origin of the previous geometry.
-- **UNGEPRÜFT:** 6 UI variants, 21 occurrences (EVS-RG-004A, Batch B). All remain VISUAL_REVIEW_REQUIRED. No license or authorship is assigned to these unresolved variants by the notices for the confirmed subsets.
+- **VERIFIED_THIRD_PARTY after Batch B:** The remaining 6 formerly unresolved UI variants, 21 occurrences, have been completely replaced with official Lucide 0.511.0 geometries, bringing the confirmed UI occurrence count to 245. There are 0 open variants and 0 open occurrences within the originally unresolved 19 UI variants of EVS-RG-004A. This does not establish the origin of the previous geometry or resolve branding SVG provenance.
 
 | Verified reference | Matching UI shapes |
 |---|---|
@@ -105,18 +105,22 @@ File families (all listed language variants were replaced together):
 
 These 56 replacements resolve only the current geometry of the listed Batch A occurrences. They do not retroactively attribute the previous unresolved variants, resolve branding rights or establish the provenance of all project code.
 
-### Remaining Batch B variants
+### Batch B replacement record
 
-All six rows remain **UNGEPRÜFT** and **VISUAL_REVIEW_REQUIRED**. Their geometry and accessibility attributes were not changed in Batch A. Motif labels identify the audited variants and do not attribute them to a library.
+The six former open IDs below were replaced in full after checkpoint `80621845df7167cb601181f2427c28625e350f70`. All 21 resulting geometries were structurally checked against the complete official Lucide 0.511.0 SVG source. Existing container size, color, stroke, viewBox, text and IDs were retained. The 15 decorative 22 px card icons now explicitly have `aria-hidden="true"` and `focusable="false"`; the existing decorative attributes of the six image-sharing and chart-hint icons were retained.
 
-| Open ID | Unresolved UI motif | Occurrences | Files |
-|---|---|---:|---|
-| S06 | Square inside square | 4 | BF4 |
-| S13 | Message box | 4 | DS4 |
-| S17 | Settings | 5 | DS4 + US |
-| S19 | Activity line | 2 | `datenschutz.en.html` + US |
-| S37 | Image export | 3 | APP3 |
-| S43 | Chart | 3 | HIST3 |
+Every row uses source **L**, the Lucide 0.511.0 official source archive linked above, `icons/<icon-name>.svg`. The existing ISC and inherited notices in `vendor/lucide-0.511.0.LICENSE.txt` and their reproduction below remain unchanged. File-family abbreviations are defined in the Batch A record.
+
+| Former open ID | Source / version | Official icon name | Replaced occurrences | Files | Current provenance |
+|---|---|---|---:|---|---|
+| S06 | L / 0.511.0 | `landmark` | 4 | BF4 | VERIFIED_THIRD_PARTY |
+| S13 | L / 0.511.0 | `hard-drive-download` | 4 | DS4 | VERIFIED_THIRD_PARTY |
+| S17 | L / 0.511.0 | `info` | 5 | DS4 + US | VERIFIED_THIRD_PARTY |
+| S19 | L / 0.511.0 | `file-text` | 2 | `datenschutz.en.html` + US | VERIFIED_THIRD_PARTY |
+| S37 | L / 0.511.0 | `image` | 3 | APP3 | VERIFIED_THIRD_PARTY |
+| S43 | L / 0.511.0 | `chart-column` | 3 | HIST3 | VERIFIED_THIRD_PARTY |
+
+These 21 replacements resolve only the current geometry of the listed Batch B occurrences. Together, Batches A and B replace all 19 originally unresolved UI variants, 77 occurrences. They do not retroactively attribute any previous unresolved geometry. Batch A remains unchanged. EVS-RG-003A, EVS-RG-003B and EVS-RG-004C remain **UNGEPRÜFT**; branding and general code provenance are outside this UI replacement scope.
 
 ---
 
