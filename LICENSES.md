@@ -53,10 +53,11 @@ The OFL permits use, modification, and redistribution including bundling and emb
 
 ### SVG provenance inventory
 
-This document is the canonical provenance summary. The audit of commit `95ae88b05b806b114fb22aa40501809f08ecee7d` identified 45 UI shape variants with 245 occurrences in HTML and `theme-init.js`, separate from the branding SVGs. Counts group identical shape data across language versions and repeated uses; they do not count styling differences as new variants.
+This document is the canonical provenance summary. Before Batch A replacement, the audit of commit `95ae88b05b806b114fb22aa40501809f08ecee7d` identified 45 UI shape variants with 245 occurrences in HTML and `theme-init.js`, separate from the branding SVGs. Counts group identical shape data across language versions and repeated uses; they do not count styling differences as new variants.
 
-- **VERIFIED_THIRD_PARTY:** 26 UI variants, 168 occurrences, structurally matched to Lucide 0.511.0 or Feather 4.28.0 reference material. The match establishes the referenced material, not the original download or editing history of every occurrence. Feather 4.28.0 is a matching source reference, not a claim that this package was installed in EVSpend.
-- **UNGEPRÜFT:** 19 UI variants, 77 occurrences (EVS-RG-004A). No license or authorship is assigned to these unresolved variants by the notices for the confirmed subsets.
+- **VERIFIED_THIRD_PARTY:** The initial audit confirmed 26 UI variants, 168 occurrences, structurally matched to Lucide 0.511.0 or Feather 4.28.0 reference material. The match establishes the referenced material, not the original download or editing history of every occurrence. Feather 4.28.0 is a matching source reference, not a claim that this package was installed in EVSpend.
+- **VERIFIED_THIRD_PARTY after Batch A:** 56 formerly unresolved occurrences have now been completely replaced by the official geometries documented below, bringing the confirmed UI occurrence count to 224. This does not establish the origin of the previous geometry.
+- **UNGEPRÜFT:** 6 UI variants, 21 occurrences (EVS-RG-004A, Batch B). All remain VISUAL_REVIEW_REQUIRED. No license or authorship is assigned to these unresolved variants by the notices for the confirmed subsets.
 
 | Verified reference | Matching UI shapes |
 |---|---|
@@ -66,29 +67,56 @@ This document is the canonical provenance summary. The audit of commit `95ae88b0
 
 The verified Lucide `user` form appears in the privacy pages; the distinct verified Feather `user` form appears in the notices, imprint and terms pages. The dynamically inserted moon and sun in `theme-init.js` match Feather `moon` and Lucide `sun`, respectively, and are included in the totals above. The license checker fingerprints HTML SVG material; it does not fingerprint SVG strings in JavaScript.
 
-All rows below remain **UNGEPRÜFT**. Motif labels identify the audited variants and do not attribute them to a library. Each path is a representative occurrence; counts include matching occurrences in other pages and language versions.
+### Batch A replacement record
 
-| Unresolved UI motif | Occurrences | Representative file |
-|---|---:|---|
-| Mail | 13 | `barrierefreiheit.en.html` |
-| Square inside square | 4 | `barrierefreiheit.en.html` |
-| Message box | 4 | `datenschutz.en.html` |
-| Globe | 5 | `datenschutz.en.html` |
-| Settings | 5 | `datenschutz.en.html` |
-| Activity line | 2 | `datenschutz.en.html` |
-| Authority building | 4 | `datenschutz.en.html` |
-| Warning triangle | 8 | `en-eu/hinweise.html` |
-| Information circle | 4 | `en-eu/hinweise.html` |
-| Copyright symbol | 4 | `en-eu/impressum.html` |
-| People | 3 | `en-eu/index.html` |
-| Line chart | 3 | `en-eu/index.html` |
-| Image export | 3 | `en-eu/index.html` |
-| Save | 3 | `en-eu/index.html` |
-| Refresh | 4 | `en-eu/terms.html` |
-| Chart | 3 | `en-eu/verlauf.html` |
-| Search | 3 | `en-eu/verlauf.html` |
-| Storage device | 1 | `privacy-policy.html` |
-| Document | 1 | `privacy-policy.html` |
+The 13 former open IDs below were replaced in full after checkpoint `bbf4e1da054d1d7564dd4d9dae5e24488ed02932`. Each resulting geometry was structurally checked against the specified official source. Existing size, color, stroke and viewBox attributes were retained. The 44 decorative 22 px card icons now explicitly have `aria-hidden="true"` and `focusable="false"`; other existing accessibility attributes were retained.
+
+Sources and existing notices:
+
+- **L:** [Lucide 0.511.0 official source archive](https://codeload.github.com/lucide-icons/lucide/tar.gz/refs/tags/0.511.0), `icons/<icon-name>.svg`. ISC and inherited notices: `vendor/lucide-0.511.0.LICENSE.txt`, reproduced unchanged below.
+- **F:** [Feather 4.28.0 official package](https://registry.npmjs.org/feather-icons/-/feather-icons-4.28.0.tgz), `package/dist/icons/<icon-name>.svg`. MIT notice: `vendor/feather-portions.LICENSE.txt`, reproduced unchanged below.
+
+File families (all listed language variants were replaced together):
+
+- **BF4:** `barrierefreiheit.html`, `barrierefreiheit.en.html`, `barrierefreiheit.tr.html`, `en-eu/barrierefreiheit.html`.
+- **DS4:** `datenschutz.html`, `datenschutz.en.html`, `datenschutz.tr.html`, `en-eu/datenschutz.html`.
+- **HW4:** `hinweise.html`, `hinweise.en.html`, `hinweise.tr.html`, `en-eu/hinweise.html`.
+- **IM4:** `impressum.html`, `impressum.en.html`, `impressum.tr.html`, `en-eu/impressum.html`.
+- **TE4:** `terms.html`, `terms.en.html`, `terms.tr.html`, `en-eu/terms.html`.
+- **APP3:** `index.html`, `en-eu/index.html`, `tr/index.html`.
+- **HIST3:** `verlauf.html`, `en-eu/verlauf.html`, `tr/verlauf.html`.
+- **US:** `privacy-policy.html`.
+
+| Former open ID | Source / version | Official icon name | Replaced occurrences | Files | Current provenance |
+|---|---|---|---:|---|---|
+| S05 | L / 0.511.0 | `mail` | 13 | BF4 + DS4 + IM4 + US | VERIFIED_THIRD_PARTY |
+| S16 | F / 4.28.0 | `globe` | 5 | DS4 + `en-eu/impressum.html` | VERIFIED_THIRD_PARTY |
+| S20 | L / 0.511.0 | `landmark` | 4 | DS4 | VERIFIED_THIRD_PARTY |
+| S25 | L / 0.511.0 | `triangle-alert` | 8 | HW4 + TE4 | VERIFIED_THIRD_PARTY |
+| S26 | L / 0.511.0 | `info` | 4 | HW4 | VERIFIED_THIRD_PARTY |
+| S30 | L / 0.511.0 | `copyright` | 4 | IM4 | VERIFIED_THIRD_PARTY |
+| S34 | L / 0.511.0 | `users` | 3 | APP3 | VERIFIED_THIRD_PARTY |
+| S35 | L / 0.511.0 | `chart-line` | 3 | APP3 | VERIFIED_THIRD_PARTY |
+| S39 | F / 4.28.0 | `save` | 3 | APP3 | VERIFIED_THIRD_PARTY |
+| S42 | F / 4.28.0 | `refresh-ccw` | 4 | TE4 | VERIFIED_THIRD_PARTY |
+| S44 | L / 0.511.0 | `search` | 3 | HIST3 | VERIFIED_THIRD_PARTY |
+| S45 | L / 0.511.0 | `hard-drive` | 1 | US | VERIFIED_THIRD_PARTY |
+| S46 | L / 0.511.0 | `file` | 1 | US | VERIFIED_THIRD_PARTY |
+
+These 56 replacements resolve only the current geometry of the listed Batch A occurrences. They do not retroactively attribute the previous unresolved variants, resolve branding rights or establish the provenance of all project code.
+
+### Remaining Batch B variants
+
+All six rows remain **UNGEPRÜFT** and **VISUAL_REVIEW_REQUIRED**. Their geometry and accessibility attributes were not changed in Batch A. Motif labels identify the audited variants and do not attribute them to a library.
+
+| Open ID | Unresolved UI motif | Occurrences | Files |
+|---|---|---:|---|
+| S06 | Square inside square | 4 | BF4 |
+| S13 | Message box | 4 | DS4 |
+| S17 | Settings | 5 | DS4 + US |
+| S19 | Activity line | 2 | `datenschutz.en.html` + US |
+| S37 | Image export | 3 | APP3 |
+| S43 | Chart | 3 | HIST3 |
 
 ---
 
