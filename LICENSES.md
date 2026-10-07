@@ -139,7 +139,9 @@ EVS-RG-004C remains **UNGEPRÜFT**: the complete provenance chain of all project
 
 ## Images & Branding
 
-The branding assets are listed below. Their original inputs and usage rights are not fully documented. The confirmed notices for libraries, fonts and icon portions do not resolve these branding questions.
+The project owner directly confirmed on 7 October 2026 that the current branding family, particularly the logo/symbol and banner, was created for EVSpend by the project owner using Claude. This is an owner-supplied project origin statement, not independent verification of exclusive copyright or a general usage-rights clearance. The original Claude session/prompts and parts of the export chain are not available in the documented evidence. The confirmed notices for libraries, fonts and icon portions remain separate.
+
+This document remains the canonical license/provenance summary. Repository evidence, current SHA-256 hashes and technical relationships are recorded in `brand/PROVENANCE.md`. That detail file is repository documentation and is not included in the public static output.
 
 ---
 
@@ -147,9 +149,10 @@ The branding assets are listed below. Their original inputs and usage rights are
 
 ### Banner & Favicons
 
-- **Origin status:** PROVENANCE_UNRESOLVED for the original inputs and export chain of the current raster files.
+- **Origin evidence:** Direct project-owner confirmation of the current EVSpend design family, recorded in `brand/PROVENANCE.md`.
+- **Export status:** PARTIAL; PROVENANCE_UNRESOLVED remains applicable to missing original inputs and export parameters, rather than to the existence of the owner confirmation.
 - **Project history:** The current branding set was introduced in May 2026; this does not establish its original creation date.
-- **Usage rights:** Not established by this document. Original creation evidence and applicable terms require review.
+- **Usage rights:** No general rights clearance is established by this document. The owner confirmation does not independently establish the applicable generation terms or every original input.
 - **Files included:**
   - `banner.png`
   - `banner.webp`
@@ -165,20 +168,24 @@ The branding assets are listed below. Their original inputs and usage rights are
 
 - **Name:** "EVSpend"
 - **Design:** Chevron symbol + wordmark
-- **Source evidence:** Readable SVG masters and project history document local design development and adaptation. They do not establish exclusive rights or the original export chain of every raster variant.
-- **Usage rights:** Original creation evidence and applicable terms require review.
+- **Source evidence:** The project owner confirms creation for EVSpend using Claude. Readable SVG masters and project history additionally document the current geometry and later adaptation. These evidence types are recorded separately in `brand/PROVENANCE.md`.
+- **Usage rights:** Exclusive copyright and a general usage-rights clearance are not established. AI assistance does not automatically establish rights.
 - **Trademark status:** TRADEMARK_REVIEW_REQUIRED. Availability and registration status are not established by this document.
 
 ### Branding provenance references
 
 | Group | Files / use | Provenance status and evidence limit |
 |---|---|---|
-| EVSpend SVG masters | `brand/EVSpend-symbol-final.svg`, `brand/EVSpend-symbol-final-transparent.svg` | **UNGEPRÜFT**. Introduced in `c3fefd0`; original inputs and usage rights are not established. |
-| Branding raster variants | Banner, favicon and app icon files listed above; `brand/EVSpend-final-brand-preview.png` | **UNGEPRÜFT**. The current set shares the branding commit `c3fefd0`, but the complete export chain from the masters is not established. |
-| Splash SVG variants | Inline branding in `index.html`, `en-eu/index.html`, `tr/index.html` | **UNGEPRÜFT**. Shared master geometry and the adaptation in `445a6f8` are documented; original rights remain unresolved. |
-| Social preview images | `og-image-de.png`, `og-image-en.png`, `og-image-tr.png` | **UNGEPRÜFT**. Commit `5344305` describes generation with Pillow and Inter, but the stated generation script is absent from the current repository. Verified font licensing does not establish all image inputs or rights. |
+| EVSpend SVG masters | `brand/EVSpend-symbol-final.svg`, `brand/EVSpend-symbol-final-transparent.svg` | Owner-confirmed project origin; introduced together in `c3fefd0`. Their symbol paths match exactly. Original session/prompts are unavailable; no exclusive-rights finding. |
+| Branding raster variants | Banner, favicon and app icon files listed above; `brand/EVSpend-final-brand-preview.png` | Owner-confirmed current design family; introduced in `c3fefd0`. Master-to-raster export chains remain **PARTIAL**. The banner area of the preview is exactly reproducible from `banner.png`. |
+| Splash SVG variants | Inline branding in `index.html`, `en-eu/index.html`, `tr/index.html` | Exact master symbol geometry, adapted in `445a6f8` and refined in `877185d`. Current language fragments are byte-identical. This technical relationship does not grant rights. |
+| Social preview images | `og-image-de.png`, `og-image-en.png`, `og-image-tr.png` | Introduced in `5344305`, which describes Pillow and Inter. These predate the current symbol masters and are not proven derivatives of them. Generator and exact inputs remain **PARTIAL**. |
 
-EVS-RG-003A (branding origin, original inputs and export chain) and EVS-RG-003B (wordmark, symbol and trademark availability) remain **UNGEPRÜFT**. Git authorship and a local adaptation do not establish original authorship or usage rights. These references grant no trademark clearance.
+**BRANDING_ORIGIN_EVIDENCE=PASS** means that the direct owner confirmation is recorded and linked to the inventoried current design family. **BRANDING_DERIVATION_CHAIN=PARTIAL** means that the exact technical relationships above are documented but not every original export process is reconstructable. **EVS_RG_003A=UNGEPRÜFT** therefore remains applicable to the complete technical origin/export chain; it is not held open by the separate trademark review.
+
+**CONCRETE_THIRD_PARTY_BRAND_ASSET_FOUND=NO** records the bounded local audit finding for current branding images/symbols. It does not prove originality or absence of all third-party inputs. Inter is a separately documented third-party font under OFL 1.1; the specific font input of the current raster banner is not independently established.
+
+**KEEP_EXISTING_BRANDING=YES_WITH_DOCUMENTATION** records the owner's decision to retain the branding with this evidence and its limitations. No branding rebuild is requested or performed. This is not a legal clearance. EVS-RG-003B (wordmark, symbol and trademark availability) remains **UNGEPRÜFT**. Git authorship and local adaptation do not establish exclusive rights; these references grant no trademark clearance.
 
 **CURRENT_FREE_RIGHTS=UNGEPRÜFT** and **FUTURE_COMMERCIAL_RIGHTS=UNGEPRÜFT**. Free use does not resolve missing usage rights. The overall findings **EVS_RG_003=UNGEPRÜFT** and **EVS_RG_004=UNGEPRÜFT** remain open.
 
