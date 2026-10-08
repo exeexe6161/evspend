@@ -3634,9 +3634,9 @@ setTimeout(() => {
   // Locale, Währung, Symbol, Pill-Label und seine eigenen Preis-Defaults
   // (inkl. Slider-Range). setMarket(code) ist der zentrale Einstiegspunkt.
   // Phase 9: MARKET_CONFIG erweitert um `units` (Metadaten) und komplette
-  // Slider-Defaults. Beim Marktwechsel werden ALLE Slider auf die jeweiligen
-  // Markt-typischen Werte gesetzt (nicht nur Preise) — so startet jeder Markt
-  // in einem realistischen, fachlich korrekten Zustand.
+  // Slider-Defaults. Die Werte sind manuell festgelegte Produktdefaults.
+  // Sie dienen als editierbare Beispielwerte und sind keine unabhängig
+  // bestätigten Marktstatistiken.
   var MARKET_CONFIG = {
     de: {
       code: "de", label: "Deutschland", language: "de", locale: "de-DE", currency: "EUR", symbol: "€",
@@ -3662,10 +3662,10 @@ setTimeout(() => {
       code: "eu", label: "EU", language: "en", locale: "en-IE", currency: "EUR", symbol: "€",
       units: { distance: "km", fuelVolume: "liter", iceEfficiency: "l/100km", evEfficiency: "kWh/100km" },
       defaults: {
-        // EU-Marktdefaults (EUR, km, L, L/100 km, kWh/100 km) — EU-Average-Preise
-        strompreis:          { value: 0.30,   min: 0.10,  max: 1.00,    step: 0.01 },  // €/kWh (EU-Schnitt; DE 0.37, FR 0.20, ES 0.30)
-        benzinpreis:         { value: 1.70,   min: 1.00,  max: 3.00,    step: 0.01 },  // €/L (EU-Schnitt; DE 1.85, ES 1.50)
-        verbrauchVerbrenner: { value: 6.5,    min: 3,     max: 20,      step: 0.1 },   // L/100 km (EU-Schnitt; DE 7.0)
+        // EU-Marktdefaults (EUR, km, L, L/100 km, kWh/100 km), manuell festgelegte Beispielwerte
+        strompreis:          { value: 0.30,   min: 0.10,  max: 1.00,    step: 0.01 },  // €/kWh
+        benzinpreis:         { value: 1.70,   min: 1.00,  max: 3.00,    step: 0.01 },  // €/L
+        verbrauchVerbrenner: { value: 6.5,    min: 3,     max: 20,      step: 0.1 },   // L/100 km
         evVerbrauch:         { value: 17,     min: 8,     max: 35,      step: 0.5 },   // kWh/100 km (wie DE)
         kmEv:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a
         kmVb:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a
@@ -3680,7 +3680,7 @@ setTimeout(() => {
       units: { distance: "mile", fuelVolume: "gallon", iceEfficiency: "mpg", evEfficiency: "kWh/100mi" },
       defaults: {
         // US-Marktdefaults (USD, mi, gal, mpg, kWh/100 mi) — manuell pflegbar
-        strompreis:          { value: 0.16,   min: 0.05,  max: 0.60,    step: 0.01 },  // $/kWh (Haushaltsdurchschnitt)
+        strompreis:          { value: 0.16,   min: 0.05,  max: 0.60,    step: 0.01 },  // $/kWh
         benzinpreis:         { value: 3.20,   min: 2.00,  max: 6.00,    step: 0.05 },  // $/gallon
         verbrauchVerbrenner: { value: 26,     min: 10,    max: 80,      step: 1 },     // mpg
         evVerbrauch:         { value: 30,     min: 15,    max: 50,      step: 0.5 },   // kWh/100 mi
@@ -3697,8 +3697,8 @@ setTimeout(() => {
       units: { distance: "km", fuelVolume: "liter", iceEfficiency: "l/100km", evEfficiency: "kWh/100km" },
       defaults: {
         // TR-Marktdefaults (TRY, km, L, L/100 km, kWh/100 km) — manuell pflegbar
-        strompreis:          { value: 3.40,   min: 0.50,  max: 10.00,   step: 0.05 },  // ₺/kWh (all-in Haushalt, Juni 2026)
-        benzinpreis:         { value: 63.00,  min: 20.00, max: 80.00,   step: 0.50 },  // ₺/L (Juni 2026, live verifiziert)
+        strompreis:          { value: 3.40,   min: 0.50,  max: 10.00,   step: 0.05 },  // ₺/kWh
+        benzinpreis:         { value: 63.00,  min: 20.00, max: 80.00,   step: 0.50 },  // ₺/L
         verbrauchVerbrenner: { value: 7.0,    min: 3,     max: 20,      step: 0.1 },   // L/100 km
         evVerbrauch:         { value: 17,     min: 8,     max: 35,      step: 0.5 },   // kWh/100 km
         kmEv:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a
@@ -3712,9 +3712,9 @@ setTimeout(() => {
   };
 
   // Phase 7/9: wendet alle Markt-spezifischen Slider-Defaults + Ranges an.
-  // Beim Marktwechsel werden sämtliche Eingabefelder auf die markt-typischen
-  // Werte zurückgesetzt, damit jeder Markt in seinem eigenen realistischen
-  // Einheitensystem startet (US: mi/mpg/gal; DE/TR: km/L).
+  // Beim Aufruf werden die Eingabefelder auf die manuell festgelegten
+  // editierbaren Beispielwerte im jeweiligen Einheitensystem zurückgesetzt
+  // (US: mi/mpg/gal; DE/TR: km/L).
   function applyMarketDefaults(mk) {
     if (!mk || !mk.defaults) return;
     function applyTo(id, cfg) {
