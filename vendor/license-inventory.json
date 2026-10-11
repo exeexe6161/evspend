@@ -48,7 +48,7 @@
     }
   ],
   "release": {
-    "svgFingerprint": "af8f8bd56194fc4f87eee040a603b6b65df70d6bb5a70ceb1a697b1a6a144233",
+    "svgFingerprint": "c3325a52555edffee84458e7bacb23eb74fb56fd3af3880c3b5b4babe9e7a6be",
     "references": [
       "404.css",
       "404.js",
@@ -60,6 +60,7 @@
       "en-eu/styles-en-eu.css",
       "favicon-16x16.png",
       "favicon-32x32.png",
+      "favicon.svg",
       "fonts/InterVariable-Italic.woff2",
       "fonts/InterVariable.woff2",
       "history-store.js",
@@ -75,19 +76,22 @@
       "verlauf.min.js"
     ],
     "material": {
-      "android-chrome-192x192.png": "c494e14268dc96990ff158951b13bf0d114d293cee9f5d6e8f38e57d91c6a305",
-      "android-chrome-512x512.png": "81e862fa41dc91e682397a2da3f8f55f83b2c4c6ea7c793fa1c60e9ee6318a8d",
-      "apple-touch-icon.png": "3cedfaaa4c7da7701306f4f849c02573b4030e135f02a629ddbc7d5254c9e936",
-      "banner.png": "5fc721da8d4d4505441f59c934eb19fc84419f660921ab99ea6cf4424efa0ba7",
-      "banner.webp": "f9dddaeefc477e85a451d26a166a9d45a0ecf00e3926fbc328add702fd56afc3",
-      "favicon-16x16.png": "50c8d4580196722fd65b608e841e72807a9066f959e5cad06cb18cfe561e7956",
-      "favicon-32x32.png": "59b3920932f45689f4ee645929a4ca6859d627ea3c9eeee964eee323a5e808cf",
-      "favicon.ico": "65d69bfb540bee1d5f46aba5a978724c12bc9905621f02d79de930a26e0a459b",
+      "android-chrome-192x192.png": "ba791b91f1cbea5fa71778882100bf288e7db18ac8f3e4f9089c318d86afa188",
+      "android-chrome-512x512.png": "743a39adf553909a4acebad6852c064da3f9a112f0c42ea36a3405a212ab41c9",
+      "apple-touch-icon.png": "5c64f02d8626ea93c9afa1cbf5e1025fd973949ea02cbf0db34891c9b88a31d0",
+      "banner.png": "5a3835c9aef8994a072f763d04e8dc44c211ab56ac0134296d65265b904cc0f9",
+      "banner.webp": "5af468473781d405c1e54cddc04155621bc94dfac0c59f853600fdb9b4bd8b25",
+      "favicon-16x16.png": "42b6163203a3ad202ee54109ec72e11ef74bbf405dd98799202527d87466c615",
+      "favicon-32x32.png": "c73e946ee5f13e61652d4e1383185f2ef9b74fdddf316b5c947ff9b9ec5487cb",
+      "favicon.ico": "3b9a86e6570967b05a25b79ef88465c710a2771570a26195c09e469044081457",
+      "favicon.svg": "b87ac36631d78dff176a7e33ba88ca0f3a530eae8878497e09d9ea2758ffe77b",
       "fonts/InterVariable-Italic.woff2": "e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a",
       "fonts/InterVariable.woff2": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
-      "og-image-de.png": "8e73102717b4938bcaabae4aacb2e40a3cc73936a49094ca277ac81673531773",
-      "og-image-en.png": "74e14564bf75e8150f81ac683cdfb571c19a2f97737178f31987f02f3280d18a",
-      "og-image-tr.png": "eb6bc90e671c3bbe613ac43af64f571f41e73d641e4594a664f95308e2395502",
+      "maskable-192x192.png": "cd204aa5575ab81779fb6eb5d7f22604f15910e55f5f506532c80b023c2df11e",
+      "maskable-512x512.png": "1131b1c9cd536692c31e94bfd53d9c3d2ad4d0a005fa9b24f0236c7e8b722a78",
+      "og-image-de.png": "c8c32f2320d945e3131ed2ffffd1e9d510db95fbb9430bc64ea48b27e3bd985e",
+      "og-image-en.png": "983858a7ad8d7b53320b664dba5dc9c57fe0a2c01211e6eea26b22655a96fab4",
+      "og-image-tr.png": "ec6eb5d217536f2f9c35f4438501eebffd4c80059b16e235c339e0cc529f7271",
       "vendor/chart-4.4.6.umd.js": "3850656abbdc319141e6e8ce8eacde2622fc767c30e20d81704af2bf3159f92d"
     }
   }

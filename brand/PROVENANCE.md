@@ -94,3 +94,29 @@ FUTURE_COMMERCIAL_BRANDING_RIGHTS=UNGEPRÜFT
 Origin PASS is limited to recording the direct owner confirmation and binding this documentation to the current family and its hashes. The complete technical origin/export chain remains partial, so EVS-RG-003A is not closed merely by that subcheck. This remaining status concerns absent technical creation/export evidence; EVS-RG-003B trademark availability is a separate open review.
 
 The owner requests retention of the existing branding with documentation and expressly rejects a rebuild. `YES_WITH_DOCUMENTATION` records that project decision without granting a legal clearance. Exclusive copyright, trademark availability and general current/free or future/commercial rights have not been independently established. EVS-RG-004C and all findings outside this branding documentation scope are unchanged.
+
+
+## C3 R2 local integration, 11 October 2026
+
+The preceding inventory and relationships document the previous Chevron family at their stated baseline. Active product branding now uses the owner-selected C3 Grounded Terminal from `EVSpend-Brand-Kit-2.0-C3-R2`. Local integration was expressly authorized by the owner on 11 October 2026, without commit or publication authorization.
+
+Sources reviewed: kit `00-START-HERE/BRAND-GUIDELINES.md`, `CHANGELOG-R2.md`, `11-INTEGRATION-HANDOFF/ASSET-MAPPING.md`, `asset-mapping.json`, and `10-LICENSES-PROVENANCE/LICENSES.md` and `PROVENANCE.md`. The complete kit SHA256SUMS verification passed. The 14 active raster/vector files below match the supplied R2 bytes. Splash inline SVG fingerprint matches the reviewed Patch 01 proposal. Existing Inter files and original third party notices remain unchanged.
+
+| Active C3 product file | R2 source | SHA256 |
+|---|---|---|
+| `android-chrome-192x192.png` | `02-APP-WEB-ICONS/web/android-chrome-192x192.png` | `ba791b91f1cbea5fa71778882100bf288e7db18ac8f3e4f9089c318d86afa188` |
+| `android-chrome-512x512.png` | `02-APP-WEB-ICONS/web/android-chrome-512x512.png` | `743a39adf553909a4acebad6852c064da3f9a112f0c42ea36a3405a212ab41c9` |
+| `apple-touch-icon.png` | `02-APP-WEB-ICONS/web/apple-touch-icon.png` | `5c64f02d8626ea93c9afa1cbf5e1025fd973949ea02cbf0db34891c9b88a31d0` |
+| `banner.png` | `03-BANNERS-SOCIAL/app-banner/banner.png` | `5a3835c9aef8994a072f763d04e8dc44c211ab56ac0134296d65265b904cc0f9` |
+| `banner.webp` | `03-BANNERS-SOCIAL/app-banner/banner.webp` | `5af468473781d405c1e54cddc04155621bc94dfac0c59f853600fdb9b4bd8b25` |
+| `favicon-16x16.png` | `02-APP-WEB-ICONS/web/favicon-16x16.png` | `42b6163203a3ad202ee54109ec72e11ef74bbf405dd98799202527d87466c615` |
+| `favicon-32x32.png` | `02-APP-WEB-ICONS/web/favicon-32x32.png` | `c73e946ee5f13e61652d4e1383185f2ef9b74fdddf316b5c947ff9b9ec5487cb` |
+| `favicon.ico` | `02-APP-WEB-ICONS/web/favicon.ico` | `3b9a86e6570967b05a25b79ef88465c710a2771570a26195c09e469044081457` |
+| `favicon.svg` | `02-APP-WEB-ICONS/web/favicon.svg` | `b87ac36631d78dff176a7e33ba88ca0f3a530eae8878497e09d9ea2758ffe77b` |
+| `maskable-192x192.png` | `02-APP-WEB-ICONS/web/maskable-192x192.png` | `cd204aa5575ab81779fb6eb5d7f22604f15910e55f5f506532c80b023c2df11e` |
+| `maskable-512x512.png` | `02-APP-WEB-ICONS/web/maskable-512x512.png` | `1131b1c9cd536692c31e94bfd53d9c3d2ad4d0a005fa9b24f0236c7e8b722a78` |
+| `og-image-de.png` | `03-BANNERS-SOCIAL/og-link-preview/og-image-de-1200x630.png` | `c8c32f2320d945e3131ed2ffffd1e9d510db95fbb9430bc64ea48b27e3bd985e` |
+| `og-image-en.png` | `03-BANNERS-SOCIAL/og-link-preview/og-image-en-1200x630.png` | `983858a7ad8d7b53320b664dba5dc9c57fe0a2c01211e6eea26b22655a96fab4` |
+| `og-image-tr.png` | `03-BANNERS-SOCIAL/og-link-preview/og-image-tr-1200x630.png` | `ec6eb5d217536f2f9c35f4438501eebffd4c80059b16e235c339e0cc529f7271` |
+
+C3 symbol and wordmark were created for EVSpend in the supplied design process; vector wordmark derives from Inter Variable 4.001, weights 720 and 380, under the existing SIL OFL 1.1 notice. Generators remain in the kit and are not published as product assets. Historical masters in `brand/` remain archived evidence and are not active resources. Trademark and exclusive usage rights remain UNGEPRÜFT / TRADEMARK_REVIEW_REQUIRED / LEGAL_REVIEW_REQUIRED. This integration documents technical identity and owner instruction, not legal clearance.

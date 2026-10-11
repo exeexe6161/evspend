@@ -16,7 +16,7 @@
  * downloads or fresh-fetch semantics.
  */
 
-const CACHE_VERSION          = 'v1790528851861';
+const CACHE_VERSION          = 'v1791731864416';
 const STATIC_CACHE_PREFIX    = 'evspend-static-';
 const RUNTIME_CACHE_PREFIX   = 'evspend-runtime-';
 const STATIC_CACHE           = STATIC_CACHE_PREFIX + CACHE_VERSION;
@@ -57,11 +57,14 @@ const OPTIONAL_PRECACHE_URLS = [
   '/styles-pages.min.css?v=20260501-legal3',
   '/lang-switch.js?v=20260501-legal3',
   '/fonts/InterVariable-Italic.woff2',
-  '/banner.webp?v=20260502-brand1',
-  '/banner.png?v=20260502-brand1',
+  '/banner.webp?v=20261011-c3',
+  '/banner.png?v=20261011-c3',
   '/favicon-16x16.png',
   '/favicon-32x32.png',
   '/favicon.ico',
+  '/favicon.svg',
+  '/maskable-192x192.png',
+  '/maskable-512x512.png',
   '/apple-touch-icon.png',
   '/android-chrome-192x192.png',
   '/android-chrome-512x512.png',

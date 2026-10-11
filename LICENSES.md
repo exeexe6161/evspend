@@ -147,7 +147,13 @@ This document remains the canonical license/provenance summary. Repository evide
 
 ## Brand Assets
 
-### Banner & Favicons
+### Active C3 R2 branding
+
+Owner-selected C3 Grounded Terminal replaces the previous active Chevron family. Local integration was authorized on 11 October 2026. Delivered R2 banner, PNG/ICO/SVG favicons, Apple Touch, standard and maskable PWA icons, DE/EN/TR social previews and inline splash vector paths are documented in `brand/PROVENANCE.md` and pinned in `vendor/license-inventory.json`. The wordmark uses Inter Variable 4.001 converted to paths or raster pixels, with the existing SIL OFL 1.1 notice retained. No font or runtime dependency changed. TRADEMARK_REVIEW_REQUIRED and LEGAL_REVIEW_REQUIRED remain open.
+
+### Previous branding provenance (historical)
+
+The following introduction history describes the replaced family; it is retained as evidence.
 
 - **Origin evidence:** Direct project-owner confirmation of the current EVSpend design family, recorded in `brand/PROVENANCE.md`.
 - **Export status:** PARTIAL; PROVENANCE_UNRESOLVED remains applicable to missing original inputs and export parameters, rather than to the existence of the owner confirmation.
@@ -167,7 +173,7 @@ This document remains the canonical license/provenance summary. Repository evide
 ### Logo / Wordmark
 
 - **Name:** "EVSpend"
-- **Design:** Chevron symbol + wordmark
+- **Design:** Active C3 Grounded Terminal symbol and EVSpend wordmark; the following provenance relationships refer to the previous Chevron family.
 - **Source evidence:** The project owner confirms creation for EVSpend using Claude. Readable SVG masters and project history additionally document the current geometry and later adaptation. These evidence types are recorded separately in `brand/PROVENANCE.md`.
 - **Usage rights:** Exclusive copyright and a general usage-rights clearance are not established. AI assistance does not automatically establish rights.
 - **Trademark status:** TRADEMARK_REVIEW_REQUIRED. Availability and registration status are not established by this document.
@@ -185,7 +191,7 @@ This document remains the canonical license/provenance summary. Repository evide
 
 **CONCRETE_THIRD_PARTY_BRAND_ASSET_FOUND=NO** records the bounded local audit finding for current branding images/symbols. It does not prove originality or absence of all third-party inputs. Inter is a separately documented third-party font under OFL 1.1; the specific font input of the current raster banner is not independently established.
 
-**KEEP_EXISTING_BRANDING=YES_WITH_DOCUMENTATION** records the owner's decision to retain the branding with this evidence and its limitations. No branding rebuild is requested or performed. This is not a legal clearance. EVS-RG-003B (wordmark, symbol and trademark availability) remains **UNGEPRÜFT**. Git authorship and local adaptation do not establish exclusive rights; these references grant no trademark clearance.
+**KEEP_EXISTING_BRANDING=YES_WITH_DOCUMENTATION** records the owner's decision to retain the branding with this evidence and its limitations. This retention statement described the prior documentation task; the owner subsequently authorized local C3 R2 integration on 11 October 2026. This is not a legal clearance. EVS-RG-003B (wordmark, symbol and trademark availability) remains **UNGEPRÜFT**. Git authorship and local adaptation do not establish exclusive rights; these references grant no trademark clearance.
 
 **CURRENT_FREE_RIGHTS=UNGEPRÜFT** and **FUTURE_COMMERCIAL_RIGHTS=UNGEPRÜFT**. Free use does not resolve missing usage rights. The overall findings **EVS_RG_003=UNGEPRÜFT** and **EVS_RG_004=UNGEPRÜFT** remain open.
 
