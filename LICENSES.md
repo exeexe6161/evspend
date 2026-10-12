@@ -1,6 +1,6 @@
 # Third-Party Licenses & Attributions
 
-EVSpend (`evspend.com`) is a static web app. This document records the confirmed third-party components and their original license texts. It does not establish the origin or usage rights of every asset; unresolved SVG and branding provenance requires separate review.
+EVSpendPure (`www.evspendpure.com`) is a static web app. This document records the confirmed third-party components and their original license texts. It does not establish the origin or usage rights of every asset; unresolved SVG and branding provenance requires separate review.
 
 Attribution summary updated: 7 October 2026.
 
@@ -126,7 +126,7 @@ These 21 replacements resolve only the current geometry of the listed Batch B oc
 
 ## Code Ownership
 
-The following files are EVSpend project sources. Project history records development with AI assistance. This list does not establish authorship or exclusive rights for every fragment. Confirmed third-party material remains subject to its original license; unresolved provenance and applicable usage rights require separate review.
+The following files are EVSpendPure project sources. Project history records development with AI assistance. This list does not establish authorship or exclusive rights for every fragment. Confirmed third-party material remains subject to its original license; unresolved provenance and applicable usage rights require separate review.
 
 EVS-RG-004C remains **UNGEPRÜFT**: the complete provenance chain of all project code portions has not been established.
 
@@ -172,8 +172,8 @@ The following introduction history describes the replaced family; it is retained
 
 ### Logo / Wordmark
 
-- **Name:** "EVSpend"
-- **Design:** Active C3 Grounded Terminal symbol and EVSpend wordmark; the following provenance relationships refer to the previous Chevron family.
+- **Name:** "EVSpendPure"
+- **Design:** BRAND_ASSET_PENDING_CLAUDE: the retained C3 Grounded Terminal symbol and EVSpend wordmark await the final EVSpendPure brandkit; the following provenance relationships refer to the previous Chevron family.
 - **Source evidence:** The project owner confirms creation for EVSpend using Claude. Readable SVG masters and project history additionally document the current geometry and later adaptation. These evidence types are recorded separately in `brand/PROVENANCE.md`.
 - **Usage rights:** Exclusive copyright and a general usage-rights clearance are not established. AI assistance does not automatically establish rights.
 - **Trademark status:** TRADEMARK_REVIEW_REQUIRED. Availability and registration status are not established by this document.
@@ -209,7 +209,7 @@ The following introduction history describes the replaced family; it is retained
 
 ## Brand & Design Independence
 
-EVSpend is independent of any operating-system vendor or design framework:
+EVSpendPure is independent of any operating-system vendor or design framework:
 
 - **Visual design** — independent. Custom CSS-only implementation aligned with the Linear / Stripe / GitHub tool aesthetic.
 - **Color palette** — chosen from the Tailwind CSS palette family (`#2563eb` = `blue-600`, `#22c55e` = `green-500`, `#f59e0b` = `amber-500`, `#16a34a` = `green-600`, `#15803d` = `green-700`, `#b45309` = `amber-700`, …). RGB hex values are factual data and are not subject to copyright; Tailwind CSS itself (the framework) is MIT-licensed but is not bundled here — only individual color values are referenced.

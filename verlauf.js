@@ -314,11 +314,11 @@
       historyBackupImport: "Backup importieren",
       historyCsvExport: "CSV exportieren",
       historyPdfExport: "PDF / Drucken",
-      historyPdfTitle: "EVSpend Verlauf",
+      historyPdfTitle: "EVSpendPure Verlauf",
       historyPdfUnavailable: "Druckfunktion nicht verfügbar.",
-      historyExportFilename: "evspend-verlauf-{date}.json",
-      historyCsvFilename: "evspend-verlauf-{date}.csv",
-      historyExportHelp: "Backup-Dateien dienen zur Wiederherstellung in EVSpend. CSV ist eine lesbare Tabelle für Excel, Numbers oder Google Sheets. PDF / Drucken erstellt einen Bericht über die Druckfunktion deines Browsers. Dateien werden nur lokal in deinem Browser verarbeitet und nicht hochgeladen.",
+      historyExportFilename: "evspendpure-verlauf-{date}.json",
+      historyCsvFilename: "evspendpure-verlauf-{date}.csv",
+      historyExportHelp: "Backup-Dateien dienen zur Wiederherstellung in EVSpendPure. CSV ist eine lesbare Tabelle für Excel, Numbers oder Google Sheets. PDF / Drucken erstellt einen Bericht über die Druckfunktion deines Browsers. Dateien werden nur lokal in deinem Browser verarbeitet und nicht hochgeladen.",
       importInvalid: "Ungültige oder beschädigte Datei. Import abgebrochen.",
       importTooLarge: "Datei zu groß (max. 2 MB).",
       importVersionMismatch: "Datei stammt aus einer anderen Version und ist nicht kompatibel.",
@@ -418,11 +418,11 @@
       historyBackupImport: "Import backup",
       historyCsvExport: "Export CSV",
       historyPdfExport: "PDF / Print",
-      historyPdfTitle: "EVSpend History",
+      historyPdfTitle: "EVSpendPure History",
       historyPdfUnavailable: "Print feature not available.",
-      historyExportFilename: "evspend-history-{date}.json",
-      historyCsvFilename: "evspend-history-{date}.csv",
-      historyExportHelp: "Backup files are used to restore data in EVSpend. CSV is a readable table for Excel, Numbers, or Google Sheets. PDF / Print creates a report using your browser’s print feature. Files are processed locally in your browser and are not uploaded.",
+      historyExportFilename: "evspendpure-history-{date}.json",
+      historyCsvFilename: "evspendpure-history-{date}.csv",
+      historyExportHelp: "Backup files are used to restore data in EVSpendPure. CSV is a readable table for Excel, Numbers, or Google Sheets. PDF / Print creates a report using your browser’s print feature. Files are processed locally in your browser and are not uploaded.",
       importInvalid: "Invalid or corrupted file. Import cancelled.",
       importTooLarge: "File too large (max 2 MB).",
       importVersionMismatch: "File is from a different version and not compatible.",
@@ -522,11 +522,11 @@
       historyBackupImport: "Yedeği içe aktar",
       historyCsvExport: "CSV dışa aktar",
       historyPdfExport: "PDF / Yazdır",
-      historyPdfTitle: "EVSpend Geçmiş",
+      historyPdfTitle: "EVSpendPure Geçmiş",
       historyPdfUnavailable: "Yazdırma özelliği kullanılamıyor.",
-      historyExportFilename: "evspend-gecmis-{date}.json",
-      historyCsvFilename: "evspend-gecmis-{date}.csv",
-      historyExportHelp: "Yedek dosyaları EVSpend içinde verileri geri yüklemek için kullanılır. CSV; Excel, Numbers veya Google Sheets için okunabilir bir tablodur. PDF / Yazdır, tarayıcının yazdırma özelliğiyle bir rapor oluşturur. Dosyalar yalnızca tarayıcında yerel olarak işlenir ve yüklenmez.",
+      historyExportFilename: "evspendpure-gecmis-{date}.json",
+      historyCsvFilename: "evspendpure-gecmis-{date}.csv",
+      historyExportHelp: "Yedek dosyaları EVSpendPure içinde verileri geri yüklemek için kullanılır. CSV; Excel, Numbers veya Google Sheets için okunabilir bir tablodur. PDF / Yazdır, tarayıcının yazdırma özelliğiyle bir rapor oluşturur. Dosyalar yalnızca tarayıcında yerel olarak işlenir ve yüklenmez.",
       importInvalid: "Geçersiz veya bozuk dosya. İçe aktarma iptal edildi.",
       importTooLarge: "Dosya çok büyük (en fazla 2 MB).",
       importVersionMismatch: "Dosya farklı bir sürümden ve uyumlu değil.",
@@ -917,7 +917,7 @@
       entryCount: all.length,
       entries: all
     };
-    var pat = _tv("historyExportFilename") || "evspend-verlauf-{date}.json";
+    var pat = _tv("historyExportFilename") || "evspendpure-verlauf-{date}.json";
     return {filename: pat.replace("{date}", _todayIsoDate()), data: JSON.stringify(envelope, null, 2)};
   }
   function exportHistory() {
@@ -1009,7 +1009,7 @@
     }
     var BOM = "\uFEFF";
     var csv = BOM + lines.join("\r\n") + "\r\n";
-    var pat = _tv("historyCsvFilename") || "evspend-verlauf-{date}.csv";
+    var pat = _tv("historyCsvFilename") || "evspendpure-verlauf-{date}.csv";
     return {filename: pat.replace("{date}", _todayIsoDate()), data: csv};
   }
   // Native changes the file transport only. Serialization, display rounding
@@ -1055,7 +1055,7 @@
     }
     var htmlEl       = document.documentElement;
     var prevTitle    = document.title;
-    var newTitle     = (_tv("historyPdfTitle") || "EVSpend Verlauf") + " " + _todayIsoDate();
+    var newTitle     = (_tv("historyPdfTitle") || "EVSpendPure Verlauf") + " " + _todayIsoDate();
     var restored     = false;
     var restoreTimer = null;
     function restore() {

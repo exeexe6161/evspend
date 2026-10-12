@@ -44,6 +44,44 @@
   }
 
   ready(function () {
+    // Keep each former origin reachable for user-controlled backup recovery.
+    // This notice neither reads nor transfers calculator data or URL parameters.
+    if (location.hostname === "evspend.com" || location.hostname === "www.evspend.com") {
+      var language = (html.lang || "de").split("-")[0];
+      var copy = {
+        de: ["Datenrettung nach dem Domainwechsel", "Diese frühere Adresse bleibt für deine lokal gespeicherten Daten erreichbar. Exportiere deinen Verlauf hier als JSON-Backup. Öffne danach www.evspendpure.com und importiere die Datei dort im Verlauf. Gespeicherte Notizen sind im Backup enthalten. Aktuelle Rechnerwerte und Einstellungen werden nicht übertragen. Lösche die bisherigen Websitedaten erst, wenn du die importierten Einträge geprüft hast.", "Verlauf auf dieser Adresse öffnen", "EVSpendPure öffnen"],
+        en: ["Recover data after the domain change", "This former address remains available for your locally stored data. Export your history here as a JSON backup. Then open www.evspendpure.com and import the file in History. Saved notes are included in the backup. Current calculator inputs and settings are not transferred. Keep the old website data until you have checked the imported entries.", "Open history on this address", "Open EVSpendPure"],
+        tr: ["Alan adı değişikliğinden sonra verileri kurtarma", "Bu eski adres, yerel olarak saklanan verilerin için açık kalır. Geçmişini burada JSON yedeği olarak dışa aktar. Ardından www.evspendpure.com adresini aç ve dosyayı Geçmiş bölümünde içe aktar. Kaydedilmiş notlar yedeğe dahildir. Güncel hesaplayıcı girdileri ve ayarlar aktarılmaz. İçe aktarılan kayıtları kontrol edene kadar eski web sitesi verilerini silme.", "Bu adreste geçmişi aç", "EVSpendPure'ı aç"]
+      };
+      var words = copy[language] || copy.en;
+      var notice = document.createElement("aside");
+      notice.id = "domain-migration-notice";
+      notice.className = "card";
+      notice.setAttribute("aria-labelledby", "domain-migration-title");
+      var title = document.createElement("h2");
+      title.id = "domain-migration-title";
+      title.textContent = words[0];
+      var explanation = document.createElement("p");
+      explanation.textContent = words[1];
+      var links = document.createElement("p");
+      var historyLink = document.createElement("a");
+      historyLink.href = /^\/(en-eu|tr)\//.test(location.pathname)
+        ? "/" + location.pathname.split("/")[1] + "/verlauf" : "/verlauf";
+      historyLink.textContent = words[2];
+      var newSite = document.createElement("a");
+      newSite.href = "https://www.evspendpure.com/";
+      newSite.rel = "noreferrer";
+      newSite.textContent = words[3];
+      links.appendChild(historyLink);
+      links.appendChild(document.createTextNode(" · "));
+      links.appendChild(newSite);
+      notice.appendChild(title);
+      notice.appendChild(explanation);
+      notice.appendChild(links);
+      var container = document.querySelector("main") || document.body;
+      container.insertBefore(notice, container.firstChild);
+    }
+
     var btn = document.getElementById("themeBtn");
     function glyph() {
       if (!btn) return;

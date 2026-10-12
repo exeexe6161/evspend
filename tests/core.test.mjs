@@ -71,7 +71,7 @@ function createRuntime(options = {}) {
   };
   const windowObject = {
     document, localStorage, sessionStorage: localStorage, navigator, crypto: webcrypto,
-    location: { search: options.search || "", pathname: options.pathname || "/", href: "https://www.evspend.com/" },
+    location: { search: options.search || "", pathname: options.pathname || "/", href: "https://www.evspendpure.com/" },
     history: { replaceState() {} },
     addEventListener() {}, removeEventListener() {},
     requestAnimationFrame: () => 1, cancelAnimationFrame() {},
@@ -268,7 +268,7 @@ test("Langzeit Teilen enthält keine Nullstrecke und keine Nullkosten", () => {
   assert.match(text, /60[.\s]000 km/);
   assert.match(text, /3[.\s]600/);
   assert.doesNotMatch(text, /für 0 km/);
-  assert.match(text, /www\.evspend\.com/);
+  assert.match(text, /www\.evspendpure\.com/);
 });
 
 test("DE Langzeit Ergebnistext nutzt neutrale Formulierung statt guenstiger, EN/TR unveraendert", () => {

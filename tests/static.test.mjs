@@ -69,7 +69,7 @@ test("Service Worker enthält Offline Shell für DE, EU und TR", () => {
 test("Manifest und Vercel Konfiguration sind gültiges JSON", () => {
   const manifest = JSON.parse(fs.readFileSync(path.join(root, "site.webmanifest"), "utf8"));
   const vercel = JSON.parse(fs.readFileSync(path.join(root, "vercel.json"), "utf8"));
-  assert.equal(manifest.short_name, "EVSpend");
+  assert.equal(manifest.short_name, "EVSpendPure");
   assert.ok(Array.isArray(manifest.icons) && manifest.icons.length >= 2);
   assert.ok(Array.isArray(vercel.headers));
 });

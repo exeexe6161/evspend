@@ -1,4 +1,4 @@
-# EVSpend — Release-Checkliste
+# EVSpendPure — Release-Checkliste
 
 Kurze Liste zum Abhaken nach jedem `git push` auf `main`.
 Reihenfolge: Deploy → Frontend → Funktionen → Legal → Sicherheit → Repo.
@@ -16,8 +16,8 @@ Reihenfolge: Deploy → Frontend → Funktionen → Legal → Sicherheit → Rep
 
 ## 2. Startseiten laden
 
-- [ ] `https://www.evspend.com/` öffnet sich, Splash erscheint und verschwindet sauber
-- [ ] `https://www.evspend.com/en-eu/` öffnet sich, englischer Text, Splash funktioniert
+- [ ] `https://www.evspendpure.com/` öffnet sich, Splash erscheint und verschwindet sauber
+- [ ] `https://www.evspendpure.com/en-eu/` öffnet sich, englischer Text, Splash funktioniert
 - [ ] In beiden Versionen: kein leerer Bildschirm, keine Konsolen-Fehlerseite, kein „Application Error"
 
 ---
@@ -47,7 +47,7 @@ Reihenfolge: Deploy → Frontend → Funktionen → Legal → Sicherheit → Rep
 - [ ] Button „Teilen als Text" → Share-Sheet oder Clipboard-Toast
 - [ ] Geteilter Text enthält „Geschätzte Differenz" / „Estimated difference" / „Tahmini fark"
 - [ ] Button „Teilen als Bild" → PNG wird generiert / Share-Sheet öffnet sich
-- [ ] Bild zeigt Werte, Marke, evspend.com — keine kaputten Glyphen
+- [ ] Bild zeigt Werte, Marke, evspendpure.com — keine kaputten Glyphen
 
 ---
 
@@ -64,7 +64,7 @@ Reihenfolge: Deploy → Frontend → Funktionen → Legal → Sicherheit → Rep
 
 ## 7. Verlauf-Export
 
-- [ ] **Backup exportieren** → Datei wird heruntergeladen (`evspend-verlauf-YYYY-MM-DD.json`)
+- [ ] **Backup exportieren** → Datei wird heruntergeladen (`evspendpure-verlauf-YYYY-MM-DD.json`)
 - [ ] **Backup importieren** → dieselbe Datei → Toast meldet „0 importiert, 1 übersprungen" (Duplikat-Erkennung)
 - [ ] **CSV exportieren** → Datei öffnet in Excel/Numbers/Google Sheets, 12 Spalten lesbar, Umlaute korrekt
 - [ ] **PDF / Drucken** → Druckdialog öffnet sich, Vorschau zeigt Chart + Statistik + Liste, keine Buttons / Footer
@@ -90,20 +90,20 @@ EN-EU-Pfade:
 
 Diese URLs **müssen 404** liefern (im Browser-Tab oder per `curl -I`):
 
-- [ ] `https://www.evspend.com/script.min.js.map` → 404
-- [ ] `https://www.evspend.com/verlauf.min.js.map` → 404
-- [ ] `https://www.evspend.com/script.js` → 404 (unminified Source)
-- [ ] `https://www.evspend.com/styles-app.css` → 404 (unminified Source)
-- [ ] `https://www.evspend.com/AUDIT_REPORT.md` → 404
-- [ ] `https://www.evspend.com/RELEASE_CHECKLIST.md` → 404 (siehe Notiz unten)
+- [ ] `https://www.evspendpure.com/script.min.js.map` → 404
+- [ ] `https://www.evspendpure.com/verlauf.min.js.map` → 404
+- [ ] `https://www.evspendpure.com/script.js` → 404 (unminified Source)
+- [ ] `https://www.evspendpure.com/styles-app.css` → 404 (unminified Source)
+- [ ] `https://www.evspendpure.com/AUDIT_REPORT.md` → 404
+- [ ] `https://www.evspendpure.com/RELEASE_CHECKLIST.md` → 404 (siehe Notiz unten)
 
 Diese URLs **müssen 200** liefern:
 
-- [ ] `https://www.evspend.com/script.min.js?v=…` → 200
-- [ ] `https://www.evspend.com/verlauf.min.js?v=…` → 200
-- [ ] `https://www.evspend.com/styles-app.min.css?v=…` → 200
-- [ ] `https://www.evspend.com/site.webmanifest` → 200
-- [ ] `https://www.evspend.com/LICENSES.md` → 200 (muss erreichbar bleiben)
+- [ ] `https://www.evspendpure.com/script.min.js?v=…` → 200
+- [ ] `https://www.evspendpure.com/verlauf.min.js?v=…` → 200
+- [ ] `https://www.evspendpure.com/styles-app.min.css?v=…` → 200
+- [ ] `https://www.evspendpure.com/site.webmanifest` → 200
+- [ ] `https://www.evspendpure.com/LICENSES.md` → 200 (muss erreichbar bleiben)
 
 ---
 

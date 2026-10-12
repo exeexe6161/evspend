@@ -5,7 +5,7 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const ROOT = process.env.EVSPEND_TEST_ROOT || path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
-const ORIGIN = 'https://www.evspend.com';
+const ORIGIN = 'https://www.evspendpure.com';
 // Import the actual production module without changing package type or copying its logic.
 const source = fs.readFileSync(path.join(ROOT, 'middleware.js'), 'utf8');
 const { default: middleware, config } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
@@ -18,7 +18,7 @@ const legalRoutes = [...new Set([
   canonical(read('privacy-policy.html')).pathname,
 ])];
 
-function request(route, country, ua = 'EVSpend regression') {
+function request(route, country, ua = 'EVSpendPure regression') {
   const headers = { 'user-agent': ua };
   if (country !== null) headers['x-vercel-ip-country'] = country;
   return new Request(new URL(route, ORIGIN), { headers });

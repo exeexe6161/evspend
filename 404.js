@@ -28,14 +28,14 @@
       text: "Die angeforderte Seite existiert nicht oder wurde verschoben.",
       cta: "Zurück zum Rechner",
       htmlLang: "de",
-      pageTitle: "404 – Seite nicht gefunden | EVSpend"
+      pageTitle: "404 – Seite nicht gefunden | EVSpendPure"
     },
     en: {
       title: "Page not found",
       text: "The page you requested doesn’t exist or has been moved.",
       cta: "Back to calculator",
       htmlLang: "en",
-      pageTitle: "404 – Page not found | EVSpend",
+      pageTitle: "404 – Page not found | EVSpendPure",
       href: "/en-eu/"
     },
     tr: {
@@ -43,7 +43,7 @@
       text: "İstenen sayfa mevcut değil veya taşınmış.",
       cta: "Hesaplayıcıya dön",
       htmlLang: "tr",
-      pageTitle: "404 – Sayfa bulunamadı | EVSpend"
+      pageTitle: "404 – Sayfa bulunamadı | EVSpendPure"
     }
   };
 

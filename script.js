@@ -1,6 +1,6 @@
 const $ = id => document.getElementById(id);
 
-// ── EVSpend Splash lifecycle ─────────────────────────────────────────────────
+// ── EVSpendPure Splash lifecycle ─────────────────────────────────────────────────
 // First-paint C3 splash. Decorative only, never blocks the app:
 //   • shown once per browser session (sessionStorage flag), never on internal navigation
 //   • removed at once if `prefers-reduced-motion` is set
@@ -2109,7 +2109,7 @@ function _ctWrap(ctx, text, x, y, color, size, weight, maxWidth, lineHeight) {
 // native share text for image/file shares.
 function _drawShareSiteBadge(ctx, W, y) {
   ctx.save();
-  const text = "EVSpend · www.evspend.com";
+  const text = "EVSpendPure · www.evspendpure.com";
   let size = 34;
   ctx.font = `700 ${size}px ${_CF}`;
   ctx.textAlign = "center";
@@ -2260,7 +2260,7 @@ function _injectShareDisclaimer(text) {
   return lines.join("\n");
 }
 function _shareSiteUrl() {
-  return "https://www.evspend.com/";
+  return "https://www.evspendpure.com/";
 }
 function buildShareTextSingle(d) {
   const kmDisp = Math.round(Math.max(0, _kmToDist(d.km))).toLocaleString(_currentLocale());
@@ -2369,19 +2369,19 @@ function shareImageCanvas() {
   }
   cvs.toBlob(blob => {
     if (!blob) { eafToast(_t("toastImageError")); return; }
-    const file = new File([blob], "evspend.png", { type: "image/png" });
+    const file = new File([blob], "evspendpure.png", { type: "image/png" });
     if (navigator.canShare && navigator.canShare({ files: [file] })) {
       navigator.share({ files: [file], title, text, url: _shareSiteUrl() }).catch(err => {
         if (err?.name === "AbortError") return;
         navigator.share({ files: [file], title, text }).catch(() => {
-          _downloadBlob(blob, "evspend.png");
+          _downloadBlob(blob, "evspendpure.png");
         });
       });
     } else {
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "evspend.png";
+      a.download = "evspendpure.png";
       a.click();
       URL.revokeObjectURL(url);
     }
@@ -2949,9 +2949,9 @@ setTimeout(() => {
 
   var translations = {
     de: {
-      heroTitle: "E-Auto vs. Verbrenner",
-      heroSubtitle1: "Energie- und Kraftstoffkosten",
-      heroSubtitle2: "im Vergleich",
+      heroTitle: "EVSpendPure",
+      heroSubtitle1: "Electric & Fuel Cost Calculator",
+      heroSubtitle2: "",
       trustNoSignup: "Ohne Anmeldung",
       trustLocal: "Eingaben lokal gespeichert",
       brandTagline: "Vergleich basierend auf deinen Eingaben",
@@ -3069,11 +3069,11 @@ setTimeout(() => {
       longtermPremiumExclHint: "Hinweis: Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.",
       longtermLblEv: "E-Auto Energiekosten",
       longtermLblVb: "Verbrenner Kraftstoffkosten",
-      shareLongtermTitle: "EVSpend Langzeitanalyse (Beispielrechnung)",
+      shareLongtermTitle: "EVSpendPure Langzeitanalyse (Beispielrechnung)",
       shareLongtermDifference: "Geschätzte Differenz nach Mehrpreis",
       shareLongtermEvAdvantage: "E-Auto rechnerisch niedriger",
       shareLongtermEvDisadvantage: "E-Auto rechnerisch teurer",
-      shareOwnValues: "Eigene Werte berechnen: www.evspend.com",
+      shareOwnValues: "Eigene Werte berechnen: www.evspendpure.com",
       longtermRemainingPremium: "Geschätzter verbleibender Kostennachteil",
       longtermAmortized: "Break-Even im Zeitraum geschätzt erreicht",
       longtermBeHint: "Basierend auf deiner monatlichen Fahrleistung",
@@ -3133,10 +3133,10 @@ setTimeout(() => {
       shareSingle:             "Laut meiner Berechnung betragen meine Kosten {val} für {km}",
       shareSingleCarpool:      "Laut meiner Eingabe betragen die Kosten pro Person {val} für {km}",
       // Phase B — professionelle Share-Texte (neutral, mit sichtbarer URL)
-      shareImageTitle: "EVSpend Beispielrechnung · www.evspend.com",
-      shareTextSingleEv: "EVSpend Beispielrechnung\nE-Auto: {value} {currency} für {km} {unit}\nEigene Werte berechnen: www.evspend.com",
-      shareTextSingleVb: "EVSpend Beispielrechnung\nVerbrenner: {value} {currency} für {km} {unit}\nEigene Werte berechnen: www.evspend.com",
-      shareTextCompare:  "EVSpend Beispielrechnung\nE-Auto: {ev_value} {currency} | Verbrenner: {ice_value} {currency}\nGeschätzte Differenz: {savings} {currency} für {km} {unit}\nEigene Werte berechnen: www.evspend.com",
+      shareImageTitle: "EVSpendPure Beispielrechnung · www.evspendpure.com",
+      shareTextSingleEv: "EVSpendPure Beispielrechnung\nE-Auto: {value} {currency} für {km} {unit}\nEigene Werte berechnen: www.evspendpure.com",
+      shareTextSingleVb: "EVSpendPure Beispielrechnung\nVerbrenner: {value} {currency} für {km} {unit}\nEigene Werte berechnen: www.evspendpure.com",
+      shareTextCompare:  "EVSpendPure Beispielrechnung\nE-Auto: {ev_value} {currency} | Verbrenner: {ice_value} {currency}\nGeschätzte Differenz: {savings} {currency} für {km} {unit}\nEigene Werte berechnen: www.evspendpure.com",
       shareRideshareLine: "Fahrgemeinschaft {n} Personen: {perPerson} {currency} pro Person",
       // Verlauf (für verlauf.html + verlauf.js)
       verlaufTitle: "Verlauf",
@@ -3181,9 +3181,9 @@ setTimeout(() => {
       chartAll:   "Gesamt Energie-/Kraftstoffkosten",
     },
     en: {
-      heroTitle: "EV vs. Combustion Engine",
-      heroSubtitle1: "Energy and fuel costs",
-      heroSubtitle2: "compared",
+      heroTitle: "EVSpendPure",
+      heroSubtitle1: "Electric & Fuel Cost Calculator",
+      heroSubtitle2: "",
       trustNoSignup: "No sign-up",
       trustLocal: "Inputs saved locally",
       brandTagline: "Comparison based on your inputs",
@@ -3301,11 +3301,11 @@ setTimeout(() => {
       longtermPremiumExclHint: "Note: Maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.",
       longtermLblEv: "EV energy costs",
       longtermLblVb: "Combustion fuel costs",
-      shareLongtermTitle: "EVSpend long-term analysis (example calculation)",
+      shareLongtermTitle: "EVSpendPure long-term analysis (example calculation)",
       shareLongtermDifference: "Estimated difference after EV price premium",
       shareLongtermEvAdvantage: "EV is lower in this calculation",
       shareLongtermEvDisadvantage: "EV is higher in this calculation",
-      shareOwnValues: "Calculate with your own inputs: www.evspend.com",
+      shareOwnValues: "Calculate with your own inputs: www.evspendpure.com",
       longtermRemainingPremium: "Estimated remaining cost disadvantage",
       longtermAmortized: "Break-even reached within period (estimated)",
       longtermBeHint: "Based on your monthly mileage",
@@ -3365,10 +3365,10 @@ setTimeout(() => {
       shareSingle:             "Based on my inputs, my calculated cost is {val} for {km}",
       shareSingleCarpool:      "Based on my inputs, cost per person is {val} for {km}",
       // Phase B — professional share text (neutral, with visible URL)
-      shareImageTitle: "EVSpend example calculation · www.evspend.com",
-      shareTextSingleEv: "EVSpend example calculation\nEV: {value} {currency} for {km} {unit}\nCalculate with your own inputs: www.evspend.com",
-      shareTextSingleVb: "EVSpend example calculation\nICE: {value} {currency} for {km} {unit}\nCalculate with your own inputs: www.evspend.com",
-      shareTextCompare:  "EVSpend example calculation\nEV: {ev_value} {currency} | ICE: {ice_value} {currency}\nEstimated difference: {savings} {currency} over {km} {unit}\nCalculate with your own inputs: www.evspend.com",
+      shareImageTitle: "EVSpendPure example calculation · www.evspendpure.com",
+      shareTextSingleEv: "EVSpendPure example calculation\nEV: {value} {currency} for {km} {unit}\nCalculate with your own inputs: www.evspendpure.com",
+      shareTextSingleVb: "EVSpendPure example calculation\nICE: {value} {currency} for {km} {unit}\nCalculate with your own inputs: www.evspendpure.com",
+      shareTextCompare:  "EVSpendPure example calculation\nEV: {ev_value} {currency} | ICE: {ice_value} {currency}\nEstimated difference: {savings} {currency} over {km} {unit}\nCalculate with your own inputs: www.evspendpure.com",
       shareRideshareLine: "Carpool {n} people: {perPerson} {currency} per person",
       // Verlauf
       verlaufTitle: "History",
@@ -3413,9 +3413,9 @@ setTimeout(() => {
       chartAll:   "Total energy/fuel costs",
     },
     tr: {
-      heroTitle: "Elektrikli Araç & Benzinli Araç",
-      heroSubtitle1: "Enerji ve yakıt maliyetleri",
-      heroSubtitle2: "karşılaştırması",
+      heroTitle: "EVSpendPure",
+      heroSubtitle1: "Electric & Fuel Cost Calculator",
+      heroSubtitle2: "",
       trustNoSignup: "Kayıt gerekmez",
       trustLocal: "Girdiler yerel olarak saklanır",
       brandTagline: "Girdilerine dayalı karşılaştırma",
@@ -3533,11 +3533,11 @@ setTimeout(() => {
       longtermPremiumExclHint: "Not: Bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
       longtermLblEv: "Elektrikli enerji maliyeti",
       longtermLblVb: "İçten yanmalı yakıt maliyeti",
-      shareLongtermTitle: "EVSpend uzun vadeli analiz (örnek hesaplama)",
+      shareLongtermTitle: "EVSpendPure uzun vadeli analiz (örnek hesaplama)",
       shareLongtermDifference: "Elektrikli araç fiyat farkı sonrası tahmini fark",
       shareLongtermEvAdvantage: "Bu hesaplamada elektrikli daha düşük",
       shareLongtermEvDisadvantage: "Bu hesaplamada elektrikli daha yüksek",
-      shareOwnValues: "Kendi değerlerinle hesapla: www.evspend.com",
+      shareOwnValues: "Kendi değerlerinle hesapla: www.evspendpure.com",
       longtermRemainingPremium: "Tahmini kalan toplam maliyet dezavantajı",
       longtermAmortized: "Dönem içinde başabaş tahmini olarak ulaşıldı",
       longtermBeHint: "Aylık kilometrenize göre",
@@ -3597,10 +3597,10 @@ setTimeout(() => {
       shareSingle:             "{km} için hesaplanan maliyetim: {val}",
       shareSingleCarpool:      "Kişi başı maliyet: {val} ({km} için, girdime göre)",
       // Phase B — profesyonel paylaşım metni (nötr, görünür URL ile)
-      shareImageTitle: "EVSpend örnek hesaplama · www.evspend.com",
-      shareTextSingleEv: "EVSpend örnek hesaplama\nElektrikli: {value} {currency} · {km} {unit}\nKendi değerlerinle hesapla: www.evspend.com",
-      shareTextSingleVb: "EVSpend örnek hesaplama\nBenzinli: {value} {currency} · {km} {unit}\nKendi değerlerinle hesapla: www.evspend.com",
-      shareTextCompare:  "EVSpend örnek hesaplama\nElektrikli: {ev_value} {currency} | Benzinli: {ice_value} {currency}\nTahmini fark: {savings} {currency} · {km} {unit}\nKendi değerlerinle hesapla: www.evspend.com",
+      shareImageTitle: "EVSpendPure örnek hesaplama · www.evspendpure.com",
+      shareTextSingleEv: "EVSpendPure örnek hesaplama\nElektrikli: {value} {currency} · {km} {unit}\nKendi değerlerinle hesapla: www.evspendpure.com",
+      shareTextSingleVb: "EVSpendPure örnek hesaplama\nBenzinli: {value} {currency} · {km} {unit}\nKendi değerlerinle hesapla: www.evspendpure.com",
+      shareTextCompare:  "EVSpendPure örnek hesaplama\nElektrikli: {ev_value} {currency} | Benzinli: {ice_value} {currency}\nTahmini fark: {savings} {currency} · {km} {unit}\nKendi değerlerinle hesapla: www.evspendpure.com",
       shareRideshareLine: "Araç paylaşımı {n} kişi: {perPerson} {currency} kişi başı",
       // Verlauf
       verlaufTitle: "Geçmiş",

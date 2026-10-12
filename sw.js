@@ -1,4 +1,4 @@
-/* EVSpend Service Worker — Phase P Sprint 3
+/* EVSpendPure Service Worker — Phase P Sprint 3
  *
  * Strategy:
  *   - Versioned assets (?v=…)  → cache-first, immutable lifetime
@@ -16,7 +16,7 @@
  * downloads or fresh-fetch semantics.
  */
 
-const CACHE_VERSION          = 'v1791731864416';
+const CACHE_VERSION          = 'v1791767043551';
 const STATIC_CACHE_PREFIX    = 'evspend-static-';
 const RUNTIME_CACHE_PREFIX   = 'evspend-runtime-';
 const STATIC_CACHE           = STATIC_CACHE_PREFIX + CACHE_VERSION;
@@ -42,9 +42,9 @@ const REQUIRED_PRECACHE_URLS = [
   '/tr/verlauf.html',
   '/site.webmanifest',
   '/styles-app.min.css?v=20260601-audit-fix-2',
-  '/theme-init.js?v=20260619-wfinal',
-  '/script.min.js?v=20260619-wfinal',
-  '/verlauf.min.js?v=20260619-wfinal',
+  '/theme-init.js?v=20261012-evspendpure',
+  '/script.min.js?v=20261012-evspendpure',
+  '/verlauf.min.js?v=20261012-evspendpure',
   '/en-eu/init-eu.js?v=20260501-legal3',
   '/en-eu/styles-en-eu.css?v=20260501-legal3',
   '/tr/init-tr.js?v=20260601-audit-3b2',

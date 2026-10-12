@@ -97,7 +97,7 @@ test('EVS-053 canonical public path is included and bypasses geo redirects', asy
   const source = fs.readFileSync(path.join(ROOT, 'middleware.js'), 'utf8');
   const { default: middleware } = await import(`data:text/javascript;base64,${Buffer.from(source).toString('base64')}`);
   for (const country of ['DE', 'TR', 'FR', 'US']) {
-    const response = middleware(new Request('https://www.evspend.com/LICENSES.md', { headers: { 'x-vercel-ip-country': country } }));
+    const response = middleware(new Request('https://www.evspendpure.com/LICENSES.md', { headers: { 'x-vercel-ip-country': country } }));
     assert.equal(response, undefined);
   }
 });

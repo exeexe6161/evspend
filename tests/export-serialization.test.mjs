@@ -21,6 +21,8 @@ test("shared JSON serialization and browser transport produce identical bytes", 
   assert.equal(envelope.entries[0].id, "eaf_export");
   assert.equal(envelope.entries[0].note, "=1+1");
   assert.match(file.filename, /2026-09-27\.json$/);
+  assert.match(file.filename, /^evspendpure-history-/);
+  assert.equal(JSON.parse(file.data).app, "evspend");
 });
 
 test("shared CSV neutralizes formula text while preserving source and normal values", () => {

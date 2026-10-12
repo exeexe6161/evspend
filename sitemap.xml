@@ -4,294 +4,294 @@
 
   <!-- Hauptseite (mehrsprachig via i18n + EN-EU-Variante) -->
   <url>
-    <loc>https://www.evspend.com/</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/tr/"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/"/>
+    <loc>https://www.evspendpure.com/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/en-eu/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/tr/"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/"/>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/en-eu/</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/tr/"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/"/>
+    <loc>https://www.evspendpure.com/en-eu/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/en-eu/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/tr/"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/"/>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/tr/</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/tr/"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/"/>
+    <loc>https://www.evspendpure.com/tr/</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/en-eu/"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/tr/"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/"/>
     <changefreq>monthly</changefreq>
     <priority>1.0</priority>
   </url>
 
   <!-- Verlauf (mehrsprachig via i18n + EN-EU-Variante + TR-Markt) -->
   <url>
-    <loc>https://www.evspend.com/verlauf</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/verlauf"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/verlauf"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/tr/verlauf"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/verlauf"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/verlauf"/>
+    <loc>https://www.evspendpure.com/verlauf</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/verlauf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/en-eu/verlauf"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/tr/verlauf"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/verlauf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/verlauf"/>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/en-eu/verlauf</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/verlauf"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/verlauf"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/tr/verlauf"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/verlauf"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/verlauf"/>
+    <loc>https://www.evspendpure.com/en-eu/verlauf</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/verlauf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/en-eu/verlauf"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/tr/verlauf"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/verlauf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/verlauf"/>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/tr/verlauf</loc>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/verlauf"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/en-eu/verlauf"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/tr/verlauf"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/verlauf"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/verlauf"/>
+    <loc>https://www.evspendpure.com/tr/verlauf</loc>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/verlauf"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/en-eu/verlauf"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/tr/verlauf"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/verlauf"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/verlauf"/>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>
   </url>
 
   <!-- ── Impressum / Legal Notice / Künye (DE/EN/TR/EU) ────────────────────────────── -->
   <url>
-    <loc>https://www.evspend.com/impressum</loc>
+    <loc>https://www.evspendpure.com/impressum</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/impressum"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/impressum.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/impressum.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/impressum"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/impressum"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/impressum"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/impressum.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/impressum.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/impressum"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/impressum"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/impressum.en</loc>
+    <loc>https://www.evspendpure.com/impressum.en</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/impressum"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/impressum.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/impressum.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/impressum"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/impressum"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/impressum"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/impressum.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/impressum.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/impressum"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/impressum"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/impressum.tr</loc>
+    <loc>https://www.evspendpure.com/impressum.tr</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/impressum"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/impressum.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/impressum.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/impressum"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/impressum"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/impressum"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/impressum.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/impressum.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/impressum"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/impressum"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/en-eu/impressum</loc>
+    <loc>https://www.evspendpure.com/en-eu/impressum</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/impressum"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/impressum.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/impressum.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/impressum"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/impressum"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/impressum"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/impressum.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/impressum.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/impressum"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/impressum"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <!-- ── Datenschutz / Privacy / Gizlilik (DE/EN/TR/EU) ────────────────────────────── -->
   <url>
-    <loc>https://www.evspend.com/datenschutz</loc>
+    <loc>https://www.evspendpure.com/datenschutz</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/datenschutz"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/datenschutz.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/datenschutz.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/datenschutz"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/datenschutz"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/datenschutz"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/datenschutz.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/datenschutz.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/datenschutz"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/datenschutz"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/datenschutz.en</loc>
+    <loc>https://www.evspendpure.com/datenschutz.en</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/datenschutz"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/datenschutz.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/datenschutz.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/datenschutz"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/datenschutz"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/datenschutz"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/datenschutz.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/datenschutz.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/datenschutz"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/datenschutz"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/datenschutz.tr</loc>
+    <loc>https://www.evspendpure.com/datenschutz.tr</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/datenschutz"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/datenschutz.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/datenschutz.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/datenschutz"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/datenschutz"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/datenschutz"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/datenschutz.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/datenschutz.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/datenschutz"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/datenschutz"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/en-eu/datenschutz</loc>
+    <loc>https://www.evspendpure.com/en-eu/datenschutz</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/datenschutz"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/datenschutz.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/datenschutz.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/datenschutz"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/datenschutz"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/datenschutz"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/datenschutz.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/datenschutz.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/datenschutz"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/datenschutz"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <!-- ── Nutzungsbedingungen / Terms of Use / Kullanım Koşulları (DE/EN/TR/EU) ────────────────────────────── -->
   <url>
-    <loc>https://www.evspend.com/terms</loc>
+    <loc>https://www.evspendpure.com/terms</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/terms"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/terms.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/terms.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/terms"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/terms.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/terms.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/terms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/terms"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/terms.en</loc>
+    <loc>https://www.evspendpure.com/terms.en</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/terms"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/terms.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/terms.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/terms"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/terms.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/terms.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/terms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/terms"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/terms.tr</loc>
+    <loc>https://www.evspendpure.com/terms.tr</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/terms"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/terms.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/terms.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/terms"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/terms.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/terms.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/terms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/terms"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/en-eu/terms</loc>
+    <loc>https://www.evspendpure.com/en-eu/terms</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/terms"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/terms.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/terms.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/terms"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/terms"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/terms.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/terms.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/terms"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/terms"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <!-- ── Hinweise / Usage Notes / Kullanım Notları (DE/EN/TR/EU) ────────────────────────────── -->
   <url>
-    <loc>https://www.evspend.com/hinweise</loc>
+    <loc>https://www.evspendpure.com/hinweise</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/hinweise"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/hinweise.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/hinweise.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/hinweise"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/hinweise"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/hinweise"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/hinweise.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/hinweise.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/hinweise"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/hinweise"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/hinweise.en</loc>
+    <loc>https://www.evspendpure.com/hinweise.en</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/hinweise"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/hinweise.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/hinweise.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/hinweise"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/hinweise"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/hinweise"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/hinweise.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/hinweise.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/hinweise"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/hinweise"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/hinweise.tr</loc>
+    <loc>https://www.evspendpure.com/hinweise.tr</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/hinweise"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/hinweise.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/hinweise.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/hinweise"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/hinweise"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/hinweise"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/hinweise.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/hinweise.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/hinweise"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/hinweise"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/en-eu/hinweise</loc>
+    <loc>https://www.evspendpure.com/en-eu/hinweise</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/hinweise"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/hinweise.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/hinweise.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/hinweise"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/hinweise"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/hinweise"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/hinweise.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/hinweise.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/hinweise"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/hinweise"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
 
   <!-- ── Barrierefreiheit / Accessibility / Erişilebilirlik (DE/EN/TR/EU) ────────────────────────────── -->
   <url>
-    <loc>https://www.evspend.com/barrierefreiheit</loc>
+    <loc>https://www.evspendpure.com/barrierefreiheit</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/barrierefreiheit"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/barrierefreiheit.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/barrierefreiheit.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/barrierefreiheit"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/barrierefreiheit"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/barrierefreiheit"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/barrierefreiheit.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/barrierefreiheit.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/barrierefreiheit"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/barrierefreiheit"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/barrierefreiheit.en</loc>
+    <loc>https://www.evspendpure.com/barrierefreiheit.en</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/barrierefreiheit"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/barrierefreiheit.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/barrierefreiheit.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/barrierefreiheit"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/barrierefreiheit"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/barrierefreiheit"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/barrierefreiheit.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/barrierefreiheit.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/barrierefreiheit"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/barrierefreiheit"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/barrierefreiheit.tr</loc>
+    <loc>https://www.evspendpure.com/barrierefreiheit.tr</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/barrierefreiheit"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/barrierefreiheit.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/barrierefreiheit.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/barrierefreiheit"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/barrierefreiheit"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/barrierefreiheit"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/barrierefreiheit.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/barrierefreiheit.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/barrierefreiheit"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/barrierefreiheit"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>
   <url>
-    <loc>https://www.evspend.com/en-eu/barrierefreiheit</loc>
+    <loc>https://www.evspendpure.com/en-eu/barrierefreiheit</loc>
     <lastmod>2026-05-01</lastmod>
-    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspend.com/barrierefreiheit"/>
-    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspend.com/barrierefreiheit.en"/>
-    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspend.com/barrierefreiheit.tr"/>
-    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspend.com/en-eu/barrierefreiheit"/>
-    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspend.com/barrierefreiheit"/>
+    <xhtml:link rel="alternate" hreflang="de" href="https://www.evspendpure.com/barrierefreiheit"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://www.evspendpure.com/barrierefreiheit.en"/>
+    <xhtml:link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/barrierefreiheit.tr"/>
+    <xhtml:link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/barrierefreiheit"/>
+    <xhtml:link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/barrierefreiheit"/>
     <changefreq>yearly</changefreq>
     <priority>0.3</priority>
   </url>

@@ -108,7 +108,7 @@ function createRuntime(options = {}) {
   };
   const windowObject = {
     document, localStorage, sessionStorage: localStorage, navigator, crypto: options.crypto ?? webcrypto,
-    location: { search: options.search || "", pathname: options.pathname || "/", href: "https://www.evspend.com/" },
+    location: { search: options.search || "", pathname: options.pathname || "/", href: "https://www.evspendpure.com/" },
     history: { replaceState() {} },
     addEventListener() {}, removeEventListener() {},
     requestAnimationFrame: () => 1, cancelAnimationFrame() {},
