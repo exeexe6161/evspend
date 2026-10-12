@@ -120,3 +120,21 @@ Sources reviewed: kit `00-START-HERE/BRAND-GUIDELINES.md`, `CHANGELOG-R2.md`, `1
 | `og-image-tr.png` | `03-BANNERS-SOCIAL/og-link-preview/og-image-tr-1200x630.png` | `ec6eb5d217536f2f9c35f4438501eebffd4c80059b16e235c339e0cc529f7271` |
 
 C3 symbol and wordmark were created for EVSpend in the supplied design process; vector wordmark derives from Inter Variable 4.001, weights 720 and 380, under the existing SIL OFL 1.1 notice. Generators remain in the kit and are not published as product assets. Historical masters in `brand/` remain archived evidence and are not active resources. Trademark and exclusive usage rights remain UNGEPRÜFT / TRADEMARK_REVIEW_REQUIRED / LEGAL_REVIEW_REQUIRED. This integration documents technical identity and owner instruction, not legal clearance.
+
+
+## EVSpendPure final brand kit (12 October 2026)
+
+Owner instruction: "EVSPENDPURE — FINAL BRAND IDENTITY, COMPLETE PREMIUM BRAND KIT, WEB & IOS REBRANDING, PRODUCTION
+INTEGRATION" (12 October 2026). Generated with the kit generators (`11-GENERATORS`, brand.py) from these inputs only:
+
+* C3 geometry (EVSpend Brand Kit 2.0 C3 R2, mono.sign C3).
+* Signature Cut: band of 12 units, 24 degrees from vertical, lower edge from the inner top corner of the right V arm
+  (375.64 | 138) in the 512 grid. Small form (no cut) for 16 to 48 px raster favicons.
+* WeatherPure wordmark master `weatherpure-wordmark-black.svg` (pure, Pure-P with Riss, verbatim paths).
+* Inter Variable 4.001, SIL OFL 1.1, converted to paths or raster pixels.
+
+Files replaced in place: favicon.svg, favicon.ico, favicon-16x16.png, favicon-32x32.png, apple-touch-icon.png,
+android-chrome-192x192.png, android-chrome-512x512.png, maskable-192x192.png, maskable-512x512.png, banner.png,
+banner.webp, og-image-de.png, og-image-en.png, og-image-tr.png, inline splash SVG in index.html, en-eu/index.html,
+tr/index.html. Masters added: brand/EVSpendPure-*.svg. SHA-256 values are pinned in vendor/license-inventory.json.
+Trademark clearance (EVS-RG-003B) and legal review remain open; this record is not a legal clearance.

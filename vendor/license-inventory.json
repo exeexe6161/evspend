@@ -48,7 +48,7 @@
     }
   ],
   "release": {
-    "svgFingerprint": "c3325a52555edffee84458e7bacb23eb74fb56fd3af3880c3b5b4babe9e7a6be",
+    "svgFingerprint": "5e4c917daec8142e33b3a42b9c7b981d66bce4996782209b18c1cdeb3479410d",
     "references": [
       "404.css",
       "404.js",
@@ -76,22 +76,22 @@
       "verlauf.min.js"
     ],
     "material": {
-      "android-chrome-192x192.png": "ba791b91f1cbea5fa71778882100bf288e7db18ac8f3e4f9089c318d86afa188",
-      "android-chrome-512x512.png": "743a39adf553909a4acebad6852c064da3f9a112f0c42ea36a3405a212ab41c9",
-      "apple-touch-icon.png": "5c64f02d8626ea93c9afa1cbf5e1025fd973949ea02cbf0db34891c9b88a31d0",
-      "banner.png": "5a3835c9aef8994a072f763d04e8dc44c211ab56ac0134296d65265b904cc0f9",
-      "banner.webp": "5af468473781d405c1e54cddc04155621bc94dfac0c59f853600fdb9b4bd8b25",
-      "favicon-16x16.png": "42b6163203a3ad202ee54109ec72e11ef74bbf405dd98799202527d87466c615",
-      "favicon-32x32.png": "c73e946ee5f13e61652d4e1383185f2ef9b74fdddf316b5c947ff9b9ec5487cb",
-      "favicon.ico": "3b9a86e6570967b05a25b79ef88465c710a2771570a26195c09e469044081457",
-      "favicon.svg": "b87ac36631d78dff176a7e33ba88ca0f3a530eae8878497e09d9ea2758ffe77b",
+      "android-chrome-192x192.png": "926394b700e197668d3a45ce11982078e10589657e5d2e571333ce605a1d98e1",
+      "android-chrome-512x512.png": "5e40db3062f79141c68746c0f1dfd6639f447007bd4dee92be32613fddfda30a",
+      "apple-touch-icon.png": "c04be31a2fc7c7cb1b2320d5c270b7614f299de08f27121634304ce5bf3bcfb0",
+      "banner.png": "36571284e95650191973b5b653aa0545cb8f2a4fb6e032cabccdacbb8ab80b33",
+      "banner.webp": "1ee30ad531c183fcf7b8e542ad7f16f0f985e93d66b82a70c03e2efa452ecfa3",
+      "favicon-16x16.png": "6011bd4f147d06199a0b6fac9a49ba6161c89d8c8224bdb83ea55cc85c0ca9f0",
+      "favicon-32x32.png": "03abfbfb640a2c767294281b928ff1524b491810db072857b9ee0746ed9ecb2d",
+      "favicon.ico": "33e5d10d0c3bdd4be36be4e78eba24464f7f317e8166d35ea28e295486c48ba1",
+      "favicon.svg": "eff2959d577a8db80999f5f65c83ed4be2fd1b0a59448e9ade359df005ffbf8a",
       "fonts/InterVariable-Italic.woff2": "e564f652916db6c139570fefb9524a77c4d48f30c92928de9db19b6b5c7a262a",
       "fonts/InterVariable.woff2": "693b77d4f32ee9b8bfc995589b5fad5e99adf2832738661f5402f9978429a8e3",
-      "maskable-192x192.png": "cd204aa5575ab81779fb6eb5d7f22604f15910e55f5f506532c80b023c2df11e",
-      "maskable-512x512.png": "1131b1c9cd536692c31e94bfd53d9c3d2ad4d0a005fa9b24f0236c7e8b722a78",
-      "og-image-de.png": "c8c32f2320d945e3131ed2ffffd1e9d510db95fbb9430bc64ea48b27e3bd985e",
-      "og-image-en.png": "983858a7ad8d7b53320b664dba5dc9c57fe0a2c01211e6eea26b22655a96fab4",
-      "og-image-tr.png": "ec6eb5d217536f2f9c35f4438501eebffd4c80059b16e235c339e0cc529f7271",
+      "maskable-192x192.png": "d8f6c1f386872430ca9de77c56d3b459ab6a8f9354f7705038331e9506bc7499",
+      "maskable-512x512.png": "812db453e068a5426f855ab2199e008b79ee1d9b507022bb932698ae1fdc071d",
+      "og-image-de.png": "3d030bc9110bdcf05ae1275515a96d2ff89bee2fc36f7e149c291a3a814aba71",
+      "og-image-en.png": "28d9d205c2cde8d787d3f9ca66240730018512d38f0c6dc4b9f0f13161626a16",
+      "og-image-tr.png": "79d0cca3c070cdfd0bade6fbee23efdc820b35f92cbeed79353ccf79902dfd49",
       "vendor/chart-4.4.6.umd.js": "3850656abbdc319141e6e8ce8eacde2622fc767c30e20d81704af2bf3159f92d"
     }
   }

@@ -147,7 +147,11 @@ This document remains the canonical license/provenance summary. Repository evide
 
 ## Brand Assets
 
-### Active C3 R2 branding
+### Active EVSpendPure branding
+
+Final EVSpendPure brand kit integrated on 12 October 2026: EV symbol with Signature Cut (small form without cut at 16 to 48 px), banner, PNG/ICO/SVG favicons, Apple Touch, standard and maskable PWA icons, DE/EN/TR social previews and the inline splash vector paths. Spend uses Inter Variable 4.001 as paths (SIL OFL 1.1 notice retained); pure is the WeatherPure wordmark master owned by the project owner. Pinned in `vendor/license-inventory.json`. TRADEMARK_REVIEW_REQUIRED and LEGAL_REVIEW_REQUIRED remain open.
+
+### Previous C3 R2 branding (historical)
 
 Owner-selected C3 Grounded Terminal replaces the previous active Chevron family. Local integration was authorized on 11 October 2026. Delivered R2 banner, PNG/ICO/SVG favicons, Apple Touch, standard and maskable PWA icons, DE/EN/TR social previews and inline splash vector paths are documented in `brand/PROVENANCE.md` and pinned in `vendor/license-inventory.json`. The wordmark uses Inter Variable 4.001 converted to paths or raster pixels, with the existing SIL OFL 1.1 notice retained. No font or runtime dependency changed. TRADEMARK_REVIEW_REQUIRED and LEGAL_REVIEW_REQUIRED remain open.
 
@@ -173,7 +177,7 @@ The following introduction history describes the replaced family; it is retained
 ### Logo / Wordmark
 
 - **Name:** "EVSpendPure"
-- **Design:** BRAND_ASSET_PENDING_CLAUDE: the retained C3 Grounded Terminal symbol and EVSpend wordmark await the final EVSpendPure brandkit; the following provenance relationships refer to the previous Chevron family.
+- **Design:** Active EVSpendPure family: C3 EV symbol with the Signature Cut in the right V arm, horizontal wordmark EV symbol plus Spendpure (Spend set in Inter Variable 4.001 as paths, pure taken verbatim from the WeatherPure wordmark master including the Pure-P Riss). Final brand kit 12 October 2026, see `brand/PROVENANCE.md`. The following provenance relationships refer to the previous Chevron family.
 - **Source evidence:** The project owner confirms creation for EVSpend using Claude. Readable SVG masters and project history additionally document the current geometry and later adaptation. These evidence types are recorded separately in `brand/PROVENANCE.md`.
 - **Usage rights:** Exclusive copyright and a general usage-rights clearance are not established. AI assistance does not automatically establish rights.
 - **Trademark status:** TRADEMARK_REVIEW_REQUIRED. Availability and registration status are not established by this document.

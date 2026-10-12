@@ -3728,19 +3728,21 @@ body[data-result-stale="true"] .stale-hint {
 }
 [data-theme="dark"] .calc-info-body strong{color:var(--l1);}
 
-/* ══ EVSpend Splash · C3 Grounded Terminal ═══════════════════════════
-   First-paint splash. Frame 0 equals the native launch image: same C3 mark,
-   width 17.573vh (168 pt on a 956 pt screen), centred on the full
-   screen, same background per appearance. JS adds `.run` (wordmark eases in),
-   then `.is-hidden` (fade). Safety fallback drops the overlay at 4 s
-   (only if the splash JS never runs). In the native app `.run` starts when
-   the native launch screen is removed.
+/* ══ EVSpendPure Splash · EV with Signature Cut ══════════════════════
+   First-paint splash. Frame 0 equals the native launch image: EV small form,
+   width 17.573vh (168 pt on a 956 pt screen), centred on the full screen,
+   same background per appearance. JS adds `.run`, then `.is-hidden` (fade).
+   Safety fallback drops the overlay at 4 s (only if the splash JS never runs).
+   In the native app `.run` starts when the native launch screen is removed.
    Sequence:
-     0.00s        mark visible (static, matches launch image)
-     0.12–0.54s   wordmark rises 6 px and fades in
-     ~1.00s       fade-out via .is-hidden (JS), 0.32 s */
+     0.00s        EV visible (static, matches launch image)
+     0.10–0.52s   a fine light line runs along the Signature Cut
+     0.22–0.42s   the cut opens
+     0.30–0.80s   Spend, then the pure part with the Pure-P Riss rise in
+     ~1.00s       fade-out via .is-hidden (JS), 0.32 s
+   Reduced motion: overlay removed at once (unchanged). */
 .evspend-splash{
-  --evs-bg:#F5F7F6; --evs-bar:#0A0F0D; --evs-v:#0A9E74; --evs-text:#0A0F0D;
+  --evs-bg:#F5F7F6; --evs-bar:#0A0F0D; --evs-v:#0A9E74; --evs-text:#0A0F0D; --evs-light:#FFFFFF; --evs-glow:rgba(10,158,116,.55);
   --evs-mark-w:17.573vh;
   position:fixed; inset:0;
   z-index:2000;
@@ -3753,7 +3755,7 @@ body[data-result-stale="true"] .stale-hint {
   animation:evspendSplashFallback 0ms ease-in 4000ms forwards;
 }
 [data-theme="dark"] .evspend-splash{
-  --evs-bg:#0A0F0D; --evs-bar:#FFFFFF; --evs-v:#10E0A0; --evs-text:#FFFFFF;
+  --evs-bg:#0A0F0D; --evs-bar:#FFFFFF; --evs-v:#10E0A0; --evs-text:#FFFFFF; --evs-light:#FFFFFF; --evs-glow:rgba(16,224,160,.85);
 }
 .evspend-splash.is-hidden{opacity:0;pointer-events:none;}
 .evspend-splash__mark,
@@ -3766,25 +3768,37 @@ body[data-result-stale="true"] .stale-hint {
   transform:translate(-50%,-50%);
 }
 .evspend-splash__wm{
-  top:calc(50% + var(--evs-mark-w) * 0.65291);
-  width:calc(var(--evs-mark-w) * 1.3); height:calc(var(--evs-mark-w) * 0.31433);
+  top:calc(50% + var(--evs-mark-w) * 0.54318);
+  width:calc(var(--evs-mark-w) * 1.82762); height:calc(var(--evs-mark-w) * 0.39161);
+  margin-left:calc(var(--evs-mark-w) * 0.00000);
   transform:translate(-50%,0);
-  opacity:0;
 }
 .evs-c3-bar{fill:var(--evs-bar);}
 .evs-c3-v{fill:var(--evs-v);}
-.evs-c3-wm{fill:var(--evs-text);}
-.evspend-splash.run .evspend-splash__wm{
-  animation:evsWordmarkIn 420ms cubic-bezier(.2,.7,.2,1) 120ms both;
+.evs-cut{fill:var(--evs-bg);opacity:0;}
+.evs-cut-light{stroke:var(--evs-light);stroke-width:2.6;stroke-linecap:round;fill:none;opacity:0;
+  filter:drop-shadow(0 0 3px var(--evs-glow));}
+.evs-wm{fill:var(--evs-text);opacity:0;}
+.evspend-splash.run .evs-cut-light{animation:evsCutLight 420ms cubic-bezier(.4,0,.2,1) 100ms both;}
+.evspend-splash.run .evs-cut{animation:evsCutOpen 200ms ease-out 220ms both;}
+.evspend-splash.run .evs-wm-spend{animation:evsWordIn 380ms cubic-bezier(.2,.7,.2,1) 300ms both;}
+.evspend-splash.run .evs-wm-pure{animation:evsWordIn 380ms cubic-bezier(.2,.7,.2,1) 420ms both;}
+@keyframes evsCutLight{
+  0%  { opacity:0; stroke-dashoffset:56.51; }
+  20% { opacity:1; }
+  62% { opacity:1; stroke-dashoffset:0; }
+  100%{ opacity:0; stroke-dashoffset:0; }
 }
-@keyframes evsWordmarkIn{
-  from{ opacity:0; transform:translate(-50%,6px); }
-  to  { opacity:1; transform:translate(-50%,0); }
+@keyframes evsCutOpen{ from{opacity:0} to{opacity:1} }
+@keyframes evsWordIn{
+  from{ opacity:0; transform:translateY(6px); }
+  to  { opacity:1; transform:translateY(0); }
 }
 @keyframes evspendSplashFallback{ to { opacity:0; pointer-events:none; visibility:hidden; } }
 
 @media (prefers-reduced-motion: reduce){
-  .evspend-splash__wm{ opacity:1 !important; transform:translate(-50%,0) !important; animation:none !important; }
+  .evs-cut,.evs-wm{ opacity:1 !important; animation:none !important; }
+  .evs-cut-light{ display:none; }
   .evspend-splash{ opacity:0; pointer-events:none; visibility:hidden; animation:none; }
 }
 
