@@ -293,6 +293,36 @@ test("H1 fehlgeschlagene Migration behält den Legacy Key und kann erneut laufen
   assert.deepEqual(stored(storageMap), [{date: 10}]);
 });
 
+test("Release Audit Migration von 50 Altbeständen übernimmt alle Datensätze", async () => {
+  const legacy = Array.from({length: 50}, (_, index) => ({id: index + 1, note: `legacy ${index}`}));
+  const storageMap = new Map([[historyKey, "[]"], [legacyKey, JSON.stringify(legacy)]]);
+  const runtime = createCoordinatorRuntime({storageMap});
+  await runtime.run("window.EAF_HISTORY.migrate(old => ({date: old.id, note: old.note}))");
+  await runtime.locks.idle();
+  assert.equal(storageMap.has(legacyKey), false);
+  assert.deepEqual(stored(storageMap), legacy.map(old => ({date: old.id, note: old.note})));
+});
+
+test("Release Audit Migration von 51 Altbeständen lehnt atomar ab und behält beide Keys", async () => {
+  const legacy = Array.from({length: 51}, (_, index) => ({id: index + 1, note: `legacy ${index}`}));
+  const oldJson = JSON.stringify(legacy);
+  const storageMap = new Map([[historyKey, "[]"], [legacyKey, oldJson]]);
+  const runtime = createCoordinatorRuntime({storageMap});
+  await assert.rejects(runtime.run("window.EAF_HISTORY.migrate(old => ({date: old.id, note: old.note}))"),
+    error => error.code === "HISTORY_INVALID_MUTATION");
+  await runtime.locks.idle();
+  assert.equal(storageMap.get(historyKey), "[]");
+  assert.equal(storageMap.get(legacyKey), oldJson);
+  assert.equal(runtime.calls.filter(([method]) => method === "setItem" || method === "removeItem").length, 0);
+  // A failed migration releases coordination and can recover after a separate
+  // synthetic owner decision makes the complete legacy set fit.
+  storageMap.set(legacyKey, JSON.stringify(legacy.slice(0, 50)));
+  await runtime.run("window.EAF_HISTORY.migrate(old => ({date: old.id, note: old.note}))");
+  await runtime.locks.idle();
+  assert.equal(storageMap.has(legacyKey), false);
+  assert.equal(stored(storageMap).length, 50);
+});
+
 test("H1 Mutationsvertrag erzwingt synchronen Transform und bestehende 50er Grenze", async () => {
   const original = [{id: "C"}];
   const storageMap = new Map([[historyKey, JSON.stringify(original)]]);
@@ -459,6 +489,71 @@ test("H1 gleichzeitiger ID Konflikt verwirft den Verlierer und bewahrt den Gewin
       .filter(([method, key]) => method === "setItem" && key === historyKey).length,
     1
   );
+});
+
+for (const [market, language, currency, expected] of [
+  ["de", "de", "EUR", "Diesen gespeicherten Eintrag löschen?"],
+  ["eu", "en", "EUR", "Delete this saved entry?"],
+  ["us", "en", "USD", "Delete this saved entry?"],
+  ["tr", "tr", "TRY", "Bu kayıtlı girdiyi silmek istiyor musunuz?"],
+]) {
+  for (const legacy of [false, true]) {
+    test(`H1 ${market} abgebrochenes Einzellöschen ${legacy ? "Legacy" : "v2"} schreibt nichts`, async () => {
+      const candidate = legacy
+        ? {schema:"v1", date:1700000003000, km:100, ev:{consumption:18, price:0.3}, fuel:{consumption:6.5, price:1.8}, note:"legacy"}
+        : entry({id:idA, date:1700000003000, note:"A"});
+      const storageMap = appStorage([candidate, entry({id:idC, futureField:{keep:true}})]);
+      storageMap.set("eaf.market", market);
+      storageMap.set("eaf.language", language);
+      storageMap.set("eaf.currency", currency);
+      const locks = createLockManager();
+      const history = historyRuntime({storageMap, locks});
+      await history.settle();
+      const before = [...storageMap];
+      const requestsBefore = locks.events.filter(event => event.type === "requested").length;
+      history.calls.length = 0;
+      const confirmations = [];
+      history.context.confirm = message => { confirmations.push(message); return false; };
+      history.elements.get(legacy ? "legacyList" : "histList").children[0].children[1].click();
+      await history.settle();
+      assert.deepEqual(confirmations, [expected]);
+      assert.deepEqual([...storageMap], before);
+      assert.equal(history.calls.some(([method]) => method === "setItem" || method === "removeItem"), false);
+      assert.equal(locks.events.filter(event => event.type === "requested").length, requestsBefore);
+    });
+  }
+}
+
+test("H1 bestätigtes Einzellöschen liest geänderten Bestand frisch und entfernt dieselbe ID", async () => {
+  const initial = [
+    entry({id:idA, date:1700000003000, note:"A"}),
+    entry({id:idB, date:1700000002000, note:"B"}),
+    entry({id:idC, date:1700000001000, note:"C", futureField:{keep:true}}),
+  ];
+  const storageMap = appStorage(initial);
+  const locks = createLockManager();
+  const history = historyRuntime({storageMap, locks});
+  await history.settle();
+  history.calls.length = 0;
+  const requestsBefore = locks.events.filter(event => event.type === "requested").length;
+  let confirmations = 0;
+  history.context.confirm = message => {
+    confirmations++;
+    assert.equal(message, "Diesen gespeicherten Eintrag löschen?");
+    assert.equal(history.calls.some(([method]) => method === "setItem"), false);
+    assert.equal(locks.events.filter(event => event.type === "requested").length, requestsBefore);
+    // Another context commits while the confirmation is displayed.
+    storageMap.set(historyKey, JSON.stringify([entry({id:idImport, note:"D"}), initial[1], initial[0], initial[2]]));
+    return true;
+  };
+  history.elements.get("histList").children[0].children[1].click();
+  await history.settle();
+  const final = stored(storageMap);
+  assert.equal(confirmations, 1);
+  assert.deepEqual(final.map(item => item.id), [idImport, idB, idC]);
+  assert.equal(JSON.stringify(final.find(item => item.id === idC)), JSON.stringify(initial[2]));
+  assert.equal(locks.events.filter(event => event.type === "requested").length, requestsBefore + 1);
+  assert.equal(history.calls.filter(([method, key]) => method === "setItem" && key === historyKey).length, 1);
 });
 
 test("H1 stale Einzellöschen entfernt nur A und bewahrt später gespeichertes D sowie B und C", async () => {

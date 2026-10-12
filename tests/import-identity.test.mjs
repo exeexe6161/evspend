@@ -5,6 +5,13 @@ import { historyRuntime, ready, importFile, envelope, entry, historyKey, importe
 const idA = "eaf_" + "a".repeat(32), idB = "eaf_" + "b".repeat(32);
 const fixedDate = 1720000000000;
 function stored(rt) { return JSON.parse(rt.storage.get(historyKey)); }
+function capacityEntries(count) {
+  return Array.from({length: count}, (_, index) => entry({
+    id: "eaf_" + index.toString(16).padStart(32, "0"),
+    date: fixedDate - index,
+    note: `capacity ${index}`,
+  }));
+}
 function untouched(rt, before) {
   assert.equal(rt.storage.get(historyKey), before);
   assert.equal(rt.calls.filter(([m,k]) => m === "setItem" && k === historyKey).length, 0);
@@ -25,6 +32,37 @@ async function exportFile(rt) {
   assert.equal(rt.blobs.length, 1);
   return JSON.parse(await rt.blobs[0].text());
 }
+
+for (const [market, message] of [["de", /Speichergrenze von 50/], ["eu", /storage limit of 50/], ["us", /storage limit of 50/], ["tr", /50 kayıtlık depolama sınırı/]]) {
+  test(`Release Audit voller ${market} Verlauf bleibt bei Import unverändert`, async () => {
+    const rt = historyRuntime({storage: {"eaf.market": market, [historyKey]: JSON.stringify(capacityEntries(50))}});
+    const before = rt.storage.get(historyKey);
+    await importFile(rt, envelope([entry({id: idA, date: fixedDate + 1000})]));
+    untouched(rt, before);
+    assert.match(rt.alerts[0], message);
+  });
+}
+test("Release Audit 49 plus 2 lehnt vollständig ab und 49 plus 1 nutzt den letzten Platz", async () => {
+  const rt = historyRuntime({storage: {[historyKey]: JSON.stringify(capacityEntries(49))}});
+  const before = rt.storage.get(historyKey);
+  await importFile(rt, envelope([entry({id: idA, date: fixedDate + 1000}), entry({id: idB, date: fixedDate + 2000})]));
+  untouched(rt, before);
+  rt.alerts.length = 0;
+  await importFile(rt, envelope([entry({id: idA, date: fixedDate + 1000})]));
+  assert.equal(stored(rt).length, 50);
+  assert.equal(stored(rt)[0].id, idA);
+  assert.equal(capacityEntries(49).every(old => stored(rt).some(current => current.id === old.id)), true);
+  assert.match(rt.alerts[0], /1 neue Einträge importiert, 0 übersprungen/);
+});
+test("Release Audit Duplikate benötigen im vollen Verlauf keinen weiteren Platz", async () => {
+  const entries = capacityEntries(50);
+  const rt = historyRuntime({storage: {[historyKey]: JSON.stringify(entries)}});
+  const before = rt.storage.get(historyKey);
+  await importFile(rt, envelope(entries));
+  assert.equal(rt.storage.get(historyKey), before);
+  assert.equal(rt.calls.filter(([method, key]) => method === "setItem" && key === historyKey).length, 0);
+  assert.match(rt.alerts[0], /0 neue Einträge importiert, 50 übersprungen/);
+});
 
 const badEntries = [
   ["fehlende Strecke", e => {delete e.km;}],

@@ -1,0 +1,55 @@
+{
+  "app": "evspend",
+  "kind": "history-export",
+  "schemaVersion": 1,
+  "exportedAt": "2026-10-12T16:21:45.937Z",
+  "entryCount": 2,
+  "entries": [
+    {
+      "date": 1791822104309,
+      "schema": "v2",
+      "type": "vb",
+      "km": 482.80320000000006,
+      "consumption": 9.046714743589742,
+      "price": 0.845350567546075,
+      "costPer100": 7.647645442921033,
+      "monthlyCost": 36.92307692307693,
+      "yearlyCost": 443.0769230769231,
+      "ridesharing": false,
+      "persons": 1,
+      "note": "",
+      "currencyMetadata": {
+        "code": "USD",
+        "symbol": "$",
+        "locale": "en-US"
+      },
+      "language": "en",
+      "marketCode": "us",
+      "sourceLocale": "en-US",
+      "id": "eaf_798bd63eedfaba46bbb1041e55cc9f73"
+    },
+    {
+      "date": 1791822040691,
+      "schema": "v2",
+      "type": "ev",
+      "km": 482.80320000000006,
+      "consumption": 18.64113576712002,
+      "price": 0.16,
+      "costPer100": 2.9825817227392033,
+      "monthlyCost": 14.400000000000002,
+      "yearlyCost": 172.8,
+      "ridesharing": false,
+      "persons": 1,
+      "note": "Audit ÄÖü İstanbul ; \"Unicode\"",
+      "currencyMetadata": {
+        "code": "USD",
+        "symbol": "$",
+        "locale": "en-US"
+      },
+      "language": "en",
+      "marketCode": "us",
+      "sourceLocale": "en-US",
+      "id": "eaf_2296fec06e357819726530568044cf6b"
+    }
+  ]
+}

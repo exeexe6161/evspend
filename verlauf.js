@@ -129,7 +129,7 @@
       const m = localStorage.getItem(MARKET_KEY);
       if (m && MARKET_CONFIG[m]) {
         const code = MARKET_CONFIG[m].currency;
-        if (CURRENCY_TABLE[code]) return CURRENCY_TABLE[code];
+        if (CURRENCY_TABLE[code]) return {...CURRENCY_TABLE[code], locale: MARKET_CONFIG[m].locale};
       }
     } catch (_) {}
     // Legacy-Fallback: alte getrennte Currency-Preference berücksichtigen.
@@ -153,7 +153,9 @@
   // Alte Einträge ohne currencyMetadata fallen weich auf EUR.
   function _pickEntryCurrency(entry) {
     if (entry && entry.currencyMetadata && entry.currencyMetadata.code && CURRENCY_TABLE[entry.currencyMetadata.code]) {
-      return CURRENCY_TABLE[entry.currencyMetadata.code];
+      const cfg = CURRENCY_TABLE[entry.currencyMetadata.code];
+      const locale = _validLocale(entry.currencyMetadata.locale) ? entry.currencyMetadata.locale : cfg.locale;
+      return {...cfg, locale};
     }
     return null;
   }
@@ -228,9 +230,10 @@
         : Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0][0];
     }
     const kept = entries.filter((e) => _entryCurrencyCode(e) === lead);
+    const ui = getCurrentCurrency();
     return {
       code: lead,
-      table: CURRENCY_TABLE[lead] || getCurrentCurrency(),
+      table: lead === ui.code ? ui : (CURRENCY_TABLE[lead] || ui),
       kept: kept,
       excluded: entries.length - kept.length
     };
@@ -310,6 +313,7 @@
       clearAll: "Alle löschen",
       confirmClearAll: "Alle gespeicherten Einzelberechnungen löschen?",
       confirmClearLegacy: "Alle alten Vergleichs-Einträge löschen?",
+      confirmDeleteEntry: "Diesen gespeicherten Eintrag löschen?",
       historyBackupExport: "Backup exportieren",
       historyBackupImport: "Backup importieren",
       historyCsvExport: "CSV exportieren",
@@ -321,6 +325,7 @@
       historyExportHelp: "Backup-Dateien dienen zur Wiederherstellung in EVSpendPure. CSV ist eine lesbare Tabelle für Excel, Numbers oder Google Sheets. PDF / Drucken erstellt einen Bericht über die Druckfunktion deines Browsers. Dateien werden nur lokal in deinem Browser verarbeitet und nicht hochgeladen.",
       importInvalid: "Ungültige oder beschädigte Datei. Import abgebrochen.",
       importTooLarge: "Datei zu groß (max. 2 MB).",
+      importCapacity: "Import abgebrochen: Zusammen mit den vorhandenen Einträgen würde die Speichergrenze von 50 überschritten. Vorhandene Daten bleiben erhalten. Bitte zuerst ein Backup exportieren und bei Bedarf Einträge löschen.",
       importVersionMismatch: "Datei stammt aus einer anderen Version und ist nicht kompatibel.",
       importMerged: "{new} neue Einträge importiert, {skipped} übersprungen.",
       historyCoordination: "Verlauf konnte nicht geändert werden. Bitte in einem aktuellen Browser über HTTPS öffnen und erneut versuchen.",
@@ -414,6 +419,7 @@
       clearAll: "Clear all",
       confirmClearAll: "Delete all saved single calculations?",
       confirmClearLegacy: "Delete all legacy compare entries?",
+      confirmDeleteEntry: "Delete this saved entry?",
       historyBackupExport: "Export backup",
       historyBackupImport: "Import backup",
       historyCsvExport: "Export CSV",
@@ -425,6 +431,7 @@
       historyExportHelp: "Backup files are used to restore data in EVSpendPure. CSV is a readable table for Excel, Numbers, or Google Sheets. PDF / Print creates a report using your browser’s print feature. Files are processed locally in your browser and are not uploaded.",
       importInvalid: "Invalid or corrupted file. Import cancelled.",
       importTooLarge: "File too large (max 2 MB).",
+      importCapacity: "Import cancelled: Together with existing entries, the storage limit of 50 would be exceeded. Existing data is preserved. Export a backup first and delete entries if needed.",
       importVersionMismatch: "File is from a different version and not compatible.",
       importMerged: "{new} new entries imported, {skipped} skipped.",
       historyCoordination: "History could not be changed. Open in an up to date browser over HTTPS and try again.",
@@ -518,6 +525,7 @@
       clearAll: "Tümünü sil",
       confirmClearAll: "Tüm kayıtlı tekli hesaplamaları silmek istiyor musunuz?",
       confirmClearLegacy: "Tüm eski karşılaştırma girdilerini silmek istiyor musunuz?",
+      confirmDeleteEntry: "Bu kayıtlı girdiyi silmek istiyor musunuz?",
       historyBackupExport: "Yedeği dışa aktar",
       historyBackupImport: "Yedeği içe aktar",
       historyCsvExport: "CSV dışa aktar",
@@ -529,6 +537,7 @@
       historyExportHelp: "Yedek dosyaları EVSpendPure içinde verileri geri yüklemek için kullanılır. CSV; Excel, Numbers veya Google Sheets için okunabilir bir tablodur. PDF / Yazdır, tarayıcının yazdırma özelliğiyle bir rapor oluşturur. Dosyalar yalnızca tarayıcında yerel olarak işlenir ve yüklenmez.",
       importInvalid: "Geçersiz veya bozuk dosya. İçe aktarma iptal edildi.",
       importTooLarge: "Dosya çok büyük (en fazla 2 MB).",
+      importCapacity: "İçe aktarma iptal edildi: Mevcut kayıtlarla birlikte 50 kayıtlık depolama sınırı aşılacak. Mevcut veriler korunur. Önce bir yedek dışa aktarın ve gerekirse kayıtları silin.",
       importVersionMismatch: "Dosya farklı bir sürümden ve uyumlu değil.",
       importMerged: "{new} yeni kayıt içe aktarıldı, {skipped} atlandı.",
       historyCoordination: "Geçmiş değiştirilemedi. Güncel bir tarayıcıda HTTPS üzerinden açıp tekrar deneyin.",
@@ -693,8 +702,8 @@
 
   // ── Helpers ────────────────────────────────────────────────────────────────
   // Aktuelle UI-Markt-Locale (identisch zur Quelle des Geld-Chips, fmtMoneyEntry):
-  // DE/EU → de-DE, US → en-US, TR → tr-TR. Hält Datum/Zahl konsistent mit der
-  // Währungs-Formatierung in derselben Verlauf-Zeile.
+  // DE → de-DE, EU → en-IE, US → en-US, TR → tr-TR. Gespeicherte Geldwerte
+  // behalten dagegen die Locale ihrer currencyMetadata.
   const _listLocale = () => { try { return getCurrentCurrency().locale || "de-DE"; } catch (_) { return "de-DE"; } };
 
   const fmt = (v, d) => isFinite(v)
@@ -732,7 +741,9 @@
       arr = JSON.parse(localStorage.getItem(HIST_KEY) || "[]");
       if (strict && (!Array.isArray(arr) || !arr.every(_isPlainObject))) throw new Error("Invalid stored history");
     } catch (e) { if (strict) throw e; }
-    return Array.isArray(arr) ? arr.filter(_isPlainObject).slice(0, 50) : [];
+    // Strict serializers preserve every stored record, including an oversized
+    // historical stock. The display limit must never truncate a backup.
+    return strict ? arr : Array.isArray(arr) ? arr.filter(_isPlainObject).slice(0, 50) : [];
   }
   async function mutateHistory(transform) {
     await migration;
@@ -745,9 +756,9 @@
 
   // ── Export / Import (v1) ───────────────────────────────────────────────────
   // Export: full history (incl. legacy entries) wrapped in an envelope so
-  // future readers can detect format/version. Import: STRICT v2-only —
-  // legacy/unknown shapes are silently skipped so a malicious or stale file
-  // can't sneak unexpected fields into storage. Merge-only (no replace).
+  // future readers can detect format/version. Import accepts current v2 and
+  // the two documented historical comparison shapes. Validate the entire
+  // backup before a merge-only commit; unknown shapes abort without a write.
   const HIST_MAX_LOCAL    = 50;
   const IMPORT_MAX_BYTES  = 2 * 1024 * 1024;
   const IMPORT_MAX_ENTRIES = 1000;
@@ -760,11 +771,11 @@
     return o != null && typeof o === "object" && !Array.isArray(o)
         && Object.prototype.toString.call(o) === "[object Object]";
   }
-  function _sanitizeNote(s) {
-    if (typeof s !== "string") return "";
-    var cleaned = s.replace(/[\x00-\x1f\x7f]/g, "").trim();
-    if (cleaned.length > NOTE_MAX_LEN) cleaned = cleaned.slice(0, NOTE_MAX_LEN);
-    return cleaned;
+  function _validImportNote(s) {
+    // Notes are rendered as text. Preserve safe whitespace and Unicode;
+    // reject unsupported data instead of silently changing a backup record.
+    return typeof s === "string" && s.length <= NOTE_MAX_LEN
+      && !/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(s);
   }
   function _finitePos(v) {
     return typeof v === "number" && Number.isFinite(v) && v >= 0 ? v : NaN;
@@ -789,11 +800,13 @@
     if (obj.schemaVersion !== 1) return false;
     if (!Array.isArray(obj.entries)) return false;
     if (obj.entries.length > IMPORT_MAX_ENTRIES) return false;
+    if (obj.entryCount !== undefined && (!Number.isInteger(obj.entryCount) || obj.entryCount !== obj.entries.length)) return false;
     return true;
   }
   function _sanitizeImportEntry(raw) {
     if (!_isPlainObject(raw)) return null;
-    if (raw.schema !== "v2") return null;                 // strict v2 only
+    if (raw.units !== undefined && !_validStoredUnits(raw.units)) return null;
+    if (raw.schema !== "v2") return _sanitizeLegacyImportEntry(raw);
     if (raw.type !== "ev" && raw.type !== "vb") return null;
     var date = raw.date;
     if (typeof date !== "number" || !Number.isFinite(date) || date <= 0
@@ -803,7 +816,7 @@
     if (raw.id !== undefined && (typeof raw.id !== "string" || !/^eaf_[0-9a-f]{32}$/.test(raw.id))) return null;
     if (raw.ridesharing !== undefined && typeof raw.ridesharing !== "boolean") return null;
     if (raw.persons !== undefined && (!Number.isInteger(raw.persons) || raw.persons < 1 || raw.persons > 99)) return null;
-    if (raw.note !== undefined && typeof raw.note !== "string") return null;
+    if (raw.note !== undefined && !_validImportNote(raw.note)) return null;
     if (raw.language !== undefined && !_allowed(ALLOWED_LANG, raw.language)) return null;
     if (raw.marketCode !== undefined && !_allowed(ALLOWED_MARKET, raw.marketCode)) return null;
     if (raw.currencyMetadata !== undefined) {
@@ -837,7 +850,7 @@
       yearlyCost:  yearlyCost,
       ridesharing: raw.ridesharing ?? false,
       persons:     raw.persons ?? 1,
-      note:        _sanitizeNote(raw.note)
+      note:        raw.note ?? ""
     };
     if (raw.id !== undefined) entry.id = raw.id;
     if (raw.language !== undefined) entry.language = raw.language;
@@ -846,6 +859,7 @@
       entry.currencyMetadata = { code: cm.code, symbol: cm.symbol, locale: cm.locale };
     }
     if (raw.sourceLocale !== undefined) entry.sourceLocale = raw.sourceLocale;
+    if (raw.units !== undefined) entry.units = Object.assign({}, raw.units);
     // Partial old market metadata has the same deterministic interpretation
     // as calculator restoration. Complete only missing counterparts on import.
     if (entry.marketCode && !entry.currencyMetadata) {
@@ -854,6 +868,97 @@
     } else if (!entry.marketCode && entry.currencyMetadata) {
       const code = entry.currencyMetadata.code;
       entry.marketCode = code === "USD" ? "us" : code === "TRY" ? "tr" : entry.language === "en" ? "eu" : "de";
+    }
+    return entry;
+  }
+  function _validImportDate(value) {
+    return typeof value === "number" && Number.isFinite(value) && value > 0
+      && Number.isFinite(new Date(value).getTime());
+  }
+  function _validStoredUnits(units) {
+    if (!_isPlainObject(units)) return false;
+    var metric = MARKET_CONFIG.de.units;
+    var keys = Object.keys(units);
+    return keys.length > 0 && keys.every(function (key) {
+      return Object.prototype.hasOwnProperty.call(metric, key) && units[key] === metric[key];
+    });
+  }
+  function _timestampDate(value) {
+    // Only a complete ISO instant with an explicit time zone is unambiguous.
+    if (typeof value !== "string" || !/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/.test(value)) return NaN;
+    var date = Date.parse(value);
+    if (!_validImportDate(date)) return NaN;
+    // Reject calendar dates which Date.parse would silently roll forward.
+    var calendar = value.slice(0, 10).split("-").map(Number);
+    var clock = value.slice(11, 19).split(":").map(Number);
+    var days = new Date(Date.UTC(calendar[0], calendar[1], 0)).getUTCDate();
+    return calendar[1] >= 1 && calendar[1] <= 12 && calendar[2] >= 1 && calendar[2] <= days
+      && clock[0] <= 23 && clock[1] <= 59 && clock[2] <= 59 ? date : NaN;
+  }
+  function _sanitizeLegacyImportEntry(raw) {
+    if (raw.schema !== undefined && raw.schema !== "v1") return null;
+    if (raw.type !== undefined) return null;
+    var original = raw.inputs !== undefined || raw.results !== undefined;
+    if (original && (raw.ev !== undefined || raw.fuel !== undefined || raw.result !== undefined)) return null;
+    if (original && (!_isPlainObject(raw.inputs) || (raw.results !== undefined && !_isPlainObject(raw.results)))) return null;
+    if (original && raw.inputs.units !== undefined && !_validStoredUnits(raw.inputs.units)) return null;
+    if (!original && (!_isPlainObject(raw.ev) || !_isPlainObject(raw.fuel)
+      || (raw.result !== undefined && !_isPlainObject(raw.result)))) return null;
+    var date = raw.date;
+    var timestamp = raw.timestamp === undefined ? undefined : _timestampDate(raw.timestamp);
+    if (raw.timestamp !== undefined && !Number.isFinite(timestamp)) return null;
+    if (raw.id !== undefined && !(typeof raw.id === "string" && /^eaf_[0-9a-f]{32}$/.test(raw.id)) && !_validImportDate(raw.id)) return null;
+    if (date === undefined) date = typeof raw.id === "number" ? raw.id : timestamp;
+    if (!_validImportDate(date) || (typeof raw.id === "number" && raw.id !== date)
+      || (timestamp !== undefined && timestamp !== date)) return null;
+    var inputs = original ? raw.inputs : raw;
+    var results = original ? raw.results || {} : raw.result || {};
+    var ev = original ? {consumption: inputs.ev_consumption, price: inputs.electricity_price, costPer100: results.ev_cost_per_100km} : raw.ev;
+    var fuel = original ? {consumption: inputs.fuel_consumption, price: inputs.fuel_price, costPer100: results.fuel_cost_per_100km} : raw.fuel;
+    var km = original ? inputs.km_per_month : raw.km;
+    var numbers = [km, ev.consumption, ev.price, fuel.consumption, fuel.price];
+    if (!numbers.every(function (value) { return Number.isFinite(_finitePos(value)); })) return null;
+    if ((raw.kmEv !== undefined && !Number.isFinite(_finitePos(raw.kmEv)))
+      || (raw.kmVb !== undefined && !Number.isFinite(_finitePos(raw.kmVb)))) return null;
+    if (raw.note !== undefined && !_validImportNote(raw.note)) return null;
+    if (raw.ridesharing !== undefined && typeof raw.ridesharing !== "boolean") return null;
+    if (raw.persons !== undefined && (!Number.isInteger(raw.persons) || raw.persons < 1 || raw.persons > 99)) return null;
+    // Reuse the existing metadata validator, with the actual historical EV
+    // parameters. Its derived values are deliberately not persisted here.
+    var metadata = _sanitizeImportEntry({schema: "v2", type: "ev", date: date,
+      km: km, consumption: ev.consumption, price: ev.price,
+      language: raw.language, marketCode: raw.marketCode,
+      currencyMetadata: raw.currencyMetadata, sourceLocale: raw.sourceLocale});
+    if (!metadata) return null;
+    var evCost = ev.consumption * ev.price, fuelCost = fuel.consumption * fuel.price;
+    var monthly = fuelCost * (raw.kmVb ?? km) / 100 - evCost * (raw.kmEv ?? km) / 100;
+    if (![evCost, fuelCost, monthly, monthly * 12].every(Number.isFinite)) return null;
+    var entry = {date: date, km: km,
+      ev: {consumption: ev.consumption, price: ev.price},
+      fuel: {consumption: fuel.consumption, price: fuel.price}};
+    for (var side of ["ev", "fuel"]) {
+      var vehicle = side === "ev" ? ev : fuel;
+      if (vehicle.costPer100 !== undefined) {
+        if (!Number.isFinite(_finitePos(vehicle.costPer100))) return null;
+        entry[side].costPer100 = vehicle.costPer100;
+      }
+    }
+    var yearlySaving = original ? results.yearly_difference : results.yearlySaving;
+    var monthlySaving = original ? results.monthly_difference : results.monthlySaving;
+    // Legacy result fields are saved observations, with historical rounding
+    // and annual semantics. Preserve finite snapshots without replacing them
+    // with a newly calculated result from today's calculator.
+    if ((yearlySaving !== undefined && (typeof yearlySaving !== "number" || !Number.isFinite(yearlySaving)))
+      || (monthlySaving !== undefined && (typeof monthlySaving !== "number" || !Number.isFinite(monthlySaving)))) return null;
+    if (raw.result !== undefined || raw.results !== undefined) entry.result = {};
+    if (yearlySaving !== undefined) (entry.result || (entry.result = {})).yearlySaving = yearlySaving;
+    if (monthlySaving !== undefined) (entry.result || (entry.result = {})).monthlySaving = monthlySaving;
+    for (var field of ["schema", "id", "timestamp", "kmEv", "kmVb", "note", "ridesharing", "persons", "units"]) {
+      if (raw[field] !== undefined) entry[field] = raw[field];
+    }
+    if (original && raw.inputs.units !== undefined && entry.units === undefined) entry.units = Object.assign({}, raw.inputs.units);
+    for (var field of ["language", "marketCode", "currencyMetadata", "sourceLocale"]) {
+      if (metadata[field] !== undefined) entry[field] = metadata[field];
     }
     return entry;
   }
@@ -868,6 +973,17 @@
   function _entryFingerprint(e) {
     const normalized = _sanitizeImportEntry(e);
     if (!normalized) return JSON.stringify(e);
+    if (normalized.schema !== "v2") {
+      // Historical stored results and absence of optional fields are snapshot
+      // identity inputs. Keep distinct observations and conflicting IDs apart.
+      return JSON.stringify([normalized.date, normalized.schema ?? null,
+        normalized.km, normalized.kmEv ?? null, normalized.kmVb ?? null,
+        normalized.ev, normalized.fuel, normalized.result ?? null,
+        normalized.note ?? null, normalized.ridesharing ?? null, normalized.persons ?? null,
+        normalized.language ?? null, normalized.marketCode ?? null,
+        normalized.currencyMetadata ?? null, normalized.sourceLocale ?? null,
+        normalized.units ?? null]);
+    }
     // Calculated costs and unknown fields are not identity inputs. Old rounded
     // exports normalize to the same immutable scenario on every reimport.
     return JSON.stringify([
@@ -875,7 +991,7 @@
       normalized.consumption, normalized.price, normalized.ridesharing,
       normalized.persons, normalized.note, normalized.language ?? null,
       normalized.marketCode ?? null, normalized.currencyMetadata ?? null,
-      normalized.sourceLocale ?? null
+      normalized.sourceLocale ?? null, normalized.units ?? null
     ]);
   }
   function _dedupKey(e) {
@@ -907,7 +1023,7 @@
     return y + "-" + m + "-" + day;
   }
   function serializeHistoryJson(strict = false) {
-    var all = loadAll(strict);
+    var all = loadAll(true);
     if (!all.length) return null;
     var envelope = {
       app: "evspend",
@@ -947,9 +1063,10 @@
   function _csvEscape(v) {
     if (v == null) return "";
     var s = String(v);
-    // CSV-Formula-Injection-Schutz: fuehrendes = + - @ (auch nach Tab/CR) neutralisieren,
+    // CSV-Formula-Injection-Schutz: fuehrendes = + - @, Tab/CR/LF und
+    // Leerraum vor einem Formeloperator neutralisieren,
     // echte (auch negative) Zahlen bleiben Zahl
-    if (/^[=+\-@\t\r]/.test(s) && isNaN(Number(s))) s = "'" + s;
+    if (/^(?:[=+\-@\t\r\n]|\s+[=+\-@])/.test(s) && isNaN(Number(s))) s = "'" + s;
     if (/[;\r\n"]/.test(s)) return '"' + s.replace(/"/g, '""') + '"';
     return s;
   }
@@ -963,7 +1080,10 @@
   function _numCell(v, decimals) {
     var n = Number(v);
     if (!Number.isFinite(n)) return "";
-    var s = decimals == null ? String(n) : _roundForDisplay(n, decimals).toFixed(decimals);
+    // CSV is a readable table, JSON is the lossless backup. Limit only the
+    // textual floating-point representation; exact integers remain unchanged.
+    var s = decimals == null ? String(Number.isInteger(n) ? n : Number(n.toPrecision(15)))
+      : _roundForDisplay(n, decimals).toFixed(decimals);
     // CSV-DEC: Dezimaltrenner an die Listen-Locale koppeln (de/tr Komma, en Punkt).
     // Number/toFixed liefert keinen Tausendertrenner, daher ist nur der eine Punkt betroffen.
     if (_listLocale().slice(0, 2) !== "en") s = s.replace(".", ",");
@@ -1152,16 +1272,19 @@
               }
             }
 
-            // Sort merged list by date desc, cap at HIST_MAX_LOCAL. Only count
-            // freshImports that actually survived the cap as "new" — ones pushed
-            // off the end count toward "skipped".
+            // Reject the whole import before commit if it cannot fit. A merge
+            // must never silently evict either existing or imported records.
+            if (existing.length + freshImports.length > HIST_MAX_LOCAL) {
+              const error = new Error("Imported history exceeds storage capacity");
+              error.code = "HISTORY_IMPORT_CAPACITY";
+              throw error;
+            }
             var freshKeys = Object.create(null);
             for (var fk = 0; fk < freshImports.length; fk++) {
               freshKeys[_dedupKey(freshImports[fk])] = 1;
             }
             var merged = existing.concat(freshImports);
             merged.sort(function (a, b) { return (Number(b && b.date) || 0) - (Number(a && a.date) || 0); });
-            if (merged.length > HIST_MAX_LOCAL) merged.length = HIST_MAX_LOCAL;
             var newCount = 0;
             for (var m = 0; m < merged.length; m++) {
               if (freshKeys[_dedupKey(merged[m])]) newCount++;
@@ -1174,7 +1297,8 @@
               result: {newCount, skipped: invalidCount + dupCount + capDropped}};
           });
         } catch (error) {
-          mutationFailure(error, error && error.code === "HISTORY_IMPORT_CONFLICT" ? "importInvalid" : "importSaveFailed");
+          mutationFailure(error, error && error.code === "HISTORY_IMPORT_CONFLICT" ? "importInvalid"
+            : error && error.code === "HISTORY_IMPORT_CAPACITY" ? "importCapacity" : "importSaveFailed");
           return;
         }
         try { refresh(); }
@@ -1431,11 +1555,15 @@
     row.appendChild(badge);
 
     const diffRaw = e.result?.yearlySaving;
-    const diff = isFinite(diffRaw) ? diffRaw : 0;
+    const diff = typeof diffRaw === "number" && Number.isFinite(diffRaw) ? diffRaw : NaN;
+    // Original comparison snapshots used EUR. An explicit validated currency
+    // remains authoritative; never relabel old values with the current market.
+    const moneyEntry = _pickEntryCurrency(e) ? e : {currencyMetadata: CURRENCY_TABLE.EUR};
     const diffEl = document.createElement("div");
     diffEl.className = "hist-diff " + (diff >= 0 ? "c-green" : "c-red");
-    // Phase 10: Legacy-Diff in aktueller UI-Währung rendern (entry=null).
-    diffEl.textContent = (diff >= 0 ? "+" : "−") + fmtMoneyEntry(Math.abs(diff), null, 0) + " " + _tv("legacyDiffSuffix");
+    diffEl.textContent = Number.isFinite(diff)
+      ? (diff >= 0 ? "+" : "−") + fmtMoneyEntry(Math.abs(diff), moneyEntry, 0) + " " + _tv("legacyDiffSuffix")
+      : "—";
 
     const meta = document.createElement("div");
     meta.className = "hist-meta";
@@ -1452,8 +1580,8 @@
     } else if (isFinite(km) || isFinite(kmEv)) {
       parts.push(fmt(toDist(isFinite(km) ? km : kmEv), 0) + " " + distUnit2);
     }
-    if (isFinite(ev.costPer100))   parts.push(_tv("typeEv") + " " + fmtMoneyEntry(toCur(ev.costPer100), null, 2) + " / 100 " + distUnit2);
-    if (isFinite(fuel.costPer100)) parts.push(_tv("typeVb") + " " + fmtMoneyEntry(toCur(fuel.costPer100), null, 2) + " / 100 " + distUnit2);
+    if (typeof ev.costPer100 === "number" && Number.isFinite(ev.costPer100)) parts.push(_tv("typeEv") + " " + fmtMoneyEntry(toCur(ev.costPer100), moneyEntry, 2) + " / 100 " + distUnit2);
+    if (typeof fuel.costPer100 === "number" && Number.isFinite(fuel.costPer100)) parts.push(_tv("typeVb") + " " + fmtMoneyEntry(toCur(fuel.costPer100), moneyEntry, 2) + " / 100 " + distUnit2);
     parts.forEach(p => {
       const s = document.createElement("span");
       s.textContent = p;
@@ -1617,7 +1745,9 @@
   }
   function deleteEntry(entry) {
     if (!state.all.includes(entry)) return;
-    return removeSelection(selection([entry]));
+    const selected = selection([entry]);
+    if (!confirm(_tv("confirmDeleteEntry"))) return;
+    return removeSelection(selected);
   }
 
   // Fade the chart out slightly, swap content, fade back in. Only runs when
@@ -1773,9 +1903,8 @@
       const market = _currentMarket();
       const cfg = MARKET_CONFIG[market] || MARKET_CONFIG.de;
       const locale = cfg.locale;
-      // CURR-EU: Zahl- und Geld-Locale aus derselben Quelle wie die Listenzeilen
-      // (Waehrungstabelle ueber _listLocale), damit der EU-Markt nicht en-IE im Chart
-      // und de-DE im Rest mischt. cfg/locale bleibt fuer Datum und Achsenbeschriftung.
+      // Current UI numbers use the same market locale as the list and stats.
+      // Saved entry currencyMetadata remains independent of this UI locale.
       const fmtLocale = _listLocale();
       const isUs = market === "us";
       const distLong = isUs ? _tv("tableHeaderDistanceImperial") : _tv("tableHeaderDistanceMetric");

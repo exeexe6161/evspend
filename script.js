@@ -323,13 +323,107 @@ const _historyMigration = (function () {
 // Phase 6: war IIFE (lief auf Module-Top-Level vor MARKET_CONFIG-Anwendung).
 // Jetzt benannte Funktion, wird in init() AUFGERUFEN nach applyMarketRanges,
 // damit Clamping gegen korrekte Markt-Range stattfindet.
+// Historical parameters can exceed today's interaction bounds or step grid.
+// Keep their exact metric source beside the current market-unit DOM value.
+// Only explicitly restored fields may opt into this binding.
+let _historicalInputs = {};
+let _historicalNote = null;
+function _validHistoricalNote(value) {
+  return typeof value === "string" && value.length <= 200 && !/[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]/.test(value);
+}
+function _setHistoricalNote(note) {
+  const el = $("noteInput");
+  if (el) el.value = note;
+  // A text input strips CR/LF. Keep the accepted original separately from
+  // its observable DOM representation, until the user actually edits it.
+  _historicalNote = {original: note, value: el ? el.value : note};
+}
+const HISTORY_INPUT_IDS = ["kmEv", "kmVb", "kmShared", "evVerbrauch", "strompreis", "verbrauchVerbrenner", "benzinpreis", "ridesharePersons"];
+function _historyInputConfig(id) {
+  if (id === "ridesharePersons") return {min: 1, max: 6, step: 1};
+  const mk = window.EAF_I18N && window.EAF_I18N.getMarket();
+  return mk && mk.defaults && mk.defaults[id];
+}
+function _historyInputOnGrid(value, cfg) {
+  if (!cfg) return false;
+  const offset = (value - cfg.min) / cfg.step;
+  return Math.abs(offset - Math.round(offset)) <= 1e-8;
+}
+function _applyHistoricalRange(el, cfg, value) {
+  if (!el || !cfg) return;
+  el.min = String(Math.min(cfg.min, value));
+  el.max = String(Math.max(cfg.max, value));
+  // Range value sanitization rounds to step even on programmatic assignment.
+  const offset = (value - Math.min(cfg.min, value)) / cfg.step;
+  el.step = Math.abs(offset - Math.round(offset)) <= 1e-8 ? String(cfg.step) : "any";
+  el.value = String(value);
+}
+function _setHistoricalInput(id, value, internal) {
+  const el = $(id);
+  if (!el) return;
+  _applyHistoricalRange(el, _historyInputConfig(id), value);
+  _historicalInputs[id] = {value: el.value, internal};
+  if (id === "ridesharePersons") ridesharePersons = internal;
+}
+function _clearHistoricalInputs() {
+  const persons = _historicalInputs.ridesharePersons;
+  _historicalInputs = {};
+  if (_historicalNote !== null && $("noteInput")) $("noteInput").value = "";
+  _historicalNote = null;
+  if (!persons) return;
+  ridesharePersons = Math.min(6, ridesharePersons);
+  _applyHistoricalRange($("ridesharePersons"), _historyInputConfig("ridesharePersons"), ridesharePersons);
+  try { localStorage.setItem(RIDESHARE_PERSONS_KEY, String(ridesharePersons)); } catch (_) {}
+  applyRideshare();
+}
+function _syncHistoricalInputs() {
+  Object.entries(_historicalInputs).forEach(([id, record]) => {
+    const el = $(id), cfg = _historyInputConfig(id);
+    if (!el || !cfg) { delete _historicalInputs[id]; return; }
+    if (el.value === record.value) return;
+    const value = Number(el.value);
+    if (!Number.isFinite(value) || value < 0) { delete _historicalInputs[id]; return; }
+    if (value >= cfg.min && value <= cfg.max && _historyInputOnGrid(value, cfg)) {
+      delete _historicalInputs[id];
+      el.min = String(cfg.min); el.max = String(cfg.max); el.step = String(cfg.step);
+      el.value = String(value);
+    } else {
+      _setHistoricalInput(id, value, _rawToInternal(id, value));
+    }
+  });
+}
+function _loadHistoricalInputs(saved) {
+  _historicalInputs = {};
+  _historicalNote = null;
+  const meta = saved._historyInputs;
+  const code = window.EAF_I18N && window.EAF_I18N.getMarketCode();
+  if (!meta || !meta.values || typeof meta.values !== "object" || Array.isArray(meta.values)) return;
+  if (meta.marketCode !== code && !(["de", "eu"].includes(meta.marketCode) && ["de", "eu"].includes(code))) return;
+  if (_validHistoricalNote(meta.note) && $("noteInput")) {
+    _setHistoricalNote(meta.note);
+  }
+  HISTORY_INPUT_IDS.forEach(id => {
+    const record = meta.values[id];
+    const savedValue = id === "ridesharePersons" ? localStorage.getItem(RIDESHARE_PERSONS_KEY) : saved[id];
+    if (!record || typeof record !== "object" || typeof record.value !== "string" || record.value !== savedValue) return;
+    if (!record.value || record.value.trim() !== record.value) return;
+    const value = Number(record.value), internal = record.internal;
+    if (!Number.isFinite(value) || !Number.isFinite(internal) || value < 0 || internal < 0) return;
+    if (id !== "kmShared" && (value === 0 || internal === 0)) return;
+    if (id === "ridesharePersons" && (!Number.isInteger(internal) || internal < 1 || internal > 99)) return;
+    const converted = _rawToInternal(id, value);
+    if (!Number.isFinite(converted) || Math.abs(converted - internal) > 1e-12 * Math.max(1, Math.abs(internal))) return;
+    _setHistoricalInput(id, value, internal);
+  });
+}
 function loadInputs() {
   try {
     const saved = JSON.parse(localStorage.getItem(LS_KEY) || "{}");
     if (!saved || typeof saved !== "object" || Array.isArray(saved)) throw new Error("Invalid stored inputs");
+    _loadHistoricalInputs(saved);
     INPUT_IDS.forEach(id => {
       const el = $(id);
-      if (!el || saved[id] == null || saved[id] === "") return;
+      if (!el || _historicalInputs[id] || saved[id] == null || saved[id] === "") return;
       const num = parseFloat(saved[id]);
       if (!isFinite(num)) return;
       const min = parseFloat(el.min), max = parseFloat(el.max);
@@ -362,6 +456,11 @@ function _historyLegacyKey(entry) {
 }
 
 let _historySelectionFailed = false;
+function _historyCompareDistancesSupported(entry) {
+  if (!entry || entry.schema === "v2") return true;
+  const km = entry.km ?? (entry.inputs && entry.inputs.km_per_month);
+  return (entry.kmEv == null || entry.kmEv === km) && (entry.kmVb == null || entry.kmVb === km);
+}
 function _historyEntryFromLocation() {
   const params = new URLSearchParams(location.search);
   const id = params.get("id");
@@ -375,10 +474,15 @@ function _historyEntryFromLocation() {
       if (/^eaf_[0-9a-f]{32}$/.test(id)) return e.id === id;
       return String(e.date ?? e.id) === id;
     }) : [];
-    if (matches.length === 1) return matches[0];
+    if (matches.length === 1) {
+      if (_historyCompareDistancesSupported(matches[0])) return matches[0];
+      _historySelectionFailed = true;
+      return null;
+    }
     // Identical old snapshots represent the same scenario. Keep its selected
     // occurrence where possible. Different snapshots must never guess by date.
     if (key && matches.length > 1 && matches.every(e => JSON.stringify(e) === JSON.stringify(matches[0]))) {
+      if (!_historyCompareDistancesSupported(matches[0])) { _historySelectionFailed = true; return null; }
       const index = Number(params.get("entryIndex"));
       return matches.includes(hist[index]) ? hist[index] : matches[0];
     }
@@ -406,9 +510,7 @@ function _newHistoryId(existing) {
 // storage and use the historic DE/EUR model instead of current global state.
 function _historyMarketForEntry(entry) {
   if (!entry) return null;
-  // Legacy compare entries predate markets and currencies. Their historical
-  // data model is metric and EUR, so reopening them is deterministic as DE.
-  if (entry.schema !== "v2") return "de";
+  // Entries without explicit metadata predate markets and use metric/EUR.
   if (["de", "eu", "us", "tr"].includes(entry.marketCode)) return entry.marketCode;
   const code = entry.currencyMetadata && entry.currencyMetadata.code;
   if (code === "USD") return "us";
@@ -421,51 +523,65 @@ function _historyMarketForEntry(entry) {
 }
 
 function _restoreHistoryEntry(entry) {
-  if (!entry) return false;
+  if (!entry || !_historyCompareDistancesSupported(entry)) return false;
   try {
+    const note = entry.note ?? "";
+    if (!_validHistoricalNote(note)) return false;
 
-    if (entry.schema === "v2" && (entry.type === "ev" || entry.type === "vb")) {
+    const single = entry.schema === "v2" && (entry.type === "ev" || entry.type === "vb");
+    const restoredPersons = entry.persons ?? 1;
+    if (!Number.isInteger(restoredPersons) || restoredPersons < 1 || restoredPersons > 99) return false;
+    let values;
+    if (single) {
+      values = entry.type === "ev"
+        ? {kmEv: entry.km, evVerbrauch: entry.consumption, strompreis: entry.price}
+        : {kmVb: entry.km, verbrauchVerbrenner: entry.consumption, benzinpreis: entry.price};
+    } else {
+      const ev = entry.ev || {}, fuel = entry.fuel || {}, i = entry.inputs || {};
+      const km = entry.km ?? i.km_per_month;
+      values = {
+        kmShared: km, kmEv: entry.kmEv ?? km, kmVb: entry.kmVb ?? km,
+        evVerbrauch: ev.consumption ?? i.ev_consumption,
+        strompreis: ev.price ?? i.electricity_price,
+        verbrauchVerbrenner: fuel.consumption ?? i.fuel_consumption,
+        benzinpreis: fuel.price ?? i.fuel_price,
+      };
+    }
+    values.ridesharePersons = restoredPersons;
+    const plan = Object.entries(values).map(([id, internal]) => {
+      if (!Number.isFinite(internal) || internal < 0 || (id !== "kmShared" && internal === 0)) throw new Error("Invalid historical input");
+      const value = id === "kmEv" || id === "kmVb" || id === "kmShared" ? _kmToDist(internal)
+        : id === "evVerbrauch" ? _evConsumptionToMarket(internal)
+        : id === "verbrauchVerbrenner" ? _iceConsumptionToMarket(internal)
+        : id === "benzinpreis" ? _fuelPriceToMarket(internal) : internal;
+      if (!Number.isFinite(value)) throw new Error("Invalid historical input");
+      return {id, value, internal};
+    });
+    plan.forEach(({id, value, internal}) => _setHistoricalInput(id, value, internal));
+    _setHistoricalNote(note);
+    ridesharePersons = restoredPersons;
+    rideshareActive = entry.ridesharing === true && restoredPersons > 1;
+    if (!_storageInitFailed) try {
+      localStorage.setItem(RIDESHARE_KEY, rideshareActive ? "1" : "0");
+      localStorage.setItem(RIDESHARE_PERSONS_KEY, String(ridesharePersons));
+    } catch (_) {}
+
+    if (single) {
       // Single-mode entry → restore only the matching side and switch to single mode
-      if (entry.type === "ev") {
-        // Internal metric values back to the entry market units (identity except US).
-        if ($("kmEv"))        $("kmEv").value        = _kmToDist(entry.km);
-        if ($("evVerbrauch")) $("evVerbrauch").value = _evConsumptionToMarket(entry.consumption);
-        if ($("strompreis"))  $("strompreis").value  = entry.price;   // $/kWh: identity (kein *ToMarket)
-      } else {
-        if ($("kmVb"))                $("kmVb").value                = _kmToDist(entry.km);
-        if ($("verbrauchVerbrenner")) $("verbrauchVerbrenner").value = _iceConsumptionToMarket(entry.consumption);
-        if ($("benzinpreis"))         $("benzinpreis").value         = _fuelPriceToMarket(entry.price);
-      }
       appMode   = "single";
       singleType = entry.type;
-      const restoredPersons = Math.max(1, Math.min(6, Math.round(Number(entry.persons)) || 1));
-      ridesharePersons = restoredPersons;
-      rideshareActive = entry.ridesharing === true && restoredPersons > 1;
-      if ($("noteInput")) $("noteInput").value = typeof entry.note === "string" ? entry.note : "";
       if (!_storageInitFailed) try {
         localStorage.setItem(MODE_KEY, appMode);
         localStorage.setItem(TYPE_KEY, singleType);
-        localStorage.setItem(RIDESHARE_KEY, rideshareActive ? "1" : "0");
-        localStorage.setItem(RIDESHARE_PERSONS_KEY, String(ridesharePersons));
       } catch(_){}
     } else {
       // Legacy compare entry → fill both sides, switch to compare mode
-      const ev = entry.ev || {}, fuel = entry.fuel || {};
-      const i  = entry.inputs || {};
-      const legacyKm = entry.km ?? i.km_per_month;
-      const sharedKm = legacyKm != null ? Math.min(5000, Math.max(50, parseFloat(legacyKm) || 1000)) : null;
-      const map = {
-        kmShared:            sharedKm,
-        kmEv:                entry.kmEv         ?? legacyKm,
-        kmVb:                entry.kmVb         ?? legacyKm,
-        evVerbrauch:         ev.consumption     ?? i.ev_consumption,
-        strompreis:          ev.price           ?? i.electricity_price,
-        verbrauchVerbrenner: fuel.consumption   ?? i.fuel_consumption,
-        benzinpreis:         fuel.price         ?? i.fuel_price,
-      };
-      Object.entries(map).forEach(([k, v]) => { if (v != null && $(k)) $(k).value = v; });
       appMode = "compare";
-      if (!_storageInitFailed) try { localStorage.setItem(MODE_KEY, appMode); } catch(_){}
+      longtermActive = false;
+      if (!_storageInitFailed) try {
+        localStorage.setItem(MODE_KEY, appMode);
+        localStorage.setItem(LT_ACTIVE_KEY, "0");
+      } catch(_){}
     }
     saveInputs();
     setTimeout(() => {
@@ -486,6 +602,9 @@ function _restoreHistoryEntry(entry) {
 INPUT_IDS.forEach(id => {
   const el = $(id); if (!el) return;
   el.addEventListener("input", () => { saveInputs(); calc(); });
+});
+if ($("noteInput")) $("noteInput").addEventListener("input", () => {
+  if (_historicalNote !== null) saveInputs();
 });
 
 // "Show results" CTA — meaningful confirm action.
@@ -540,7 +659,17 @@ function saveInputs() {
   if (_storageInitFailed) return;
   try {
     const data = {};
+    _syncHistoricalInputs();
+    if (_historicalNote !== null) {
+      const note = $("noteInput") && $("noteInput").value;
+      if (!_validHistoricalNote(note)) _historicalNote = null;
+      else if (_historicalNote.value !== note) _historicalNote = {original: note, value: note};
+    }
     INPUT_IDS.forEach(id => { const el = $(id); if (el) data[id] = el.value; });
+    if (Object.keys(_historicalInputs).length || _historicalNote !== null) data._historyInputs = {
+      marketCode: window.EAF_I18N.getMarketCode(), values: _historicalInputs
+    };
+    if (_historicalNote !== null) data._historyInputs.note = _historicalNote.original;
     localStorage.setItem(LS_KEY, JSON.stringify(data));
   } catch(e) {}
 }
@@ -615,7 +744,8 @@ async function saveQuick() {
   // entry.ridesharing / entry.persons.
   const noteEl = $("noteInput");
   const noteInputSnapshot = noteEl ? noteEl.value : "";
-  const noteRaw = (noteInputSnapshot || "").trim();
+  const noteRaw = _historicalNote !== null && noteInputSnapshot === _historicalNote.value
+    ? _historicalNote.original : (noteInputSnapshot || "").trim();
   const note = noteRaw || "";
 
   // Phase 3 + 5: Markt-/Sprach-/Währungsmetadaten zur Speicherzeit mitschreiben.
@@ -628,8 +758,7 @@ async function saveQuick() {
   let _marketCode = "de";
   try {
     if (window.EAF_I18N && typeof window.EAF_I18N.getCurrency === "function") {
-      const _curCode = window.EAF_I18N.getCurrency();
-      const _cfg = window.EAF_I18N.currencyConfig && window.EAF_I18N.currencyConfig[_curCode];
+      const _cfg = _currentCurrencyFormat();
       if (_cfg) _currencyMetadata = { code: _cfg.code, symbol: _cfg.symbol, locale: _cfg.locale };
     }
     if (window.EAF_I18N && typeof window.EAF_I18N.getLanguage === "function") {
@@ -664,17 +793,26 @@ async function saveQuick() {
     await _historyMigration;
     if (_historyMigrationError) throw _historyMigrationError;
     await window.EAF_HISTORY.mutate(arr => {
+      if (arr.length >= HIST_MAX) {
+        const error = new Error("History storage capacity reached");
+        error.code = "HISTORY_SAVE_CAPACITY";
+        throw error;
+      }
       entry.id = _newHistoryId(arr);
       arr.unshift(entry);
-      if (arr.length > HIST_MAX) arr.length = HIST_MAX;
       return {entries: arr};
     });
     eafToast(_t("toastSaved"), "var(--green)");
     _flashVerlaufBtn();
-    if (noteEl && noteEl.value === noteInputSnapshot) noteEl.value = "";
+    if (noteEl && noteEl.value === noteInputSnapshot) {
+      noteEl.value = "";
+      _historicalNote = null;
+      saveInputs();
+    }
     return true;
   } catch(e) {
-    eafToast(_t(e && e.code === "HISTORY_COORDINATION_UNAVAILABLE" ? "toastHistoryCoordination" : "toastSaveFailed"));
+    eafToast(_t(e && e.code === "HISTORY_COORDINATION_UNAVAILABLE" ? "toastHistoryCoordination"
+      : e && e.code === "HISTORY_SAVE_CAPACITY" ? "toastCapacity" : "toastSaveFailed"));
     return false;
   }
 }
@@ -814,6 +952,8 @@ function n(id) {
   if (!el) return NaN;                 // BUG-01→audit-3b1-2: null-guard before .value
   const v = parseFloat(el.value);
   if (!isFinite(v)) return NaN;
+  const restored = _historicalInputs[id];
+  if (restored && restored.value === el.value) return restored.internal;
   return _rawToInternal(id, v);
 }
 // Raw-Wert ohne Konversion (für Anzeige-/Speicher-Zwecke, wenn der User-Wert
@@ -980,16 +1120,25 @@ function _currencySymbol() {
 // ── Phase 2 / Phase 5: Markt-basierter Geldwert-Formatter ───────────────────
 // Rohwerte sind seit Phase 5 immer in der aktiven Marktwährung — der
 // Formatter lokalisiert sie nur, ohne Wechselkurs-Konversion.
+function _currentCurrencyFormat() {
+  try {
+    const i18n = window.EAF_I18N;
+    if (!i18n || typeof i18n.getCurrency !== "function") return null;
+    const cfg = i18n.currencyConfig && i18n.currencyConfig[i18n.getCurrency()];
+    if (!cfg) return null;
+    const market = typeof i18n.getMarket === "function" ? i18n.getMarket() : null;
+    // EUR keeps its historical DE default; only the active matching market
+    // supplies its UI locale, including en-IE for new EU calculations.
+    const locale = market && market.currency === cfg.code && market.locale ? market.locale : cfg.locale;
+    return {code: cfg.code, symbol: cfg.symbol, locale};
+  } catch (_) { return null; }
+}
+
 function _fmtMoney(v, decimals) {
   if (!isFinite(v)) return "—";
   if (decimals == null) decimals = 2;
   v = _roundForDisplay(v, decimals);
-  var cfg = null;
-  try {
-    if (window.EAF_I18N && window.EAF_I18N.currencyConfig && typeof window.EAF_I18N.getCurrency === "function") {
-      cfg = window.EAF_I18N.currencyConfig[window.EAF_I18N.getCurrency()];
-    }
-  } catch (_) {}
+  var cfg = _currentCurrencyFormat();
   if (!cfg) return fmt(v, decimals) + " " + _currencySymbol();
   try {
     return new Intl.NumberFormat(cfg.locale, {
@@ -1126,6 +1275,7 @@ function applyRideshare() {
   const body   = $("rideshareBody");
   const valEl  = $("ridesharePersonsV");
   const slider = $("ridesharePersons");
+  if ($("rideshareToggle")) $("rideshareToggle").checked = rideshareActive;
   if (body)   body.hidden = !rideshareActive;
   if (slider) {
     slider.value = String(ridesharePersons);
@@ -1145,13 +1295,18 @@ function setRideshareActive(v) {
   }
   try { localStorage.setItem(RIDESHARE_KEY, rideshareActive ? "1" : "0"); } catch (_) {}
   applyRideshare();
+  saveInputs();
   calc();
 }
 function setRidesharePersons(v) {
   if (!isFinite(v)) return;
-  v = Math.max(1, Math.min(6, Math.round(v)));
+  const slider = $("ridesharePersons");
+  const max = _historicalInputs.ridesharePersons && slider ? Number(slider.max) : 6;
+  v = Math.max(1, Math.min(max, Math.round(v)));
   ridesharePersons = v;
+  if (slider) slider.value = String(v);
   try { localStorage.setItem(RIDESHARE_PERSONS_KEY, String(v)); } catch (_) {}
+  saveInputs();
   const valEl = $("ridesharePersonsV");
   if (valEl) valEl.textContent = v.toString();
   calc();
@@ -1171,6 +1326,7 @@ function applyLongterm() {
   const kmVal  = $("kmMonatV");
   const kmJahr = $("ltKmJahr");
   const kmWarn = $("ltKmWarn");
+  if ($("longtermToggle")) $("longtermToggle").checked = longtermActive;
   if (body)  body.hidden = !longtermActive;
   if (yrSl)  { yrSl.value = String(longtermYears); _updateSliderFill(yrSl); }
   if (yrVal) yrVal.textContent = `${longtermYears} ${longtermYears === 1 ? _t("yearOne") : _t("yearOther")}`;
@@ -1302,6 +1458,7 @@ function confirmReset() {
 }
 
 function reset() {
+  _clearHistoricalInputs();
   const market = (window.EAF_I18N && typeof window.EAF_I18N.getMarket === "function")
     ? window.EAF_I18N.getMarket()
     : null;
@@ -2496,7 +2653,15 @@ function _updateSliderVal(id) {
   if (!el || !valEl || !fmtFn) return;
   const v = id === "kmMonat" ? kmMonat : parseFloat(el.value);
   if (isFinite(v)) {
-    const txt = fmtFn(v);
+    let txt = fmtFn(v);
+    const restored = _historicalInputs[id];
+    if (restored && restored.value === el.value && !_historyInputOnGrid(v, _historyInputConfig(id))) {
+      const unit = id === "evVerbrauch" ? _evEffUnit()
+        : id === "verbrauchVerbrenner" ? _iceEffUnit()
+        : id === "strompreis" ? _currencySymbol() + "/kWh"
+        : id === "benzinpreis" ? _currencySymbol() + "/" + _fuelVolumeUnit() : _distanceUnit();
+      txt = v.toLocaleString(_currentLocale(), {maximumSignificantDigits: 15}) + " " + unit;
+    }
     valEl.textContent = txt;
     // a11y: aria-valuetext mirrors the visible value (e.g. "17,0 kWh/100 km")
     el.setAttribute("aria-valuetext", txt);
@@ -3048,6 +3213,7 @@ setTimeout(() => {
       toastInvalidInput: "Bitte gültige Werte eingeben",
       toastSaved: "Im Verlauf gespeichert",
       toastSaveFailed: "Speichern nicht möglich",
+      toastCapacity: "Speichern nicht möglich: Die Speichergrenze von 50 Einträgen ist erreicht. Vorhandene Daten bleiben erhalten. Bitte zuerst ein Backup exportieren und bei Bedarf Einträge löschen.",
       toastHistoryCoordination: "Verlauf konnte nicht geändert werden. Bitte in einem aktuellen Browser über HTTPS öffnen und erneut versuchen.",
       toastStorageUnavailable: "Gerätespeicher konnte nicht verwendet werden. Bitte Zugriff prüfen und Seite neu laden. Gespeicherte Daten bleiben erhalten.",
       toastRestoreFailed: "Gespeichertes Szenario konnte nicht geöffnet werden",
@@ -3280,6 +3446,7 @@ setTimeout(() => {
       toastInvalidInput: "Please enter valid values",
       toastSaved: "Saved to history",
       toastSaveFailed: "Save failed",
+      toastCapacity: "Save failed: The storage limit of 50 entries has been reached. Existing data is preserved. Export a backup first and delete entries if needed.",
       toastHistoryCoordination: "History could not be changed. Open in an up to date browser over HTTPS and try again.",
       toastStorageUnavailable: "Device storage could not be used. Check access and reload the page. Saved data is preserved.",
       toastRestoreFailed: "Saved scenario could not be opened",
@@ -3512,6 +3679,7 @@ setTimeout(() => {
       toastInvalidInput: "Lütfen geçerli değerler girin",
       toastSaved: "Geçmişe kaydedildi",
       toastSaveFailed: "Kaydedilemedi",
+      toastCapacity: "Kaydedilemedi: 50 kayıtlık depolama sınırına ulaşıldı. Mevcut veriler korunur. Önce bir yedek dışa aktarın ve gerekirse kayıtları silin.",
       toastHistoryCoordination: "Geçmiş değiştirilemedi. Güncel bir tarayıcıda HTTPS üzerinden açıp tekrar deneyin.",
       toastStorageUnavailable: "Cihaz depolaması kullanılamadı. Erişimi kontrol edip sayfayı yeniden yükleyin. Kayıtlı veriler korunur.",
       toastRestoreFailed: "Kayıtlı senaryo açılamadı",
@@ -3740,6 +3908,7 @@ setTimeout(() => {
   // (US: mi/mpg/gal; DE/TR: km/L).
   function applyMarketDefaults(mk) {
     if (!mk || !mk.defaults) return;
+    _clearHistoricalInputs();
     function applyTo(id, cfg) {
       var el = document.getElementById(id);
       if (!el || !cfg) return;
@@ -3767,6 +3936,11 @@ setTimeout(() => {
     function applyTo(id, cfg) {
       var el = document.getElementById(id);
       if (!el || !cfg) return;
+      const restored = _historicalInputs[id];
+      if (restored && restored.value === el.value) {
+        _applyHistoricalRange(el, cfg, Number(restored.value));
+        return;
+      }
       if (cfg.min  != null) el.min  = String(cfg.min);
       if (cfg.max  != null) el.max  = String(cfg.max);
       if (cfg.step != null) el.step = String(cfg.step);
@@ -3815,6 +3989,7 @@ setTimeout(() => {
     ].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
+      if (_historicalInputs[id] && _historicalInputs[id].value === el.value) return;
       var num = parseFloat(el.value);
       if (!isFinite(num)) return;
       var min = parseFloat(el.min), max = parseFloat(el.max);
@@ -4065,7 +4240,7 @@ setTimeout(() => {
   // Marktwährung. Keine Wechselkurs-Konversion — Rohwerte sind bereits in
   // der aktiven Währung (die Berechnung läuft im aktiven Markt).
   function formatCurrency(value) {
-    var cfg = currencyConfig[currentCurrency] || currencyConfig.EUR;
+    var cfg = _currentCurrencyFormat() || currencyConfig[currentCurrency] || currencyConfig.EUR;
     if (value == null || !isFinite(Number(value))) {
       return "";
     }

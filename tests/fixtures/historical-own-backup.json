@@ -1,0 +1,47 @@
+{
+  "app": "evspend",
+  "kind": "history-export",
+  "schemaVersion": 1,
+  "exportedAt": "2026-10-12T16:26:08.486Z",
+  "entryCount": 2,
+  "entries": [
+    {
+      "schema": "v2",
+      "type": "ev",
+      "date": 1791822368485,
+      "km": 100,
+      "consumption": 18,
+      "price": 0.3,
+      "costPer100": 5.4,
+      "monthlyCost": 5.4,
+      "yearlyCost": 64.8,
+      "note": "existing",
+      "marketCode": "de",
+      "language": "de",
+      "currencyMetadata": {
+        "code": "EUR",
+        "symbol": "€",
+        "locale": "de-DE"
+      },
+      "id": "eaf_00000000000000000000000000000001"
+    },
+    {
+      "date": 1791799200000,
+      "km": 1000,
+      "ev": {
+        "consumption": 17.5,
+        "price": 0.32,
+        "costPer100": 5.6
+      },
+      "fuel": {
+        "consumption": 6.4,
+        "price": 1.9,
+        "costPer100": 12.16
+      },
+      "result": {
+        "yearlySaving": 1180.8,
+        "monthlySaving": 98.4
+      }
+    }
+  ]
+}

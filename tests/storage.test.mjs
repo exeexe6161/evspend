@@ -2,6 +2,53 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { createRuntime, ready, historyRuntime, importFile, envelope, entry, historyKey, existingJson, assertFailed, importedSignal } from "./history-runtime.mjs";
 
+function fullHistory(count = 50) {
+  return Array.from({length: count}, (_, index) => entry({
+    id: "eaf_" + index.toString(16).padStart(32, "0"),
+    date: 1720000000000 - index,
+    note: `saved ${index}`,
+  }));
+}
+for (const [market, message] of [["de", /Speichergrenze von 50/], ["eu", /storage limit of 50/], ["us", /storage limit of 50/], ["tr", /50 kayıtlık depolama sınırı/]]) {
+  test(`Release Audit 51. Speichern im ${market} Markt bewahrt Verlauf und neue Notiz`, async () => {
+    for (const type of ["ev", "vb"]) {
+      const before = JSON.stringify(fullHistory());
+      const rt = ready({storage: {"eaf.market": market, [historyKey]: before}});
+      rt.element("noteInput", "pending new note");
+      rt.run(`appMode='single'; singleType='${type}'`);
+      rt.calls.length = 0;
+      await rt.run("saveEntrySafe()");
+      assert.equal(rt.storage.get(historyKey), before);
+      assert.equal(rt.calls.filter(([method, key]) => method === "setItem" && key === historyKey).length, 0);
+      assert.equal(rt.storage.has("lastSaveTime"), false);
+      assert.equal(rt.elements.get("noteInput").value, "pending new note");
+      assert.equal(rt.run("_saveEntryPending"), false);
+      assert.match(rt.elements.get("eaf-toast").textContent, message);
+    }
+  });
+}
+test("Release Audit letzter Speicherplatz und erneutes Speichern nach gezieltem Löschen funktionieren", async () => {
+  const original = fullHistory(49);
+  const rt = ready({storage: {[historyKey]: JSON.stringify(original)}});
+  rt.element("noteInput", "last available slot");
+  rt.run("appMode='single'");
+  assert.equal(await rt.run("saveQuick()"), true);
+  let saved = JSON.parse(rt.storage.get(historyKey));
+  assert.equal(saved.length, 50);
+  assert.equal(original.every(old => saved.some(current => current.id === old.id)), true);
+  assert.equal(rt.elements.get("noteInput").value, "");
+  rt.elements.get("noteInput").value = "retry after capacity failure";
+  assert.equal(await rt.run("saveQuick()"), false);
+  assert.equal(rt.elements.get("noteInput").value, "retry after capacity failure");
+  saved.pop(); // Isolated synthetic user deletion makes one slot available.
+  rt.storage.set(historyKey, JSON.stringify(saved));
+  assert.equal(await rt.run("saveQuick()"), true);
+  const afterRetry = JSON.parse(rt.storage.get(historyKey));
+  assert.equal(afterRetry.length, 50);
+  assert.equal(afterRetry[0].note, "retry after capacity failure");
+  assert.equal(saved.every(old => afterRetry.some(current => current.id === old.id)), true);
+});
+
 test("EVS-004 gültiger Import bestätigt genau einen Commit und aktualisierte Ansicht", async () => {
   const rt = historyRuntime();
   await importFile(rt, envelope());

@@ -54,7 +54,7 @@
         if (!old) return;
         const legacy = JSON.parse(old);
         if (!Array.isArray(legacy)) throw failure("HISTORY_INVALID_STORAGE");
-        if (legacy.length) commit(legacy.map(mapper).slice(0, 50));
+        if (legacy.length) commit(legacy.map(mapper));
         // A cleanup error must never roll back the committed new history.
         try { localStorage.removeItem(LEGACY_KEY); } catch (_) {}
       });
