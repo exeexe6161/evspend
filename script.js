@@ -436,7 +436,7 @@ function loadInputs() {
     if (saved.km != null && saved.km !== "" && saved.kmEv == null && saved.kmVb == null) {
       if ($("kmEv")) $("kmEv").value = Math.min(500, parseFloat(saved.km) || 50);
       if ($("kmVb")) $("kmVb").value = Math.min(500, parseFloat(saved.km) || 50);
-      if ($("kmShared")) $("kmShared").value = Math.min(5000, parseFloat(saved.km) || 1000);
+      if ($("kmShared")) $("kmShared").value = Math.min(Number($("kmShared").max), parseFloat(saved.km) || 1000);
     }
   } catch (_) { _storageInitFailed = true; }
 }
@@ -607,29 +607,13 @@ if ($("noteInput")) $("noteInput").addEventListener("input", () => {
   if (_historicalNote !== null) saveInputs();
 });
 
-// "Show results" CTA — meaningful confirm action.
-// On any input change inside .calc-section: mark result body as stale (dimmed)
-// and glow the button. On click: recalculate, lift dim, clear glow.
-// Auto-calc keeps running in the background (per existing input listeners) so
-// the displayed numbers stay current; the stale state is purely the visual
-// "you changed something, confirm with a click" cue.
+// Results stay current on load and input. The button is a navigation aid
+// and retains the existing explicit screen-reader announcement.
 (() => {
   const btn = $("calcBtn");
   if (!btn) return;
-  const scope = document.querySelector(".calc-section") || document;
-  const markStale = () => {
-    btn.classList.add("active");
-    document.body.setAttribute("data-result-stale", "true");
-  };
-  const clearStale = () => {
-    btn.classList.remove("active");
-    document.body.removeAttribute("data-result-stale");
-  };
-  scope.addEventListener("input",  markStale);
-  scope.addEventListener("change", markStale);
   btn.addEventListener("click", () => {
     calc();
-    clearStale();
     // Phase D/E — Smooth-Scroll. 100ms gibt calc() Zeit zu rendern.
     // Compare-Modus: scroll zu chartSection (Chart oben → Werte darunter →
     //                Sticky-Button = komplette Section auf einen Blick).
@@ -670,6 +654,7 @@ function saveInputs() {
       marketCode: window.EAF_I18N.getMarketCode(), values: _historicalInputs
     };
     if (_historicalNote !== null) data._historyInputs.note = _historicalNote.original;
+    data._marketCode = window.EAF_I18N.getMarketCode();
     localStorage.setItem(LS_KEY, JSON.stringify(data));
   } catch(e) {}
 }
@@ -1331,13 +1316,13 @@ function applyLongterm() {
   if (yrSl)  { yrSl.value = String(longtermYears); _updateSliderFill(yrSl); }
   if (yrVal) yrVal.textContent = `${longtermYears} ${longtermYears === 1 ? _t("yearOne") : _t("yearOther")}`;
   if (yrSl && yrVal) yrSl.setAttribute("aria-valuetext", yrVal.textContent);
-  if (prSl)  { prSl.value = String(longtermPremium); _updateSliderFill(prSl); }
-  if (prVal) prVal.textContent = longtermPremium.toLocaleString(_currentLocale()) + " " + _currencySymbol();
+  if (prSl)  { _applyHistoricalRange(prSl, _historyInputConfig("longtermPremium"), longtermPremium); _updateSliderFill(prSl); }
+  if (prVal) prVal.textContent = _fmtMoney(longtermPremium, 0);
   if (prSl && prVal) prSl.setAttribute("aria-valuetext", prVal.textContent);
-  if (kmSl)  { kmSl.value = String(kmMonat); _updateSliderFill(kmSl); }
+  if (kmSl)  { _applyHistoricalRange(kmSl, _historyInputConfig("kmMonat"), kmMonat); _updateSliderFill(kmSl); }
   if (kmVal) kmVal.textContent = Math.round(kmMonat).toLocaleString(_currentLocale()) + " " + _distanceUnit();
   if (kmJahr) kmJahr.textContent = _t("kmPerYearApprox", { km: Math.round(kmMonat * 12).toLocaleString(_currentLocale()) });
-  if (kmWarn) kmWarn.hidden = !(kmMonat > 3000);
+  if (kmWarn) kmWarn.hidden = !(kmMonat > (_isUsMarket() ? 1900 : 3000));
   document.body.setAttribute("data-longterm", longtermActive ? "on" : "off");
   const ltSwitch = $("ltSwitchBtn");
   if (ltSwitch) {
@@ -1409,12 +1394,12 @@ function setLongtermPremium(v) {
   const slEl = $("longtermPremium");
   const minV  = slEl ? (parseFloat(slEl.min)  || 0)     : 0;
   const maxV  = slEl ? (parseFloat(slEl.max)  || 40000) : 40000;
-  const stepV = slEl ? (parseFloat(slEl.step) || 100)   : 100;
-  v = Math.max(minV, Math.min(maxV, Math.round(v / stepV) * stepV));
+  // The browser handles interaction steps; preserve accepted stored precision.
+  v = Math.max(minV, Math.min(maxV, v));
   longtermPremium = v;
   try { localStorage.setItem(LT_PREMIUM_KEY, String(v)); } catch (_) {}
   const valEl = $("longtermPremiumV");
-  if (valEl) valEl.textContent = v.toLocaleString(_currentLocale()) + " " + _currencySymbol();
+  if (valEl) valEl.textContent = _fmtMoney(v, 0);
   calc();
 }
 
@@ -1437,19 +1422,10 @@ function animCount(el, to, d, col, prefix, suffix) {
 // Phase 2: animierte Geldwert-Ausgabe, nutzt aktuelle Währung über _fmtMoney.
 function _animCountMoney(el, to, col, prefix, suffix) {
   if (!el) return;
-  if (!isFinite(to)) { el.style.color = col; el.textContent = "—"; return; }
-  prefix = prefix || ""; suffix = suffix || "";
   if (el._animRaf) cancelAnimationFrame(el._animRaf);
-  const dur = 550, t0 = performance.now();
-  function step(t) {
-    const p = Math.min((t - t0) / dur, 1);
-    const e = 1 - Math.pow(1 - p, 3);
-    el.style.color = col;
-    el.textContent = prefix + _fmtMoney(to * e) + suffix;
-    if (p < 1) el._animRaf = requestAnimationFrame(step);
-    else { el.textContent = prefix + _fmtMoney(to) + suffix; el._animRaf = null; }
-  }
-  el._animRaf = requestAnimationFrame(step);
+  el._animRaf = null;
+  el.style.color = col;
+  el.textContent = isFinite(to) ? (prefix || "") + _fmtMoney(to) + (suffix || "") : "—";
 }
 
 // ── Reset ────────────────────────────────────────────────────────────────────
@@ -1562,7 +1538,7 @@ function calcSingle() {
   }
 
   // 3) Ø Kosten pro 100 km/mi (Markt-Einheit)
-  if (c100El) _animCountMoney(c100El, _costPer100ToMarket(d.costPer100), "var(--l1)", "Ø ", " " + _t("per100km", { unit: _distanceUnit() }));
+  if (c100El) _animCountMoney(c100El, _costPer100ToMarket(d.costPer100), "var(--l1)", _t("averagePrefix") + " ", " " + _t("per100km", { unit: _distanceUnit() }));
 
   if (metaEl) {
     // Phase 9: Single-Meta-Chips in Markt-Einheiten.
@@ -1631,7 +1607,7 @@ function calcCompare() {
     heroLbl  = _t("differenceFor", { km: kmLabel });
   }
 
-  if (badgeEl) { badgeEl.textContent = badgeTxt; badgeEl.className = badgeCls; }
+  if (badgeEl) { badgeEl.hidden = km === 0; badgeEl.style.display = km === 0 ? "none" : ""; badgeEl.textContent = badgeTxt; badgeEl.className = badgeCls; }
   if (hlblEl)  hlblEl.textContent = heroLbl;
   if (hvalEl)  _animCountMoney(hvalEl, Math.abs(displayDifference), color);
 
@@ -1716,10 +1692,10 @@ function renderLongterm({ yrEv, yrVb }) {
     kostenEv = summary.evEnergyCost;
     kostenVb = summary.fuelCost;
     betriebErsparnis = summary.operatingDifference;
-    // STRENG: nur als amortisiert behandeln, wenn (a) ein Mehrpreis existiert,
+    // Show the operating advantage when it covers the configured premium,
     // (b) der EV operativ tatsächlich günstiger ist und (c) die operativen
     // Ersparnisse den Mehrpreis im gewählten Zeitraum decken.
-    if (premium > 0 && hasAnnualSavings && summary.netDifference >= -netTolerance) {
+    if (premium >= 0 && hasAnnualSavings && summary.netDifference >= -netTolerance) {
       amortisiert = true;
       gesamtErsparnis = betriebErsparnis - premium;
       restMehrpreis = 0;
@@ -1745,13 +1721,12 @@ function renderLongterm({ yrEv, yrVb }) {
   if (doneVal) doneVal.textContent = _t("totalSavingsLabel", { val: fmtEu(_roundForDisplay(gesamtErsparnis, 0, differenceMagnitude)) });
 
   // ── Mutually exclusive: loss OR done (niemals beide) ───────────────────
-  // Sonderfall: kein Mehrpreis konfiguriert → kein Loss-/Done-Block sinnvoll.
-  // Nur die Break-Even-Zeile ("Ab sofort günstiger") trägt die Aussage.
+  // With no premium, still show the operating advantage or disadvantage.
   const noPremium = (premium <= 0);
   if (lossBlock && doneBlock) {
-    if (noPremium) {
-      lossBlock.hidden = true;
-      doneBlock.hidden = true;
+    if (noPremium && years > 0 && monat > 0) {
+      lossBlock.hidden = restMehrpreis <= 0;
+      doneBlock.hidden = !(gesamtErsparnis > 0);
     } else if (amortisiert) {
       doneBlock.hidden = false;
       lossBlock.hidden = true;
@@ -1773,7 +1748,7 @@ function renderLongterm({ yrEv, yrVb }) {
       const fmtYrs = yrsNeeded < 10
         ? yrsNeeded.toLocaleString(_currentLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })
         : Math.round(yrsNeeded).toLocaleString(_currentLocale());
-      const yrsUnit = yrsNeeded === 1 ? _t("yearOne") : _t("yearOther");
+      const yrsUnit = _t(yrsNeeded === 1 ? "yearAfterOne" : "yearAfterOther");
       txt = _t("breakevenAfter", { years: fmtYrs + " " + yrsUnit });
     } else {
       // Nicht amortisiert ODER EV operativ nicht günstiger → klar kein Break-Even.
@@ -2384,20 +2359,22 @@ function _resultSentence(d, mode, perspective) {
   }
   // Compare + carpool: append per-person count suffix.
   if (mode === "compare" && carpool) {
-    sentence += " " + _t("sentenceCarpoolSuffix", { n: d.persons });
+    const suffix = _t("sentenceCarpoolSuffix", { n: d.persons });
+    sentence = sentence.endsWith(")") && suffix.startsWith("(") && suffix.endsWith(")")
+      ? sentence.slice(0, -1) + "; " + suffix.slice(1)
+      : sentence + " " + suffix;
   }
   return sentence;
 }
 
 // Phase B/C: Marketing-Style Share-Texte (multi-line, Markt-/Sprach-aware).
-// {value}, {ev_value}, {ice_value}, {savings} sind Locale-Zahlen ohne Währung;
-// Templates fügen explizit € (DE/TR) bzw. {currency} (EN) ein.
+// Monetary substitutions already include the market currency and locale.
 // Phase C: Fahrgemeinschaft-Zeile wird vor dem CTA injiziert wenn aktiv.
-function _injectRideshareLine(text, d, perPerson) {
+function _injectRideshareLine(text, d, perPerson, difference = false) {
   if (!d || !d.ridesharing || !(d.persons > 1)) return text;
-  const line = _t("shareRideshareLine", {
+  const line = _t(difference ? "shareRideshareDifference" : "shareRideshareLine", {
     n: d.persons,
-    perPerson: fmt(perPerson, 2),
+    perPerson: _fmtMoney(perPerson, 2),
     currency: _currencySymbol()
   });
   const lines = text.split("\n");
@@ -2425,7 +2402,7 @@ function buildShareTextSingle(d) {
   const text = _t(key, {
     km: kmDisp,
     unit: _distanceUnit(),
-    value: fmt(d.totalCost, 2),
+    value: _fmtMoney(d.totalCost, 2),
     currency: _currencySymbol()
   });
   // Single: Pro-Person-Wert sind die Kosten/Person.
@@ -2457,16 +2434,19 @@ function buildShareTextCompare(d) {
     return lines.join("\n");
   }
   const kmDisp = Math.round(Math.max(0, _kmToDist(d.kmEv))).toLocaleString(_currentLocale());
-  const text = _t("shareTextCompare", {
+  let text = _t("shareTextCompare", {
     km: kmDisp,
     unit: _distanceUnit(),
-    ev_value:  fmt(d.eAutoTotal, 2),
-    ice_value: fmt(d.verbrennerTotal, 2),
-    savings:   fmt(Math.abs(_compareDifferenceForDisplay(d)), 2),
+    ev_value:  _fmtMoney(d.eAutoTotal, 2),
+    ice_value: _fmtMoney(d.verbrennerTotal, 2),
+    savings:   _fmtMoney(Math.abs(_compareDifferenceForDisplay(d)), 2),
     currency:  _currencySymbol()
   });
-  // Compare: Pro-Person-Wert ist die Ersparnis/Person.
-  return _injectShareDisclaimer(_injectRideshareLine(text, d, Math.abs(_compareDifferenceForDisplay(d, true))));
+  const direction = _compareDifferenceForDisplay(d);
+  const lines = text.split("\n");
+  lines.splice(lines.length - 1, 0, _t(direction > 0 ? "shareLongtermEvAdvantage" : direction < 0 ? "shareLongtermEvDisadvantage" : "costsEqual"));
+  text = lines.join("\n");
+  return _injectShareDisclaimer(_injectRideshareLine(text, d, Math.abs(_compareDifferenceForDisplay(d, true)), true));
 }
 async function shareText() {
   // Vor Share: UI erzwingen, damit UI = Share = Calc identisch sind.
@@ -2627,8 +2607,8 @@ const SLIDER_FMT = {
     if (_isUsMarket()) return Math.round(v).toLocaleString(_currentLocale()) + " " + _iceEffUnit();
     return v.toLocaleString(_currentLocale(), {minimumFractionDigits:1, maximumFractionDigits:1}) + " " + _iceEffUnit();
   },
-  strompreis:          v => v.toLocaleString(_currentLocale(), {minimumFractionDigits:2, maximumFractionDigits:2}) + " " + _currencySymbol() + "/kWh",
-  benzinpreis:         v => v.toLocaleString(_currentLocale(), {minimumFractionDigits:2, maximumFractionDigits:2}) + " " + _currencySymbol() + "/" + _fuelVolumeUnit(),
+  strompreis:          v => _fmtMoney(v, 2) + "/kWh",
+  benzinpreis:         v => _fmtMoney(v, 2) + "/" + _fuelVolumeUnit(),
   batteryKwh:          v => Math.round(v).toLocaleString(_currentLocale()) + " kWh",
   ridesharePersons:    v => Math.round(v).toString(),
   kmMonat:             v => Math.round(v).toLocaleString(_currentLocale()) + " " + _distanceUnit(),
@@ -2754,8 +2734,8 @@ function initApp() {
   try { applyMode(); } catch (_) {}
   try { applyRideshare(); } catch (_) {}
   try { applyLongterm(); } catch (_) {}
-  // Skip initial calc(): empty-state stays visible until first user interaction.
-  // First input/slider event will trigger calc() and render the result.
+  // Market, translations and historical inputs are ready; render immediately.
+  try { calc(); } catch (_) {}
   try { updateRangeDisplay(); } catch (_) {}
   // Layout-settle pass: catch the case where slider tracks paint with the
   // wrong width on first frame (custom fonts loading, late style insertion,
@@ -3114,8 +3094,21 @@ setTimeout(() => {
 
   var translations = {
     de: {
+      averagePrefix: "Ø",
+      exampleValuesHint: "Voreingestellte Werte sind Beispiele. Trage deine eigenen Werte ein.",
+      ariaSettings: "Einstellungen",
+      ariaTheme: "Farbschema wechseln",
+      ariaFeatures: "Funktionen",
+      ariaMode: "Berechnungsmodus",
+      ariaVehicle: "Fahrzeugtyp",
+      ariaInputs: "Eingaben",
+      ariaRideshare: "Fahrgemeinschaft aktivieren",
+      ariaLongterm: "Langzeitanalyse aktivieren",
+      ariaActions: "Aktionen",
+      ariaResult: "Ergebnis",
+      ariaChart: "Energie- und Kraftstoffkostenvergleich",
       heroTitle: "EVSpendPure",
-      heroSubtitle1: "Electric & Fuel Cost Calculator",
+      heroSubtitle1: "Strom und Kraftstoffkosten berechnen",
       heroSubtitle2: "",
       trustNoSignup: "Ohne Anmeldung",
       trustLocal: "Eingaben lokal gespeichert",
@@ -3134,14 +3127,14 @@ setTimeout(() => {
       labelIceConsumption: "Spritverbrauch",
       labelElectricityPrice: "Strompreis",
       labelBatterySize: "Batteriekapazität",
-      labelGasPrice: "Benzinpreis",
-      labelGasPriceUs: "Benzinpreis",
+      labelGasPrice: "Kraftstoffpreis",
+      labelGasPriceUs: "Kraftstoffpreis",
       labelPersons: "Personen",
       rangeHintText: "Theoretische Berechnung (Batterie ÷ Verbrauch). Reale Reichweite je nach Fahrweise, Klima und Topographie deutlich abweichend. Keine WLTP-Angabe.",
       rideshareLabel: "Fahrgemeinschaft",
       rideshareHint: "Kosten werden auf alle Personen aufgeteilt.",
       longtermLabel: "Langzeitanalyse",
-      calculate: "Ergebnis aktualisieren",
+      calculate: "Ergebnis anzeigen",
       staleHint: "Eingaben geändert, bitte Ergebnis aktualisieren",
       shareImage: "Als Bild teilen",
       shareText: "Als Text teilen",
@@ -3204,9 +3197,11 @@ setTimeout(() => {
       breakevenAfter: "Geschätzter Break-Even nach ca. {years}",
       yearOne: "Jahr",
       yearOther: "Jahre",
-      profitableNow: "Laut deinen Eingaben aktuell mit niedrigerem Betrag",
+      yearAfterOne: "Jahr",
+      yearAfterOther: "Jahren",
+      profitableNow: "Das E-Auto hat laut deinen Eingaben geringere Energiekosten",
       noBreakeven: "Kein Break-Even im gewählten Zeitraum",
-      totalSavingsLabel: "Geschätzte Differenz nach Break-Even: {val}",
+      totalSavingsLabel: "Geschätzter Vorteil am Ende des Zeitraums: {val}",
       kmPerYearApprox: "≈ {km} {unit} pro Jahr",
       // Toasts + confirms
       toastSaveSingleOnly: "Nur Einzelberechnungen werden gespeichert",
@@ -3300,10 +3295,11 @@ setTimeout(() => {
       shareSingleCarpool:      "Laut meiner Eingabe betragen die Kosten pro Person {val} für {km}",
       // Phase B — professionelle Share-Texte (neutral, mit sichtbarer URL)
       shareImageTitle: "EVSpendPure Beispielrechnung · www.evspendpure.com",
-      shareTextSingleEv: "EVSpendPure Beispielrechnung\nE-Auto: {value} {currency} für {km} {unit}\nEigene Werte berechnen: www.evspendpure.com",
-      shareTextSingleVb: "EVSpendPure Beispielrechnung\nVerbrenner: {value} {currency} für {km} {unit}\nEigene Werte berechnen: www.evspendpure.com",
-      shareTextCompare:  "EVSpendPure Beispielrechnung\nE-Auto: {ev_value} {currency} | Verbrenner: {ice_value} {currency}\nGeschätzte Differenz: {savings} {currency} für {km} {unit}\nEigene Werte berechnen: www.evspendpure.com",
-      shareRideshareLine: "Fahrgemeinschaft {n} Personen: {perPerson} {currency} pro Person",
+      shareTextSingleEv: "EVSpendPure Beispielrechnung\nE-Auto: {value} für {km} {unit}\nEigene Werte berechnen: www.evspendpure.com",
+      shareTextSingleVb: "EVSpendPure Beispielrechnung\nVerbrenner: {value} für {km} {unit}\nEigene Werte berechnen: www.evspendpure.com",
+      shareTextCompare:  "EVSpendPure Beispielrechnung\nE-Auto: {ev_value} | Verbrenner: {ice_value}\nGeschätzte Differenz: {savings} für {km} {unit}\nEigene Werte berechnen: www.evspendpure.com",
+      shareRideshareDifference: "Fahrgemeinschaft {n} Personen: geschätzte Differenz {perPerson} pro Person",
+      shareRideshareLine: "Fahrgemeinschaft {n} Personen: {perPerson} pro Person",
       // Verlauf (für verlauf.html + verlauf.js)
       verlaufTitle: "Verlauf",
       verlaufSub: "Deine persönlichen Berechnungen",
@@ -3347,6 +3343,20 @@ setTimeout(() => {
       chartAll:   "Gesamt Energie-/Kraftstoffkosten",
     },
     en: {
+      averagePrefix: "Avg.",
+      exampleValuesHint: "Preset values are examples. Enter your own values.",
+      labelIceConsumptionUs: "Fuel economy",
+      ariaSettings: "Settings",
+      ariaTheme: "Toggle theme",
+      ariaFeatures: "Features",
+      ariaMode: "Calculation mode",
+      ariaVehicle: "Vehicle type",
+      ariaInputs: "Inputs",
+      ariaRideshare: "Enable carpool",
+      ariaLongterm: "Enable long-term analysis",
+      ariaActions: "Actions",
+      ariaResult: "Result",
+      ariaChart: "Energy and fuel cost comparison",
       heroTitle: "EVSpendPure",
       heroSubtitle1: "Electric & Fuel Cost Calculator",
       heroSubtitle2: "",
@@ -3363,18 +3373,18 @@ setTimeout(() => {
       sectionVb: "Combustion",
       labelKilometer: "Kilometres",
       labelKilometerUs: "Miles",
-      labelEvConsumption: "Electric efficiency",
-      labelIceConsumption: "Fuel efficiency",
+      labelEvConsumption: "Energy consumption",
+      labelIceConsumption: "Fuel consumption",
       labelElectricityPrice: "Electricity cost",
-      labelBatterySize: "Battery size",
-      labelGasPrice: "Petrol price",
-      labelGasPriceUs: "Gas price",
+      labelBatterySize: "Battery capacity",
+      labelGasPrice: "Fuel price",
+      labelGasPriceUs: "Fuel price",
       labelPersons: "People",
       rangeHintText: "Theoretical calculation (battery ÷ consumption). Real-world range varies significantly depending on driving style, climate and topography. Not a WLTP figure.",
       rideshareLabel: "Carpool",
       rideshareHint: "Costs are split among all people.",
       longtermLabel: "Long-term analysis",
-      calculate: "Update results",
+      calculate: "Show results",
       staleHint: "Inputs changed, please update results",
       shareImage: "Share as image",
       shareText: "Share as text",
@@ -3404,7 +3414,7 @@ setTimeout(() => {
       srResultUpdated: "New result: {value}",
       // Phase P Sprint 2 (F4.8) — Slider aria-labels with vehicle context
       ariaKmShared: "Distance for both vehicles",
-      ariaKmEv: "EV distance",
+      ariaKmEv: "Electric vehicle distance",
       ariaKmVb: "Combustion distance",
       footerVerlauf: "History",
       footerNote: "Non-binding example calculation. Check inputs and results before decisions. Not a complete total-cost calculation. Inputs are stored locally.",
@@ -3415,8 +3425,8 @@ setTimeout(() => {
       marketTr: "TR · ₺",
       marketSwitchSr: "Change market, currently",
       // Phase 7 — dynamic result/action texts (legally-careful wording)
-      evCheaper: "EV: lower estimated cost",
-      vbCheaper: "ICE: lower estimated cost",
+      evCheaper: "Electric: lower estimated cost",
+      vbCheaper: "Combustion: lower estimated cost",
       costsEqual: "Costs roughly equal (based on your inputs)",
       savingsFor: "Estimated difference over {km}",
       extraCostFor: "Estimated extra cost over {km}",
@@ -3425,11 +3435,11 @@ setTimeout(() => {
       perPersonPrefix: "Per person ({n})",
       perPerson: "per person",
       persons: "people",
-      costLabelEv: "EV energy costs",
+      costLabelEv: "Electric energy costs",
       costLabelVb: "Combustion fuel costs",
       per100km: "/ 100 {unit}",
       rangeText: "Estimated range: {km} {unit}",
-      rangeEmpty: "Estimated range: {km} {unit}",
+      rangeEmpty: "Estimated range: — {unit}",
       fullChargeText: "Estimated full charge: {cost}",
       fullChargeHint: "Charging losses and base fees not included.",
       rideshareLine: "Carpool · {n} people",
@@ -3437,9 +3447,11 @@ setTimeout(() => {
       breakevenAfter: "Estimated break-even after approx. {years}",
       yearOne: "year",
       yearOther: "years",
-      profitableNow: "Currently the lower estimated amount based on your inputs",
+      yearAfterOne: "year",
+      yearAfterOther: "years",
+      profitableNow: "The electric vehicle has lower estimated energy costs based on your inputs",
       noBreakeven: "No break-even within this period",
-      totalSavingsLabel: "Estimated difference after break-even: {val}",
+      totalSavingsLabel: "Estimated advantage at the end of the period: {val}",
       kmPerYearApprox: "≈ {km} {unit} per year",
       // Toasts + confirms
       toastSaveSingleOnly: "Only single calculations can be saved",
@@ -3464,14 +3476,14 @@ setTimeout(() => {
       longtermKmMonthHint: "Average usage per month",
       longtermKmWarn: "Very high monthly mileage, results may deviate significantly from typical usage.",
       longtermPeriod: "Period",
-      longtermPremiumLabel: "EV price premium vs. combustion",
+      longtermPremiumLabel: "Electric vehicle price premium",
       longtermPremiumExclHint: "Note: Maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.",
-      longtermLblEv: "EV energy costs",
+      longtermLblEv: "Electric energy costs",
       longtermLblVb: "Combustion fuel costs",
       shareLongtermTitle: "EVSpendPure long-term analysis (example calculation)",
-      shareLongtermDifference: "Estimated difference after EV price premium",
-      shareLongtermEvAdvantage: "EV is lower in this calculation",
-      shareLongtermEvDisadvantage: "EV is higher in this calculation",
+      shareLongtermDifference: "Estimated difference after electric vehicle price premium",
+      shareLongtermEvAdvantage: "Electric has lower costs in this calculation",
+      shareLongtermEvDisadvantage: "Electric has higher costs in this calculation",
       shareOwnValues: "Calculate with your own inputs: www.evspendpure.com",
       longtermRemainingPremium: "Estimated remaining cost disadvantage",
       longtermAmortized: "Break-even reached within period (estimated)",
@@ -3503,7 +3515,7 @@ setTimeout(() => {
       // Share text
       shareSavings: "💰 Difference:",
       sharePerPersonSuffix: "per person",
-      shareCompareTitle: "Electric vs. Combustion comparison",
+      shareCompareTitle: "Electric and combustion comparison",
       // Share-Image (Canvas-PNG)
       shareImgSubCompare: "Energy/fuel cost comparison (example)",
       shareImgSubSingle: "Energy/fuel cost calculation (example)",
@@ -3518,7 +3530,7 @@ setTimeout(() => {
       shareTextDisclaimer: "Note: Non-binding estimate based on your inputs. Check the inputs and result. Energy/fuel costs only; maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.",
       // Result sentence (legally qualified, used in result/share/share-image)
       sentenceCompareSavings:  "Estimated difference: {val} over {km} (based on your inputs)",
-      sentenceCompareExtra:    "Based on your inputs, the ICE value is lower by {val} over {km}",
+      sentenceCompareExtra:    "Based on your inputs, combustion costs are lower by {val} over {km}",
       sentenceCompareEqual:    "Both options are similarly priced based on your inputs",
       sentenceCompareLongterm: "Cost difference over the selected period based on your inputs",
       sentenceSingle:          "Your calculated cost: {val} for {km}",
@@ -3526,17 +3538,18 @@ setTimeout(() => {
       sentenceCarpoolSuffix:   "(per person, {n} people)",
       // Share-text variant ("I" perspective)
       shareCompareSavings:     "Estimated difference: {val} over {km} (based on my inputs)",
-      shareCompareExtra:       "Based on my inputs, the ICE value is lower by {val} over {km}",
+      shareCompareExtra:       "Based on my inputs, combustion costs are lower by {val} over {km}",
       shareCompareEqual:       "Based on my inputs, both options are similarly priced",
       shareCompareLongterm:    "Based on my inputs, cost difference over the selected period",
       shareSingle:             "Based on my inputs, my calculated cost is {val} for {km}",
       shareSingleCarpool:      "Based on my inputs, cost per person is {val} for {km}",
       // Phase B — professional share text (neutral, with visible URL)
       shareImageTitle: "EVSpendPure example calculation · www.evspendpure.com",
-      shareTextSingleEv: "EVSpendPure example calculation\nEV: {value} {currency} for {km} {unit}\nCalculate with your own inputs: www.evspendpure.com",
-      shareTextSingleVb: "EVSpendPure example calculation\nICE: {value} {currency} for {km} {unit}\nCalculate with your own inputs: www.evspendpure.com",
-      shareTextCompare:  "EVSpendPure example calculation\nEV: {ev_value} {currency} | ICE: {ice_value} {currency}\nEstimated difference: {savings} {currency} over {km} {unit}\nCalculate with your own inputs: www.evspendpure.com",
-      shareRideshareLine: "Carpool {n} people: {perPerson} {currency} per person",
+      shareTextSingleEv: "EVSpendPure example calculation\nElectric: {value} for {km} {unit}\nCalculate with your own inputs: www.evspendpure.com",
+      shareTextSingleVb: "EVSpendPure example calculation\nCombustion: {value} for {km} {unit}\nCalculate with your own inputs: www.evspendpure.com",
+      shareTextCompare:  "EVSpendPure example calculation\nElectric: {ev_value} | Combustion: {ice_value}\nEstimated difference: {savings} over {km} {unit}\nCalculate with your own inputs: www.evspendpure.com",
+      shareRideshareDifference: "Carpool {n} people: estimated difference {perPerson} per person",
+      shareRideshareLine: "Carpool {n} people: {perPerson} per person",
       // Verlauf
       verlaufTitle: "History",
       verlaufSub: "Your personal calculations",
@@ -3580,6 +3593,22 @@ setTimeout(() => {
       chartAll:   "Total energy/fuel costs",
     },
     tr: {
+      chartHintPeriodSub: "Daha eski kayıtlar aşağıda listelenir. İstatistiklerde görmek için dönemi değiştir.",
+      statsNeedsTwoEntries: "En az 2 kayıt gerekli",
+      confirmDeleteEntry: "Bu kaydı silmek istediğine emin misin?",
+      averagePrefix: "Ort.",
+      exampleValuesHint: "Ön tanımlı değerler örnektir. Kendi değerlerini gir.",
+      ariaSettings: "Ayarlar",
+      ariaTheme: "Temayı değiştir",
+      ariaFeatures: "Özellikler",
+      ariaMode: "Hesaplama modu",
+      ariaVehicle: "Araç türü",
+      ariaInputs: "Girdiler",
+      ariaRideshare: "Ortak yolculuğu etkinleştir",
+      ariaLongterm: "Uzun vadeli analizi etkinleştir",
+      ariaActions: "İşlemler",
+      ariaResult: "Sonuç",
+      ariaChart: "Enerji ve yakıt maliyeti karşılaştırması",
       heroTitle: "EVSpendPure",
       heroSubtitle1: "Electric & Fuel Cost Calculator",
       heroSubtitle2: "",
@@ -3589,25 +3618,25 @@ setTimeout(() => {
       modeSingle: "Tekli hesaplama",
       modeCompare: "Karşılaştırma",
       typeEv: "Elektrikli",
-      typeVb: "Benzinli",
+      typeVb: "İçten yanmalı araç",
       quickCalc: "Hızlı hesaplayıcı",
       sectionMileage: "Mesafe",
       sectionEv: "Elektrikli",
-      sectionVb: "Benzinli",
+      sectionVb: "İçten yanmalı araç",
       labelKilometer: "Kilometre",
       labelKilometerUs: "Mil",
       labelEvConsumption: "Elektrik tüketimi",
       labelIceConsumption: "Yakıt tüketimi",
       labelElectricityPrice: "Elektrik fiyatı",
       labelBatterySize: "Batarya kapasitesi",
-      labelGasPrice: "Benzin fiyatı",
-      labelGasPriceUs: "Benzin fiyatı",
+      labelGasPrice: "Yakıt fiyatı",
+      labelGasPriceUs: "Yakıt fiyatı",
       labelPersons: "Kişi sayısı",
       rangeHintText: "Teorik hesaplama (batarya ÷ tüketim). Gerçek menzil sürüş tarzına, iklime ve topografyaya göre önemli ölçüde değişir. WLTP değeri değildir.",
       rideshareLabel: "Ortak yolculuk",
       rideshareHint: "Maliyetler tüm kişilere bölünür.",
       longtermLabel: "Uzun vadeli analiz",
-      calculate: "Sonucu güncelle",
+      calculate: "Sonucu göster",
       staleHint: "Girdiler değişti, sonucu güncelleyin",
       shareImage: "Resim olarak paylaş",
       shareText: "Metin olarak paylaş",
@@ -3638,7 +3667,7 @@ setTimeout(() => {
       // Phase P Sprint 2 (F4.8) — Slider aria-labels with vehicle context
       ariaKmShared: "Her iki araç için mesafe",
       ariaKmEv: "Elektrikli araç mesafesi",
-      ariaKmVb: "Benzinli araç mesafesi",
+      ariaKmVb: "İçten yanmalı araç mesafesi",
       footerVerlauf: "Geçmiş",
       footerNote: "Bağlayıcı olmayan örnek hesaplama. Karar vermeden önce girdileri ve sonuçları kontrol edin. Tam toplam maliyet hesabı değildir. Girdiler yerel olarak saklanır.",
       privacyNotice: "Hesaplayıcı girdileri tarayıcıda kalır. Web sitesi yüklenirken teknik bağlantı verileri barındırma sağlayıcısı tarafından işlenebilir.",
@@ -3649,7 +3678,7 @@ setTimeout(() => {
       marketSwitchSr: "Pazar değiştir, şu an",
       // Phase 7 — dinamik sonuç/aksiyon metinleri (hukuki olarak temkinli)
       evCheaper: "Elektrikli tahminen daha uygun",
-      vbCheaper: "Benzinli tahminen daha uygun",
+      vbCheaper: "İçten yanmalı araç tahminen daha uygun",
       costsEqual: "Maliyetler benzer (girdilerine göre)",
       savingsFor: "{km} için tahmini fark",
       extraCostFor: "{km} için tahmini fazla maliyet",
@@ -3667,37 +3696,39 @@ setTimeout(() => {
       fullChargeHint: "Şarj kayıpları ve sabit ücretler dahil değildir.",
       rideshareLine: "Ortak yolculuk · {n} kişi",
       // Longterm
-      breakevenAfter: "Tahmini break-even yaklaşık {years} sonra",
+      breakevenAfter: "Tahmini başabaş noktası: yaklaşık {years}",
       yearOne: "yıl",
       yearOther: "yıl",
-      profitableNow: "Girdilerine göre şu anda daha düşük tahmini tutar",
-      noBreakeven: "Seçilen süre içinde break-even yok",
-      totalSavingsLabel: "Başabaş sonrası tahmini fark: {val}",
-      kmPerYearApprox: "≈ {km} {unit} yıllık",
+      yearAfterOne: "yıl",
+      yearAfterOther: "yıl",
+      profitableNow: "Girdilerine göre elektrikli aracın tahmini enerji maliyeti daha düşük",
+      noBreakeven: "Seçilen sürede başabaş noktasına ulaşılmıyor",
+      totalSavingsLabel: "Dönem sonunda tahmini avantaj: {val}",
+      kmPerYearApprox: "Yılda yaklaşık {km} {unit}",
       // Toasts + confirms
       toastSaveSingleOnly: "Sadece tekli hesaplamalar kaydedilir",
-      toastInvalidInput: "Lütfen geçerli değerler girin",
+      toastInvalidInput: "Lütfen geçerli değerler gir.",
       toastSaved: "Geçmişe kaydedildi",
       toastSaveFailed: "Kaydedilemedi",
-      toastCapacity: "Kaydedilemedi: 50 kayıtlık depolama sınırına ulaşıldı. Mevcut veriler korunur. Önce bir yedek dışa aktarın ve gerekirse kayıtları silin.",
-      toastHistoryCoordination: "Geçmiş değiştirilemedi. Güncel bir tarayıcıda HTTPS üzerinden açıp tekrar deneyin.",
-      toastStorageUnavailable: "Cihaz depolaması kullanılamadı. Erişimi kontrol edip sayfayı yeniden yükleyin. Kayıtlı veriler korunur.",
+      toastCapacity: "Kaydedilemedi: 50 kayıtlık depolama sınırına ulaşıldı. Mevcut veriler korunur. Önce bir yedek dışa aktar ve gerekirse kayıtları sil.",
+      toastHistoryCoordination: "Geçmiş değiştirilemedi. Güncel bir tarayıcıda HTTPS üzerinden açıp tekrar dene.",
+      toastStorageUnavailable: "Cihaz depolaması kullanılamadı. Erişimi kontrol edip sayfayı yeniden yükle. Kayıtlı veriler korunur.",
       toastRestoreFailed: "Kayıtlı senaryo açılamadı",
-      saveCooldown: "Lütfen biraz bekleyin, kısa bir aradan sonra tekrar kaydetmek mümkün.",
+      saveCooldown: "Lütfen biraz bekle. Kısa bir aradan sonra tekrar kaydedebilirsin.",
       marketResetWarn: "“{market}” farklı birim/para birimi kullanıyor. Girdiğin değerler bu pazarın varsayılan değerlerine sıfırlanacak. Devam edilsin mi?",
       toastCalcFirst: "Önce hesaplama yapın",
       toastImageReady: "Resim paylaşıma hazır",
       toastClipboard: "Panoya kopyalandı",
       toastShareFailed: "Paylaşım başarısız",
       toastImageError: "Resim oluşturulamadı",
-      confirmReset: "Tüm değerleri sıfırlamak istediğinize emin misiniz?",
+      confirmReset: "Tüm değerleri sıfırlamak istediğine emin misin?",
       // Uzun vadeli bölüm
       longtermInfoHint: "Uzun vadeli analiz aktif, zamana göre tahmin",
       labelKmPerMonth: "Aylık kilometre",
       longtermKmMonthHint: "Aylık ortalama kullanım",
       longtermKmWarn: "Çok yüksek aylık kilometre, sonuçlar tipik kullanımdan önemli ölçüde sapabilir.",
       longtermPeriod: "Süre",
-      longtermPremiumLabel: "Elektrikli aracın benzinliye göre fark fiyatı",
+      longtermPremiumLabel: "Elektrikli aracın içten yanmalı araca göre fiyat farkı",
       longtermPremiumExclHint: "Not: Bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
       longtermLblEv: "Elektrikli enerji maliyeti",
       longtermLblVb: "İçten yanmalı yakıt maliyeti",
@@ -3707,15 +3738,15 @@ setTimeout(() => {
       shareLongtermEvDisadvantage: "Bu hesaplamada elektrikli daha yüksek",
       shareOwnValues: "Kendi değerlerinle hesapla: www.evspendpure.com",
       longtermRemainingPremium: "Tahmini kalan toplam maliyet dezavantajı",
-      longtermAmortized: "Dönem içinde başabaş tahmini olarak ulaşıldı",
-      longtermBeHint: "Aylık kilometrenize göre",
+      longtermAmortized: "Seçilen sürede tahmini başabaş noktasına ulaşıldı",
+      longtermBeHint: "Aylık kullanımına göre",
       longtermLossHint: "Seçilen dönemde enerji/yakıt maliyeti farkı dahil araç fiyat farkı",
       longtermDoneHint: "Girdilerine göre örnek hesaplama",
       longtermFootnote: "Bağlayıcı olmayan örnek hesaplama. Yalnızca enerji/yakıt maliyetleri. Satın alma bedeli yalnızca fiyat farkı olarak dikkate alınır; bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir. Gerçek toplam maliyetler önemli ölçüde farklı olabilir.",
       // Feedback
-      verlaufHintText: "Girdileriniz artık geçmişte",
-      shareHintText: "Sonucunuzu resim olarak paylaşın",
-      noscriptText: "Bu uygulama JavaScript gerektirir. Lütfen tarayıcınızda JavaScript'i etkinleştirin.",
+      verlaufHintText: "Hesaplaman artık geçmişte",
+      shareHintText: "Sonucunu resim olarak paylaş",
+      noscriptText: "Bu uygulama JavaScript gerektirir. Lütfen tarayıcında JavaScript'i etkinleştir.",
       // Phase J Sprint 1 (F5.1 + F5.2) — PWA kurulum metinleri
       pwaClose: "Kapat",
       pwaBarText: "Daha hızlı erişim için uygulamayı yükle?",
@@ -3736,7 +3767,7 @@ setTimeout(() => {
       // Share text
       shareSavings: "💰 Fark:",
       sharePerPersonSuffix: "kişi başı",
-      shareCompareTitle: "Elektrikli & Benzinli karşılaştırması",
+      shareCompareTitle: "Elektrikli & İçten yanmalı araç karşılaştırması",
       // Share-Image (Canvas-PNG)
       shareImgSubCompare: "Enerji/yakıt maliyeti karşılaştırması (örnek)",
       shareImgSubSingle: "Enerji/yakıt maliyeti hesaplaması (örnek)",
@@ -3751,7 +3782,7 @@ setTimeout(() => {
       shareTextDisclaimer: "Not: Girdilerine dayalı bağlayıcı olmayan tahmindir. Girdileri ve sonucu kontrol edin. Yalnızca enerji/yakıt maliyetleri; bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
       // Result sentence (legally qualified, used in result/share/share-image)
       sentenceCompareSavings:  "Tahmini fark: {km} için {val} (girdilerine göre)",
-      sentenceCompareExtra:    "Girdilerine göre benzinli değer {km} için {val} daha düşük",
+      sentenceCompareExtra:    "Girdilerine göre içten yanmalı aracın maliyeti {km} için {val} daha düşük",
       sentenceCompareEqual:    "Her iki seçenek girdilerine göre benzer maliyette",
       sentenceCompareLongterm: "Seçilen süre için maliyet farkı (girdilere göre)",
       sentenceSingle:          "{km} için hesaplanan maliyet: {val}",
@@ -3759,25 +3790,26 @@ setTimeout(() => {
       sentenceCarpoolSuffix:   "(kişi başı, {n} kişi)",
       // Share-text variant ("I" perspective)
       shareCompareSavings:     "Tahmini fark: {km} için {val} (girdilerime göre)",
-      shareCompareExtra:       "Girdilerime göre benzinli değer {km} için {val} daha düşük",
+      shareCompareExtra:       "Girdilerime göre içten yanmalı aracın maliyeti {km} için {val} daha düşük",
       shareCompareEqual:       "Her iki seçenek girdilerime göre benzer maliyette",
       shareCompareLongterm:    "Seçilen süre için maliyet farkı (girdilerime göre)",
       shareSingle:             "{km} için hesaplanan maliyetim: {val}",
       shareSingleCarpool:      "Kişi başı maliyet: {val} ({km} için, girdime göre)",
       // Phase B — profesyonel paylaşım metni (nötr, görünür URL ile)
       shareImageTitle: "EVSpendPure örnek hesaplama · www.evspendpure.com",
-      shareTextSingleEv: "EVSpendPure örnek hesaplama\nElektrikli: {value} {currency} · {km} {unit}\nKendi değerlerinle hesapla: www.evspendpure.com",
-      shareTextSingleVb: "EVSpendPure örnek hesaplama\nBenzinli: {value} {currency} · {km} {unit}\nKendi değerlerinle hesapla: www.evspendpure.com",
-      shareTextCompare:  "EVSpendPure örnek hesaplama\nElektrikli: {ev_value} {currency} | Benzinli: {ice_value} {currency}\nTahmini fark: {savings} {currency} · {km} {unit}\nKendi değerlerinle hesapla: www.evspendpure.com",
-      shareRideshareLine: "Araç paylaşımı {n} kişi: {perPerson} {currency} kişi başı",
+      shareTextSingleEv: "EVSpendPure örnek hesaplama\nElektrikli: {value} · {km} {unit}\nKendi değerlerinle hesapla: www.evspendpure.com",
+      shareTextSingleVb: "EVSpendPure örnek hesaplama\nİçten yanmalı araç: {value} · {km} {unit}\nKendi değerlerinle hesapla: www.evspendpure.com",
+      shareTextCompare:  "EVSpendPure örnek hesaplama\nElektrikli: {ev_value} | İçten yanmalı araç: {ice_value}\nTahmini fark: {savings} · {km} {unit}\nKendi değerlerinle hesapla: www.evspendpure.com",
+      shareRideshareDifference: "Ortak yolculuk {n} kişi: kişi başı tahmini fark {perPerson}",
+      shareRideshareLine: "Ortak yolculuk {n} kişi: {perPerson} kişi başı",
       // Verlauf
       verlaufTitle: "Geçmiş",
-      verlaufSub: "Kişisel hesaplamalarınız",
-      verlaufTrust: "Kaydedilen girdilerine göre",
+      verlaufSub: "Kişisel hesaplamaların",
+      verlaufTrust: "Kaydettiğin hesaplamalara göre",
       verlaufPrivacy: "Tüm hesaplamalar yalnızca cihazında yerel olarak saklanır. Web sitesi yüklenirken teknik bağlantı verileri barındırma sağlayıcısı tarafından işlenebilir. Veriler tarayıcı belleğinde kalır ve istediğin zaman silinebilir. Tarayıcı verilerini temizlersen veya başka bir cihaz kullanırsan kaybolabileceklerini unutma.",
       statsHeader: "İstatistik",
-      entriesHeader: "Girdiler",
-      searchPlaceholder: "Girdi ara…",
+      entriesHeader: "Kayıtlar",
+      searchPlaceholder: "Kayıt ara…",
       pagerPrev: "← Geri",
       pagerNext: "İleri →",
       periodToday: "Bugün",
@@ -3785,26 +3817,26 @@ setTimeout(() => {
       periodMonth: "Ay",
       periodYear: "Yıl",
       yearly: "Yıllar",
-      statsInPeriod: "Dönemdeki girdi sayısı",
+      statsInPeriod: "Dönemdeki kayıt sayısı",
       statsTotalKm: "Toplam km",
       statsTotalCost: "Toplam enerji/yakıt maliyeti",
       statsAvgCost: "Ø maliyet / 100 km",
       statsAvgConsumption: "Ø tüketim",
       statsEmpty: "Henüz kayıtlı tekli hesaplama yok",
-      legacyLabel: "Eski karşılaştırma girdileri",
-      legacyClear: "Eski girdileri sil",
+      legacyLabel: "Eski karşılaştırma kayıtları",
+      legacyClear: "Eski kayıtları sil",
       clearAll: "Tümünü sil",
-      confirmClearAll: "Tüm kayıtlı tekli hesaplamaları silmek istiyor musunuz?",
-      confirmClearLegacy: "Tüm eski karşılaştırma girdilerini silmek istiyor musunuz?",
+      confirmClearAll: "Tüm kayıtlı tekli hesaplamaları silmek istediğine emin misin?",
+      confirmClearLegacy: "Tüm eski karşılaştırma kayıtlarını silmek istediğine emin misin?",
       histEmptyNone: "Kayıtlı tekli hesaplama yok",
-      histEmptySearch: "Bu arama için girdi yok",
-      histEntrySingular: "girdi",
-      histEntryPlural: "girdi",
-      histEntryDelete: "Girdiyi sil",
+      histEmptySearch: "Bu arama için kayıt yok",
+      histEntrySingular: "kayıt",
+      histEntryPlural: "kayıt",
+      histEntryDelete: "Kaydı sil",
       backToCalc: "Hesaplayıcıya dön",
       legacyBadge: "Karşılaştırma (eski)",
       legacyDiffSuffix: "/ yıl",
-      verlaufFooterNote: "Kayıtlı girdiler yalnızca bu cihazda kalır.",
+      verlaufFooterNote: "Kayıtlar yalnızca bu cihazda kalır.",
       chartToday: "Bugün enerji/yakıt maliyeti",
       chartWeek:  "Bu hafta enerji/yakıt maliyeti",
       chartMonth: "Bu ay enerji/yakıt maliyeti",
@@ -3878,7 +3910,7 @@ setTimeout(() => {
         kmEv:                { value: 30,     min: 1,     max: 300,     step: 1 },     // mi — Phase Z6.5.a (≈ 50/500 km)
         kmVb:                { value: 30,     min: 1,     max: 300,     step: 1 },     // mi — Phase Z6.5.a
         kmShared:            { value: 600,    min: 0,     max: 6000,    step: 1 },     // mi — F6.1
-        kmMonat:             { value: 1000,   min: 60,    max: 3100,    step: 50 },    // mi
+        kmMonat:             { value: 1000,   min: 50,    max: 3100,    step: 50 },    // mi
         batteryKwh:          { value: 75,     min: 20,    max: 150,     step: 1 },     // kWh
         longtermPremium:     { value: 5500,   min: 0,     max: 45000,   step: 100 }    // USD
       }
@@ -4064,7 +4096,8 @@ setTimeout(() => {
   // Default DE, wenn nichts passt.
   function loadI18nState() {
     try {
-      var m = localStorage.getItem(MARKET_KEY);
+      var explicit = new URLSearchParams(location.search).get("market");
+      var m = ["de", "us"].includes(explicit) ? explicit : localStorage.getItem(MARKET_KEY);
       if (m && MARKET_CONFIG[m]) {
         currentMarket = m;
         currentLanguage = MARKET_CONFIG[m].language;
@@ -4125,6 +4158,7 @@ setTimeout(() => {
   function applyTranslations() {
     var dict = translations[currentLanguage] || translations.de;
     var fallback = translations.de;
+    document.title = "EVSpendPure · " + dict.heroSubtitle1;
     // Phase 9: automatische Platzhalter-Ersetzung für gängige Markt-Tokens,
     // damit z. B. "Ca. — {unit} Reichweite" in US zu "Approx. — mi range" wird,
     // ohne dass die aufrufende Stelle subs übergeben muss.
@@ -4152,6 +4186,12 @@ setTimeout(() => {
       var key = el.getAttribute("data-i18n-placeholder");
       var val = _resolveKey(dict, fallback, key);
       if (typeof val === "string") el.setAttribute("placeholder", sub(val));
+    });
+    const legalPages = {footerImpressum:"impressum", footerDatenschutz:"datenschutz", footerTerms:"terms", footerHinweise:"hinweise", footerBarrierefreiheit:"barrierefreiheit"};
+    Object.entries(legalPages).forEach(([key, page]) => {
+      const suffix = currentLanguage === "de" ? "" : "." + currentLanguage;
+      const target = currentMarket === "eu" && currentLanguage === "en" ? "/en-eu/" + page : "/" + page + suffix;
+      document.querySelectorAll('a[data-i18n="' + key + '"]').forEach(el => el.setAttribute("href", target + ".html"));
     });
     document.querySelectorAll("[data-i18n-aria]").forEach(function (el) {
       var key = el.getAttribute("data-i18n-aria");
@@ -4207,8 +4247,8 @@ setTimeout(() => {
     // entered values. Warn first if the user changed anything away from the
     // current market's defaults — honours the "Stored locally" promise.
     if (!compatible && _hasCustomInputs(fromMk) &&
-        !confirm(_t("marketResetWarn", { market: mk.label }))) {
-      return; // user cancelled → stay in current market, values untouched
+        !confirm(_t("marketResetWarn", { market: code.toUpperCase() }))) {
+      return false; // user cancelled → stay in current market, values untouched
     }
     currentMarket = code;
     try { localStorage.setItem(MARKET_KEY, code); } catch (_) {}
@@ -4234,6 +4274,7 @@ setTimeout(() => {
     _refreshMarketPillLabel();
     updateMenuActive();
     document.dispatchEvent(new CustomEvent("eaf:marketchange", { detail: { market: code } }));
+    return true;
   }
 
   // Phase 5: direktes Lokalisieren des Rohwerts in der aktiven
@@ -4314,7 +4355,7 @@ setTimeout(() => {
     // Markt wird VOR der Navigation persistiert (lang-switch.js-Pattern), damit
     // die Ziel-Shell ihn beim Laden sofort liest.
     function gotoLocale(code, path) {
-      try { localStorage.setItem(MARKET_KEY, code); } catch (_) {}
+      if (setMarket(code) === false) return;
       location.href = path;
     }
     document.querySelectorAll("[data-market]").forEach(function (item) {
@@ -4324,10 +4365,11 @@ setTimeout(() => {
         var p = location.pathname;
         var inTr = (p === "/tr" || p.indexOf("/tr/") === 0);
         var inEu = (p === "/en-eu" || p.indexOf("/en-eu/") === 0);
-        var navigates = (code === "tr" && !inTr) || (code === "eu" && !inEu);
+        var navigates = (code === "tr" && !inTr) || (code === "eu" && !inEu) || ((code === "de" || code === "us") && (inTr || inEu));
         closeAll(!navigates);
         if (code === "tr" && !inTr) return gotoLocale("tr", "/tr/");
         if (code === "eu" && !inEu) return gotoLocale("eu", "/en-eu/");
+        if ((code === "de" || code === "us") && (inTr || inEu)) return gotoLocale(code, "/?market=" + code);
         setMarket(code);
       });
     });
@@ -4374,7 +4416,27 @@ setTimeout(() => {
     // User-Werte gegen die KORREKTE Markt-Range geclampt werden (Smart-Fix
     // für US-/EU-User: "Stored locally" bleibt erhalten).
     try { applyMarketRanges(MARKET_CONFIG[currentMarket]); } catch (_) {}
-    try { loadInputs(); } catch (_) {}
+    try {
+      if (_storageInitFailed) throw new Error("Storage unavailable");
+      const mk = MARKET_CONFIG[currentMarket];
+      const saved = JSON.parse(localStorage.getItem(LS_KEY) || "{}");
+      if (!saved || typeof saved !== "object" || Array.isArray(saved)) throw new Error("Invalid stored inputs");
+      const inputMarket = MARKET_CONFIG[saved._marketCode];
+      const incompatible = inputMarket && !_marketsCompatible(inputMarket, mk);
+      Object.entries(mk.defaults).forEach(([id, cfg]) => {
+        const el = $(id);
+        if (el && (incompatible || !saved || saved[id] == null)) el.value = String(cfg.value);
+      });
+      if (!incompatible) loadInputs();
+      const storedKm = incompatible ? null : localStorage.getItem(LT_KM_MONAT_KEY);
+      const storedPremium = incompatible ? null : localStorage.getItem(LT_PREMIUM_KEY);
+      kmMonat = storedKm !== null && Number.isFinite(Number(storedKm))
+        ? Math.max(mk.defaults.kmMonat.min, Math.min(mk.defaults.kmMonat.max, Number(storedKm))) : mk.defaults.kmMonat.value;
+      longtermPremium = storedPremium !== null && Number.isFinite(Number(storedPremium))
+        ? Math.max(0, Math.min(mk.defaults.longtermPremium.max, Number(storedPremium))) : mk.defaults.longtermPremium.value;
+      if (!_storageInitFailed) localStorage.setItem(MARKET_KEY, currentMarket);
+    } catch (_) { _storageInitFailed = true; }
+
     var historyRestoreFailed = _historySelectionFailed;
     try { if (historyEntry) historyRestoreFailed = !_restoreHistoryEntry(historyEntry); }
     catch (_) { historyRestoreFailed = true; }

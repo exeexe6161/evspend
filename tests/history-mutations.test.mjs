@@ -495,7 +495,7 @@ for (const [market, language, currency, expected] of [
   ["de", "de", "EUR", "Diesen gespeicherten Eintrag löschen?"],
   ["eu", "en", "EUR", "Delete this saved entry?"],
   ["us", "en", "USD", "Delete this saved entry?"],
-  ["tr", "tr", "TRY", "Bu kayıtlı girdiyi silmek istiyor musunuz?"],
+  ["tr", "tr", "TRY", "Bu kaydı silmek istediğine emin misin?"],
 ]) {
   for (const legacy of [false, true]) {
     test(`H1 ${market} abgebrochenes Einzellöschen ${legacy ? "Legacy" : "v2"} schreibt nichts`, async () => {

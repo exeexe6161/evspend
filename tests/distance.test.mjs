@@ -10,7 +10,7 @@ function close(actual, expected) {
 test("H2: gültige US Reglerstellungen bleiben Quelle, Anzeige und Speicherwert", () => {
   const rt = distanceRuntime();
   const slider = rt.elements.get("kmMonat");
-  assert.deepEqual([slider.min, slider.max, slider.step], ["60", "3100", "50"]);
+  assert.deepEqual([slider.min, slider.max, slider.step], ["50", "3100", "50"]);
   for (const value of [60, 110, 160, 1010, 3060]) {
     slider.value = String(value);
     slider.dispatchEvent({type: "input"});
@@ -40,7 +40,7 @@ test("H2: kanonische US Nachbarwerte werden nicht vom visuellen step quantisiert
 
 test("H2: US Produktgrenzen bleiben erhalten, 1 und 10 mi sind keine Monatsreglerwerte", () => {
   const rt = distanceRuntime();
-  for (const [input, expected] of [[1,60], [10,60], [59.9,60], [60,60], [60.1,60.1], [3099.9,3099.9], [3100,3100], [3100.1,3100]]) {
+  for (const [input, expected] of [[1,50], [10,50], [49.9,50], [60,60], [60.1,60.1], [3099.9,3099.9], [3100,3100], [3100.1,3100]]) {
     rt.run(`setKmMonat(${input})`);
     assert.equal(rt.run("kmMonat"), expected);
   }

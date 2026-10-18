@@ -73,7 +73,7 @@
 <!-- Screen-reader live region for slider change announcements (BFSG / WCAG 2.1) -->
 <div id="sliderAnnouncer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
 
-<div class="top-controls" role="toolbar" aria-label="Settings">
+<div class="top-controls" role="toolbar" data-i18n-aria="ariaSettings" aria-label="Settings">
   <div class="top-pill-wrap">
     <button class="top-pill" id="marketSwitch" type="button" aria-haspopup="true" aria-expanded="false">
       <span class="sr-only" data-i18n="marketSwitchSr">Change market, currently</span>
@@ -87,7 +87,7 @@
       <button class="top-menu-item" type="button" data-market="tr"><span data-i18n="marketTr">TR · ₺</span></button>
     </div>
   </div>
-  <button class="theme-btn" id="themeBtn" type="button" aria-label="Toggle theme" title="Light / Dark"></button>
+  <button class="theme-btn" id="themeBtn" data-i18n-aria="ariaTheme" type="button" aria-label="Toggle theme" title="Light / Dark"></button>
 </div>
 
 <header class="hero" role="banner">
@@ -101,84 +101,85 @@
     <p><span data-i18n="heroSubtitle1">Electric &amp; Fuel Cost Calculator</span> <span class="hdr-accent" data-i18n="heroSubtitle2"></span></p>
   </div>
 
-  <ul class="trust-list" aria-label="Benefits">
+  <ul class="trust-list" data-i18n-aria="ariaFeatures" aria-label="Features">
     <li class="trust-chip">
       <svg class="trust-chip-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"/></svg>
-      <span data-i18n="trustNoSignup">No signup</span>
+      <span data-i18n="trustNoSignup">No sign-up</span>
     </li>
     <li class="trust-chip">
       <svg class="trust-chip-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><polyline points="20 6 9 17 4 12"/></svg>
       <span data-i18n="trustLocal">Inputs saved locally</span>
     </li>
   </ul>
-  <p class="disclaimer" data-i18n="brandTagline">Comparison based on your input</p>
+  <p class="disclaimer" data-i18n="brandTagline">Comparison based on your inputs</p>
 </header>
 
 <main class="app-main">
 
 <!-- Mode (Single / Compare) -->
-<div class="mode-toggle" role="group" aria-label="Calculation mode">
-  <button id="modeSingleBtn"  class="mode-btn"                  aria-pressed="false" data-mode="single"  type="button" data-i18n="modeSingle">Single</button>
-  <button id="modeCompareBtn" class="mode-btn mode-btn--active" aria-pressed="true"  data-mode="compare" type="button" data-i18n="modeCompare">Compare</button>
+<div class="mode-toggle" data-i18n-aria="ariaMode" role="group" aria-label="Calculation mode">
+  <button id="modeSingleBtn"  class="mode-btn"                  aria-pressed="false" data-mode="single"  type="button" data-i18n="modeSingle">Single calculation</button>
+  <button id="modeCompareBtn" class="mode-btn mode-btn--active" aria-pressed="true"  data-mode="compare" type="button" data-i18n="modeCompare">Comparison</button>
 </div>
 
 <!-- Vehicle type (visible only in single mode) -->
-<div id="typeToggle" class="type-toggle mode-single-only" role="group" aria-label="Vehicle type">
-  <button id="typeEvBtn" class="type-btn type-btn--ev type-btn--active" aria-pressed="true" data-type="ev" type="button" data-i18n="typeEv">EV</button>
-  <button id="typeVbBtn" class="type-btn type-btn--vb" aria-pressed="false" data-type="vb" type="button" data-i18n="typeVb">ICE</button>
+<div id="typeToggle" data-i18n-aria="ariaVehicle" class="type-toggle mode-single-only" role="group" aria-label="Vehicle type">
+  <button id="typeEvBtn" class="type-btn type-btn--ev type-btn--active" aria-pressed="true" data-type="ev" type="button" data-i18n="typeEv">Electric</button>
+  <button id="typeVbBtn" class="type-btn type-btn--vb" aria-pressed="false" data-type="vb" type="button" data-i18n="typeVb">Combustion</button>
 </div>
 
-<section class="calc-section" aria-label="Inputs">
+<section class="calc-section" data-i18n-aria="ariaInputs" aria-label="Inputs">
 
 <!-- Quick calculator -->
 <div class="quick-compact">
-  <div class="qc-caption" data-i18n="quickCalc">Quick Calculator</div>
+  <div class="qc-caption" data-i18n="quickCalc">Quick calculator</div>
+  <p class="sl-hint" data-i18n="exampleValuesHint">Preset values are examples. Enter your own values.</p>
 
   <!-- Shared mileage (visible only in compare mode) -->
   <div class="qc-shared mode-compare-only">
-    <div class="qc-hdr qc-hdr--shared" data-i18n="sectionMileage">Mileage</div>
+    <div class="qc-hdr qc-hdr--shared" data-i18n="sectionMileage">Distance</div>
     <div class="sl-row">
       <div class="sl-head">
         <label for="kmShared" class="sl-lbl" data-i18n="labelKilometer">Kilometres</label>
         <span class="sl-val" id="kmSharedV">1,000 km</span>
       </div>
-      <input id="kmShared" class="sl sl--shared" type="range" min="0" max="10000" step="1" value="1000" data-i18n-aria="ariaKmShared" aria-label="Kilometres (for both vehicles)">
+      <input id="kmShared" class="sl sl--shared" type="range" min="0" max="10000" step="1" value="1000" data-i18n-aria="ariaKmShared" aria-label="Distance for both vehicles">
     </div>
   </div>
 
   <div class="calc-wrapper">
   <div class="qc-section qc-section--ev" data-section="ev">
-    <div class="qc-hdr qc-hdr--ev" data-i18n="sectionEv">EV</div>
+    <div class="qc-hdr qc-hdr--ev" data-i18n="sectionEv">Electric</div>
     <div class="sl-row sl-row--km">
       <div class="sl-head">
         <label for="kmEv" class="sl-lbl" data-i18n="labelKilometer">Kilometres</label>
         <span class="sl-val" id="kmEvV">50 km</span>
       </div>
-      <input id="kmEv" class="sl sl--ev" type="range" min="1" max="500" step="1" value="50" data-i18n-aria="ariaKmEv" aria-label="EV kilometres">
+      <input id="kmEv" class="sl sl--ev" type="range" min="1" max="500" step="1" value="50" data-i18n-aria="ariaKmEv" aria-label="Electric vehicle distance">
     </div>
     <div class="sl-row">
       <div class="sl-head">
-        <label for="evVerbrauch" class="sl-lbl" data-i18n="labelEvConsumption">EV consumption</label>
+        <label for="evVerbrauch" class="sl-lbl" data-i18n="labelEvConsumption">Energy consumption</label>
         <span class="sl-val" id="evVerbrauchV">17.0 kWh/100 km</span>
       </div>
-      <input id="evVerbrauch" class="sl sl--ev" type="range" min="8" max="35" step="0.5" value="17" data-i18n-aria="labelEvConsumption" aria-label="EV consumption">
+      <input id="evVerbrauch" class="sl sl--ev" type="range" min="8" max="35" step="0.5" value="17" data-i18n-aria="labelEvConsumption" aria-label="Energy consumption">
     </div>
     <div class="sl-row">
       <div class="sl-head">
-        <label for="strompreis" class="sl-lbl" data-i18n="labelElectricityPrice">Electricity price</label>
-        <span class="sl-val" id="strompreisV">0.35 €/kWh</span>
+        <label for="strompreis" class="sl-lbl" data-i18n="labelElectricityPrice">Electricity cost</label>
+        <span class="sl-val" id="strompreisV">€0.30/kWh</span>
       </div>
-      <input id="strompreis" class="sl sl--ev" type="range" min="0.10" max="1.00" step="0.01" value="0.35" data-i18n-aria="labelElectricityPrice" aria-label="Electricity price">
+      <input id="strompreis" class="sl sl--ev" type="range" min="0.10" max="1.00" step="0.01" value=".30" data-i18n-aria="labelElectricityPrice" aria-label="Electricity cost">
     </div>
     <div class="sl-row">
       <div class="sl-head">
-        <label for="batteryKwh" class="sl-lbl" data-i18n="labelBatterySize">Battery size</label>
+        <label for="batteryKwh" class="sl-lbl" data-i18n="labelBatterySize">Battery capacity</label>
         <span class="sl-val" id="batteryKwhV">60 kWh</span>
       </div>
-      <input id="batteryKwh" class="sl sl--ev" type="range" min="20" max="150" step="1" value="60" data-i18n-aria="labelBatterySize" aria-label="Battery size in kWh">
+      <input id="batteryKwh" class="sl sl--ev" type="range" min="20" max="150" step="1" value="60" data-i18n-aria="labelBatterySize" aria-label="Battery capacity">
     </div>
     <div class="range-box" id="rangeBox" hidden>
-      <div class="range-display" id="rangeDisplay" aria-live="polite" data-i18n="rangeEmpty">Estimated range: km</div>
+      <div class="range-display" id="rangeDisplay" aria-live="polite" data-i18n="rangeEmpty">Estimated range: — {unit}</div>
       <div class="full-charge-display" id="fullChargeDisplay" aria-live="polite" hidden></div>
       <div class="full-charge-hint" id="fullChargeHint" hidden data-i18n="fullChargeHint">Charging losses and base fees not included.</div>
     </div>
@@ -186,27 +187,27 @@
   </div>
 
   <div class="qc-section qc-section--vb" data-section="vb">
-    <div class="qc-hdr qc-hdr--vb" data-i18n="sectionVb">ICE</div>
+    <div class="qc-hdr qc-hdr--vb" data-i18n="sectionVb">Combustion</div>
     <div class="sl-row sl-row--km">
       <div class="sl-head">
         <label for="kmVb" class="sl-lbl" data-i18n="labelKilometer">Kilometres</label>
         <span class="sl-val" id="kmVbV">50 km</span>
       </div>
-      <input id="kmVb" class="sl sl--vb" type="range" min="1" max="500" step="1" value="50" data-i18n-aria="ariaKmVb" aria-label="ICE kilometres">
+      <input id="kmVb" class="sl sl--vb" type="range" min="1" max="500" step="1" value="50" data-i18n-aria="ariaKmVb" aria-label="Combustion distance">
     </div>
     <div class="sl-row">
       <div class="sl-head">
-        <label for="verbrauchVerbrenner" class="sl-lbl" data-i18n="labelIceConsumption">ICE consumption</label>
-        <span class="sl-val" id="verbrauchVerbrennerV">7.0 L/100 km</span>
+        <label for="verbrauchVerbrenner" class="sl-lbl" data-i18n="labelIceConsumption">Fuel consumption</label>
+        <span class="sl-val" id="verbrauchVerbrennerV">6.5 L/100 km</span>
       </div>
-      <input id="verbrauchVerbrenner" class="sl sl--vb" type="range" min="3" max="20" step="0.1" value="7.0" data-i18n-aria="labelIceConsumption" aria-label="ICE consumption">
+      <input id="verbrauchVerbrenner" class="sl sl--vb" type="range" min="3" max="20" step="0.1" value="6.5" data-i18n-aria="labelIceConsumption" aria-label="Fuel consumption">
     </div>
     <div class="sl-row">
       <div class="sl-head">
-        <label for="benzinpreis" class="sl-lbl" data-i18n="labelGasPrice">Petrol price</label>
-        <span class="sl-val" id="benzinpreisV">1.85 €/L</span>
+        <label for="benzinpreis" class="sl-lbl" data-i18n="labelGasPrice">Fuel price</label>
+        <span class="sl-val" id="benzinpreisV">€1.70/L</span>
       </div>
-      <input id="benzinpreis" class="sl sl--vb" type="range" min="1.00" max="3.00" step="0.01" value="1.85" data-i18n-aria="labelGasPrice" aria-label="Petrol price">
+      <input id="benzinpreis" class="sl sl--vb" type="range" min="1.00" max="3.00" step="0.01" value="1.70" data-i18n-aria="labelGasPrice" aria-label="Fuel price">
     </div>
   </div>
 
@@ -228,7 +229,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><path d="M16 3.128a4 4 0 0 1 0 7.744" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><circle cx="9" cy="7" r="4" /></svg>
       <span data-i18n="rideshareLabel">Carpool</span>
     </div>
-    <label class="toggle-switch" aria-label="Enable carpool">
+    <label class="toggle-switch" data-i18n-aria="ariaRideshare" aria-label="Enable carpool">
       <input type="checkbox" id="rideshareToggle">
       <span class="toggle-switch-slider"></span>
     </label>
@@ -239,15 +240,15 @@
         <label for="ridesharePersons" class="sl-lbl" data-i18n="labelPersons">People</label>
         <span class="sl-val" id="ridesharePersonsV">1</span>
       </div>
-      <input id="ridesharePersons" class="sl sl--rs" type="range" min="1" max="6" step="1" value="1" data-i18n-aria="labelPersons" aria-label="Number of people">
+      <input id="ridesharePersons" class="sl sl--rs" type="range" min="1" max="6" step="1" value="1" data-i18n-aria="labelPersons" aria-label="People">
     </div>
-    <div class="rideshare-hint" data-i18n="rideshareHint">Costs are split across all people.</div>
+    <div class="rideshare-hint" data-i18n="rideshareHint">Costs are split among all people.</div>
   </div>
 </div>
 
 <div class="sticky-cta-wrapper">
   <button id="calcBtn" class="calc-btn" type="button">
-    <span data-i18n="calculate">Calculate</span>
+    <span data-i18n="calculate">Show results</span>
   </button>
 </div>
 
@@ -258,7 +259,7 @@
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M3 3v16a2 2 0 0 0 2 2h16" /><path d="m19 9-5 5-4-4-3 3" /></svg>
       <span data-i18n="longtermLabel">Long-term analysis</span>
     </div>
-    <label class="toggle-switch" aria-label="Enable long-term analysis">
+    <label class="toggle-switch" data-i18n-aria="ariaLongterm" aria-label="Enable long-term analysis">
       <input type="checkbox" id="longtermToggle">
       <span class="toggle-switch-slider"></span>
     </label>
@@ -270,9 +271,9 @@
         <label for="kmMonat" class="sl-lbl" data-i18n="labelKmPerMonth">Monthly mileage</label>
         <span class="sl-val" id="kmMonatV">1,000 km</span>
       </div>
-      <input id="kmMonat" class="sl sl--lt" type="range" min="100" max="5000" step="50" value="1000" data-i18n-aria="labelKmPerMonth" aria-label="Monthly mileage in kilometres">
+      <input id="kmMonat" class="sl sl--lt" type="range" min="100" max="5000" step="50" value="1000" data-i18n-aria="labelKmPerMonth" aria-label="Monthly mileage">
       <div class="lt-km-jahr" id="ltKmJahr">≈ 12,000 km per year</div>
-      <div class="lt-km-hint" data-i18n="longtermKmMonthHint">Average use per month</div>
+      <div class="lt-km-hint" data-i18n="longtermKmMonthHint">Average usage per month</div>
       <div class="lt-km-warn" id="ltKmWarn" hidden data-i18n="longtermKmWarn">Very high monthly mileage, results may deviate significantly from typical usage.</div>
     </div>
     <div class="sl-row sl-row--lt">
@@ -280,37 +281,37 @@
         <label for="longtermYears" class="sl-lbl" data-i18n="longtermPeriod">Period</label>
         <span class="sl-val" id="longtermYearsV">10 years</span>
       </div>
-      <input id="longtermYears" class="sl sl--lt" type="range" min="0" max="20" step="1" value="10" data-i18n-aria="longtermPeriod" aria-label="Period in years">
+      <input id="longtermYears" class="sl sl--lt" type="range" min="0" max="20" step="1" value="10" data-i18n-aria="longtermPeriod" aria-label="Period">
     </div>
     <div class="sl-row sl-row--lt">
       <div class="sl-head">
-        <label for="longtermPremium" class="sl-lbl" data-i18n="longtermPremiumLabel">EV price premium vs. combustion</label>
-        <span class="sl-val" id="longtermPremiumV">5,000 €</span>
+        <label for="longtermPremium" class="sl-lbl" data-i18n="longtermPremiumLabel">Electric vehicle price premium</label>
+        <span class="sl-val" id="longtermPremiumV">€5,000</span>
       </div>
-      <input id="longtermPremium" class="sl sl--ev" type="range" min="0" max="40000" step="100" value="5000" data-i18n-aria="longtermPremiumLabel" aria-label="EV price premium vs. combustion">
+      <input id="longtermPremium" class="sl sl--ev" type="range" min="0" max="40000" step="100" value="5000" data-i18n-aria="longtermPremiumLabel" aria-label="Electric vehicle price premium">
       <div class="lt-km-hint lt-premium-excl" data-i18n="longtermPremiumExclHint">Note: Maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.</div>
     </div>
     <div class="longterm-result">
       <div class="longterm-totals">
         <div class="lt-line">
           <span class="lt-dot lt-dot--ev" aria-hidden="true"></span>
-          <span class="lt-lbl" data-i18n="longtermLblEv">EV energy costs</span>
-          <span class="lt-val" id="ltEvTotal">— €</span>
+          <span class="lt-lbl" data-i18n="longtermLblEv">Electric energy costs</span>
+          <span class="lt-val" id="ltEvTotal">—</span>
         </div>
         <div class="lt-line">
           <span class="lt-dot lt-dot--vb" aria-hidden="true"></span>
           <span class="lt-lbl" data-i18n="longtermLblVb">Combustion fuel costs</span>
-          <span class="lt-val" id="ltVbTotal">— €</span>
+          <span class="lt-val" id="ltVbTotal">—</span>
         </div>
       </div>
       <div class="lt-block lt-block--loss" id="ltBlockLoss" hidden>
         <div class="lt-block-lbl" data-i18n="longtermRemainingPremium">Estimated remaining cost disadvantage</div>
-        <div class="lt-block-val" id="ltLossVal">— €</div>
+        <div class="lt-block-val" id="ltLossVal">—</div>
         <div class="lt-block-hint" data-i18n="longtermLossHint">Price premium including the energy/fuel cost difference over the selected period</div>
       </div>
       <div class="lt-block lt-block--done" id="ltBlockDone" hidden>
         <div class="lt-block-lbl" data-i18n="longtermAmortized">Break-even reached within period (estimated)</div>
-        <div class="lt-block-val" id="ltDoneVal">Estimated difference after break-even: — €</div>
+        <div class="lt-block-val" id="ltDoneVal">Estimated advantage at the end of the period: —</div>
         <div class="lt-block-hint" data-i18n="longtermDoneHint">Example calculation based on your inputs</div>
       </div>
       <div class="longterm-breakeven" id="ltBreakeven">Break-even after approx. — years</div>
@@ -323,7 +324,7 @@
 </section>
 
 <!-- Primary Actions -->
-<section class="cta-section" aria-label="Actions">
+<section class="cta-section" data-i18n-aria="ariaActions" aria-label="Actions">
 <div class="primary-cta-row">
 
   <div class="cta-group cta-group--action">
@@ -358,20 +359,20 @@
   <div class="cta-group cta-group--feedback" role="status" aria-live="polite">
     <div id="saveHint" class="save-hint" hidden></div>
     <div id="verlaufHint" class="verlauf-hint" hidden data-i18n="verlaufHintText">Your inputs are now in history</div>
-    <div id="shareHint" class="share-hint" hidden data-i18n="shareHintText">Share your result as image</div>
+    <div id="shareHint" class="share-hint" hidden data-i18n="shareHintText">Share your result as an image</div>
   </div>
 
 </div>
 </section>
 
-<section class="result-section" aria-label="Result">
+<section class="result-section" data-i18n-aria="ariaResult" aria-label="Result">
 
 <!-- Phase E — Order swapped: Chart first (visualization), result below -->
 <!-- Cost evolution chart (Compare) — above the result -->
 <div id="chartSection" class="mode-compare-only chart-section" hidden>
   <div class="list-card chart-card-v2">
     <div class="chart-card-hdr" data-i18n="chartHeader">Energy/fuel cost comparison</div>
-    <canvas id="costChart" class="cost-chart" aria-label="Energy/fuel cost comparison EV vs ICE" aria-describedby="compareResult"></canvas>
+    <canvas id="costChart" data-i18n-aria="ariaChart" class="cost-chart" aria-label="Energy and fuel cost comparison" aria-describedby="compareResult"></canvas>
   </div>
 </div>
 
@@ -390,17 +391,17 @@
     </div>
     <div class="single-hero">
       <div class="single-hero-lbl" id="compareHeroLbl">Estimated difference per year</div>
-      <div class="single-hero-val" id="compareHeroVal">— €</div>
-      <div class="per-person-line" id="comparePerPerson" hidden>— € per person</div>
+      <div class="single-hero-val" id="compareHeroVal">—</div>
+      <div class="per-person-line" id="comparePerPerson" hidden>— per person</div>
     </div>
     <div class="single-grid">
       <div class="single-cell">
         <div class="single-cell-lbl" id="compareMonthlyLbl">per trip</div>
-        <div class="single-cell-val" id="compareMonthly">— €</div>
+        <div class="single-cell-val" id="compareMonthly">—</div>
       </div>
       <div class="single-cell">
         <div class="single-cell-lbl" id="compareDiff100Lbl">per 100 km</div>
-        <div class="single-cell-val" id="compareDiff100">— €</div>
+        <div class="single-cell-val" id="compareDiff100">—</div>
       </div>
     </div>
     <div class="single-meta" id="compareMeta"></div>
@@ -424,19 +425,17 @@
       <span id="singleBadge" class="mode-badge mode-badge--ev">EV</span>
     </div>
     <div class="single-hero">
-      <div class="single-hero-val" id="singleHeroVal">— €</div>
+      <div class="single-hero-val" id="singleHeroVal">—</div>
       <div class="single-hero-lbl" id="singleHeroLbl">Estimated energy/fuel costs for — km</div>
       <div class="per-person-line" id="singlePerPerson" hidden></div>
     </div>
-    <div class="single-cost100-line" id="singleCost100">Avg — € / 100 km</div>
+    <div class="single-cost100-line" id="singleCost100">Avg — / 100 km</div>
     <div class="single-meta" id="singleMeta"></div>
   </div>
   <div class="hint hint--foot" data-i18n="hintSingleFoot">Based on your inputs and pre-set example values. Real costs may differ.</div>
   <div class="hint hint--foot-sub" data-i18n="hintSingleExclusions">Energy/fuel costs only. Maintenance, insurance, taxes, depreciation, charging losses and base fees are not included.</div>
 </div>
 
-<!-- Stale-result hint (shown only while data-result-stale is set on body) -->
-<div class="stale-hint" data-i18n="staleHint">Inputs changed, please update results</div>
 
 <!-- Calculation explanation + disclaimer (visible in both single + compare modes) -->
 <div class="calc-info" data-i18n-html="calcInfoBlock"></div>
@@ -447,13 +446,13 @@
 
 <footer>
   <div class="footer-links">
-    <a href="/en-eu/impressum" data-i18n="footerImpressum">Legal Notice</a>
+    <a href="/en-eu/impressum" data-i18n="footerImpressum">Imprint</a>
     <span>·</span>
     <a href="/en-eu/datenschutz" data-i18n="footerDatenschutz">Privacy</a>
     <span>·</span>
     <a href="/en-eu/terms" data-i18n="footerTerms">Terms of Use</a>
     <span>·</span>
-    <a href="/en-eu/hinweise" data-i18n="footerHinweise">Usage Notes</a>
+    <a href="/en-eu/hinweise" data-i18n="footerHinweise">Usage notes</a>
     <span>·</span>
     <a href="/en-eu/barrierefreiheit" data-i18n="footerBarrierefreiheit">Accessibility</a>
     <span>·</span>
@@ -468,7 +467,7 @@
 <div id="pwaBar" class="pwa-bar" aria-hidden="true">
   <div class="pwa-bar-card">
     <button class="pwa-bar-x" id="pwaBarClose" type="button" data-i18n-aria="pwaClose" aria-label="Close">✕</button>
-    <div class="pwa-bar-text" data-i18n="pwaBarText">Install app for faster access?</div>
+    <div class="pwa-bar-text" data-i18n="pwaBarText">Install the app for faster access?</div>
     <div class="pwa-bar-btns">
       <button class="pwa-bar-btn pwa-bar-btn--primary" id="pwaBarInstall" type="button" data-i18n="pwaInstall">Install</button>
       <button class="pwa-bar-btn pwa-bar-btn--ghost" id="pwaBarLater" type="button" data-i18n="pwaLater">Later</button>
@@ -483,7 +482,7 @@
     <button class="pwa-popup-x" id="pwaPopupClose" type="button" data-i18n-aria="pwaClose" aria-label="Close">✕</button>
     <img src="/apple-touch-icon.png" class="pwa-popup-icon" alt="" loading="lazy" decoding="async">
     <div class="pwa-popup-title" id="pwaPopupTitle" data-i18n="pwaPopupTitle">Add to Home Screen</div>
-    <div class="pwa-popup-sub" id="pwaPopupSub" data-i18n="pwaPopupSub">Here's how on your device:</div>
+    <div class="pwa-popup-sub" id="pwaPopupSub" data-i18n="pwaPopupSub">Here’s how on your device:</div>
     <div class="pwa-popup-steps" id="pwaPopupSteps"></div>
     <div class="pwa-popup-btns">
       <button class="pwa-btn pwa-btn--primary" id="pwaPopupAdd" type="button" data-i18n="pwaPopupAdd">Got it</button>

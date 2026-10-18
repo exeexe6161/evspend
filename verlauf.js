@@ -60,13 +60,7 @@
   function _entryFuelPrice(pL, entry)       { return _entryIsUs(entry) ? pL * UNIT_CONV.GAL_TO_L : pL; }
 
   // Aktueller UI-Markt (für Stats-Aggregate): US → Konversion, sonst metrisch.
-  function _currentIsUs() {
-    try {
-      const m = localStorage.getItem(MARKET_KEY);
-      return m === "us";
-    } catch (_) {}
-    return false;
-  }
+  function _currentIsUs() { return _currentMarket() === "us"; }
   function _currentDistanceUnit()       { return _currentIsUs() ? "mi"         : "km"; }
   function _currentEvEffUnit()          { return _currentIsUs() ? "kWh/100 mi" : "kWh/100 km"; }
   function _currentIceEffUnit()         { return _currentIsUs() ? "mpg"        : "L/100 km"; }
@@ -97,7 +91,7 @@
     // BUG-E: Geld in der Eintrags-Währung rendern, GEGATED auf currencyMetadata.
     // Eintrag mit Metadata → dessen Währung/Symbol; ohne Metadata → null → heutiges
     // UI-Markt-Verhalten (kein €-Flip für US/TR-Legacy/Import-Einträge).
-    const costStr = fmtMoneyEntry(cost, _pickEntryCurrency(entry) ? entry : null, 0);
+    const costStr = fmtMoneyEntry(cost, _pickEntryCurrency(entry) ? entry : null, 2);
     if (lang === "en") return `${costStr} for ${dist} ${unit}`;
     if (lang === "tr") return `${dist} ${unit} için ${costStr}`;
     return `${costStr} für ${dist} ${unit}`;
@@ -116,7 +110,9 @@
       }
       for (let i = 0; i < list.length; i++) {
         const L = String(list[i] || "").toLowerCase();
+        if (L === "de" || L.indexOf("de-") === 0) return "de";
         if (L === "en-us" || L === "en_us") return "us";
+        if (L === "en" || L.indexOf("en-") === 0) return "eu";
         if (L === "tr" || L === "tr-tr" || L === "tr_tr" || L.indexOf("tr-") === 0) return "tr";
       }
     } catch (_) {}
@@ -141,7 +137,7 @@
     const auto = _detectMarketFromBrowser();
     if (auto && MARKET_CONFIG[auto]) {
       const code = MARKET_CONFIG[auto].currency;
-      if (CURRENCY_TABLE[code]) return CURRENCY_TABLE[code];
+      if (CURRENCY_TABLE[code]) return {...CURRENCY_TABLE[code], locale: MARKET_CONFIG[auto].locale};
     }
     return CURRENCY_TABLE.EUR;
   }
@@ -276,6 +272,7 @@
   // Wenn Schlüssel fehlen, wird der Roh-Schlüssel als Fallback angezeigt.
   const VERLAUF_TRANSLATIONS = {
     de: {
+      marketResetWarn: "Dieser Markt verwendet andere Einheiten oder eine andere Währung. Rechnerwerte werden beim nächsten Öffnen zurückgesetzt. Gespeicherte Verlaufseinträge bleiben erhalten. Fortfahren?",
       // Phase B — Markt-Pill auf Verlauf
       marketDe: "DE · €",
       marketEu: "EU · €",
@@ -382,6 +379,7 @@
       footerBarrierefreiheit: "Barrierefreiheit"
     },
     en: {
+      marketResetWarn: "This market uses different units or currency. Calculator inputs will reset on next opening. Saved history entries are preserved. Continue?",
       // Phase B — Market pill on Verlauf
       marketDe: "DE · €",
       marketEu: "EU · €",
@@ -488,18 +486,19 @@
       footerBarrierefreiheit: "Accessibility"
     },
     tr: {
+      marketResetWarn: "Bu pazar farklı birim veya para birimi kullanıyor. Hesaplayıcı sonraki açılışta sıfırlanacak. Kaydedilmiş geçmiş korunur. Devam edilsin mi?",
       // Phase B — Verlauf üzerinde Pazar Pill
       marketDe: "DE · €",
       marketEu: "EU · €",
       marketUs: "US · $",
       marketTr: "TR · ₺",
       verlaufTitle: "Geçmiş",
-      verlaufSub: "Kişisel hesaplamalarınız",
-      verlaufTrust: "Kaydedilen girdilerine göre",
+      verlaufSub: "Kişisel hesaplamaların",
+      verlaufTrust: "Kaydettiğin hesaplamalara göre",
       verlaufPrivacy: "Tüm hesaplamalar yalnızca cihazında yerel olarak saklanır. Web sitesi yüklenirken teknik bağlantı verileri barındırma sağlayıcısı tarafından işlenebilir. Veriler tarayıcı belleğinde kalır ve istediğin zaman silinebilir. Tarayıcı verilerini temizlersen veya başka bir cihaz kullanırsan kaybolabileceklerini unutma.",
       statsHeader: "İstatistik",
-      entriesHeader: "Tüm girdiler",
-      searchPlaceholder: "Girdi ara…",
+      entriesHeader: "Kayıtlar",
+      searchPlaceholder: "Kayıt ara…",
       pagerPrev: "← Geri",
       pagerNext: "İleri →",
       periodToday: "Bugün",
@@ -507,7 +506,7 @@
       periodMonth: "Ay",
       periodYear: "Yıl",
       yearly: "Yıllar",
-      statsInPeriod: "Dönemdeki girdi sayısı",
+      statsInPeriod: "Dönemdeki kayıt sayısı",
       statsTotalKm: "Toplam {unit}",
       statsTotalCost: "Toplam enerji/yakıt maliyeti",
       statsAvgCost: "Ø maliyet / 100 {unit}",
@@ -516,16 +515,16 @@
       statsAvgCostPer100: "Ø tahmini maliyet / 100 {unit}",
       statsAvgPerEntry: "Kayıtlı hesap başına Ø",
       statsLowestPer100: "Kaydedilen en düşük Ø/100 değeri",
-      statsNeedsTwoEntries: "En az 2 kayıtlı girdi gerekli",
+      statsNeedsTwoEntries: "En az 2 kayıt gerekli",
       statsCaveatFooter: "Değerler kaydettiğin örnek hesaplamalara dayanır. Yalnızca enerji/yakıt maliyetleri. Bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir. Garanti veya tavsiye değildir.",
       mixCurrencyNote: "{n} {noun} farklı para biriminde olduğu için dahil edilmedi.",
       statsEmpty: "Henüz kayıtlı tekli hesaplama yok",
-      legacyLabel: "Eski karşılaştırma girdileri",
-      legacyClear: "Eski girdileri sil",
+      legacyLabel: "Eski karşılaştırma kayıtları",
+      legacyClear: "Eski kayıtları sil",
       clearAll: "Tümünü sil",
-      confirmClearAll: "Tüm kayıtlı tekli hesaplamaları silmek istiyor musunuz?",
-      confirmClearLegacy: "Tüm eski karşılaştırma girdilerini silmek istiyor musunuz?",
-      confirmDeleteEntry: "Bu kayıtlı girdiyi silmek istiyor musunuz?",
+      confirmClearAll: "Tüm kayıtlı tekli hesaplamaları silmek istediğine emin misin?",
+      confirmClearLegacy: "Tüm eski karşılaştırma kayıtlarını silmek istediğine emin misin?",
+      confirmDeleteEntry: "Bu kaydı silmek istediğine emin misin?",
       historyBackupExport: "Yedeği dışa aktar",
       historyBackupImport: "Yedeği içe aktar",
       historyCsvExport: "CSV dışa aktar",
@@ -537,27 +536,27 @@
       historyExportHelp: "Yedek dosyaları EVSpendPure içinde verileri geri yüklemek için kullanılır. CSV; Excel, Numbers veya Google Sheets için okunabilir bir tablodur. PDF / Yazdır, tarayıcının yazdırma özelliğiyle bir rapor oluşturur. Dosyalar yalnızca tarayıcında yerel olarak işlenir ve yüklenmez.",
       importInvalid: "Geçersiz veya bozuk dosya. İçe aktarma iptal edildi.",
       importTooLarge: "Dosya çok büyük (en fazla 2 MB).",
-      importCapacity: "İçe aktarma iptal edildi: Mevcut kayıtlarla birlikte 50 kayıtlık depolama sınırı aşılacak. Mevcut veriler korunur. Önce bir yedek dışa aktarın ve gerekirse kayıtları silin.",
+      importCapacity: "İçe aktarma iptal edildi: Mevcut kayıtlarla birlikte 50 kayıtlık depolama sınırı aşılacak. Mevcut veriler korunur. Önce bir yedek dışa aktar ve gerekirse kayıtları sil.",
       importVersionMismatch: "Dosya farklı bir sürümden ve uyumlu değil.",
       importMerged: "{new} yeni kayıt içe aktarıldı, {skipped} atlandı.",
-      historyCoordination: "Geçmiş değiştirilemedi. Güncel bir tarayıcıda HTTPS üzerinden açıp tekrar deneyin.",
-      historyMutationFailed: "Geçmiş değiştirilemedi. Depolamayı ve mevcut seçimi kontrol edip tekrar deneyin.",
-      importSaveFailed: "İçe aktarma kaydedilemedi. Mevcut veriler korunur. Cihaz depolamasını kontrol edip tekrar deneyin.",
-      importRefreshFailed: "Veriler kaydedildi, ancak görünüm güncellenemedi. Lütfen sayfayı yeniden yükleyin.",
+      historyCoordination: "Geçmiş değiştirilemedi. Güncel bir tarayıcıda HTTPS üzerinden açıp tekrar dene.",
+      historyMutationFailed: "Geçmiş değiştirilemedi. Depolamayı ve mevcut seçimi kontrol edip tekrar dene.",
+      importSaveFailed: "İçe aktarma kaydedilemedi. Mevcut veriler korunur. Cihaz depolamasını kontrol edip tekrar dene.",
+      importRefreshFailed: "Veriler kaydedildi, ancak görünüm güncellenemedi. Lütfen sayfayı yeniden yükle.",
       exportEmpty: "Geçmiş boş, dışa aktarılacak bir şey yok.",
       histEmptyNone: "Geçmişin boş. İlk hesabını kaydet ve takibe başla.",
       histEmptyCta: "İlk yolculuğu hesapla",
-      histEmptySearch: "Bu arama için girdi yok",
-      histEntrySingular: "girdi",
-      histEntryPlural: "girdi",
-      histEntryDelete: "Girdiyi sil",
+      histEmptySearch: "Bu arama için kayıt yok",
+      histEntrySingular: "kayıt",
+      histEntryPlural: "kayıt",
+      histEntryDelete: "Kaydı sil",
       backToCalc: "Hesaplayıcıya dön",
       typeEv: "Elektrikli",
-      typeVb: "Benzinli",
+      typeVb: "İçten yanmalı araç",
       legacyBadge: "Karşılaştırma (eski)",
       legacyDiffSuffix: "/ yıl",
       rideshareLine: "Ortak yolculuk · {n} kişi",
-      verlaufFooterNote: "Kayıtlı girdiler yalnızca bu cihazda kalır.",
+      verlaufFooterNote: "Kayıtlar yalnızca bu cihazda kalır.",
       chartToday: "Bugün enerji/yakıt maliyeti",
       chartWeek:  "Bu hafta enerji/yakıt maliyeti",
       chartMonth: "Bu ay enerji/yakıt maliyeti",
@@ -570,13 +569,13 @@
       footerDatenschutz: "Gizlilik",
       footerTerms: "Kullanım Koşulları",
       footerHinweise: "Kullanım notları",
-      chartA11ySummary: "{start} ile {end} arasında {count} kayıtla geçmiş grafiği. Ortalama maliyetler: elektrikli için 100 {unit} başına {evCost} {currency}, benzinli için 100 {unit} başına {vbCost} {currency}. Ayrıntılı kayıtlar tabloda yer alır.",
+      chartA11ySummary: "{start} ile {end} arasında {count} kayıtla geçmiş grafiği. Ortalama maliyetler: elektrikli için 100 {unit} başına {evCost} {currency}, içten yanmalı araç için 100 {unit} başına {vbCost} {currency}. Ayrıntılı kayıtlar tabloda yer alır.",
       chartA11yEmpty: "Geçerli filtrede kayıt yok.",
       chartA11yFallback: "Geçmiş grafiği mevcut, ayrıntılı veriler yüklenemedi.",
       chartHintSingleTitle: "Bu zaman diliminde kayıt yok",
       chartHintSingleSub: "Önce hesaplamaları kaydet, burada görünsünler.",
       chartHintPeriodTitle: "Bu dönemde kayıt yok",
-      chartHintPeriodSub: "Daha eski girdiler aşağıda listelenir. İstatistiklerde görmek için dönemi değiştir.",
+      chartHintPeriodSub: "Daha eski kayıtlar aşağıda listelenir. İstatistiklerde görmek için dönemi değiştir.",
       tableCaption: "Ayrıntılı geçmiş verileri",
       tableHeaderDate: "Tarih",
       tableHeaderDistanceMetric: "Kilometre",
@@ -632,6 +631,12 @@
       const k = el.getAttribute("data-i18n-placeholder");
       const v = _tv(k);
       if (typeof v === "string") el.setAttribute("placeholder", sub(v));
+    });
+    const language = _currentLanguage();
+    const pages = {footerImpressum:"impressum",footerDatenschutz:"datenschutz",footerTerms:"terms",footerHinweise:"hinweise",footerBarrierefreiheit:"barrierefreiheit"};
+    Object.entries(pages).forEach(([key,page]) => {
+      const target = _currentMarket() === "eu" ? "/en-eu/" + page : "/" + page + (language === "de" ? "" : "." + language);
+      document.querySelectorAll('a[data-i18n="' + key + '"]').forEach(el => el.setAttribute("href", target + ".html"));
     });
   }
   // Initial direkt einmal anwenden (script.js läuft auf verlauf.html nicht).
@@ -1376,15 +1381,16 @@
       const lead = _leadCurrency(items);
       const agg  = lead.kept;
 
-      nEl.textContent = items.length + " " + (items.length === 1 ? _tv("histEntrySingular") : _tv("histEntryPlural"));
+      nEl.textContent = agg.length + " " + (agg.length === 1 ? _tv("histEntrySingular") : _tv("histEntryPlural"));
 
       // Period sum: Σ (costPer100 × km / 100), in Leitwährung.
       const total = sum(agg.map(e => Number(e.costPer100) * Number(e.km) / 100));
-      totalEl.textContent = _fmtMoneyInCurrency(total, lead.table, 0);
+      totalEl.textContent = _fmtMoneyInCurrency(total, lead.table, 2);
       _clearAdjacentUnit(totalEl);
 
       // Avg cost / 100 {unit}, US-converted from per-100-km to per-100-mi.
-      const avgRaw       = avg(agg.map(e => e.costPer100));
+      const distance = sum(agg.map(e => Number(e.km)));
+      const avgRaw = distance > 0 ? total / distance * 100 : NaN;
       const avgConverted = _currentIsUs() ? avgRaw * UNIT_CONV.MI_TO_KM : avgRaw;
       avgCostEl.textContent = _fmtMoneyInCurrency(avgConverted, lead.table, 2);
       _clearAdjacentUnit(avgCostEl);
@@ -1486,8 +1492,6 @@
     // BUG-E: Preis-Symbol pro Eintrag, GEGATED — Eintrag mit currencyMetadata → dessen
     // Symbol; ohne → getCurrentCurrency() (UI-Markt), exakt wie bisher. priceUnit (unten)
     // bleibt unverändert; _currentFuelVolumeUnit bleibt UI-Markt → kein gal/L-Mix.
-    const currSym   = (function(){ var ce = _pickEntryCurrency(e); var c = ce || getCurrentCurrency(); return (c && c.symbol) || "€"; })();
-    const priceUnit = isEv ? (currSym + " / kWh") : (currSym + " / " + _currentFuelVolumeUnit());
     const consDisp  = isEv ? _evConsToCurrent(e.consumption) : _iceConsToCurrent(e.consumption);
     const priceDisp = isEv ? e.price : _fuelPriceToCurrent(e.price);
     const consDec   = isEv ? 1 : (_currentIsUs() ? 0 : 1);
@@ -1497,7 +1501,7 @@
       // BUG-E: Kosten/100 in Eintrags-Währung, GEGATED. costPer100Disp (Distanz-Skalierung,
       // REGEL-B-safe) und distUnit bleiben UI-Markt-gekoppelt → kein km+mi-Mix.
       fmtMoneyEntry(costPer100Disp, _pickEntryCurrency(e) ? e : null, 2) + " / 100 " + distUnit,
-      fmt(priceDisp, 2) + " " + priceUnit,
+      fmtMoneyEntry(priceDisp, _pickEntryCurrency(e) ? e : null, 2) + " / " + (isEv ? "kWh" : _currentFuelVolumeUnit()),
     ];
     parts.forEach(p => {
       const s = document.createElement("span");
@@ -1616,7 +1620,7 @@
     // unabhängig vom aktiven Markt funktioniert. Gemeinsame Begriffe wie
     // "ev" / "electric" / "elektrikli" bzw. "verbrenner" / "combustion" / "benzinli".
     const EV_LABELS  = ["ev", "e-auto", "electric", "elektrikli"];
-    const VB_LABELS  = ["vb", "verbrenner", "combustion", "benzinli"];
+    const VB_LABELS  = ["vb", "verbrenner", "combustion", "benzinli", "içten yanmalı", "i̇çten yanmalı"];
     return entries.filter(e => {
       const noteHit = (e.note || "").toLowerCase().includes(q);
       const typeHit = (e.type || "").toLowerCase().includes(q);
@@ -1869,10 +1873,11 @@
     tr: { de: "Türkische Lira", en: "Turkish Lira", tr: "Türk Lirası" }
   };
   function _currentMarket() {
-    try { return localStorage.getItem(MARKET_KEY) || "de"; } catch (_) { return "de"; }
+    try { const m = localStorage.getItem(MARKET_KEY); if (MARKET_CONFIG[m]) return m; } catch (_) {}
+    return _detectMarketFromBrowser() || "de";
   }
-  function _currencyLongform() {
-    const m = _currentMarket(); const l = _currentLanguage();
+  function _currencyLongform(currency) {
+    const m = currency ? ({EUR:"de",USD:"us",TRY:"tr"}[currency]) : _currentMarket(); const l = _currentLanguage();
     return (CURRENCY_LONGFORM[m] && CURRENCY_LONGFORM[m][l]) || "";
   }
 
@@ -1908,7 +1913,8 @@
       const fmtLocale = _listLocale();
       const isUs = market === "us";
       const distLong = isUs ? _tv("tableHeaderDistanceImperial") : _tv("tableHeaderDistanceMetric");
-      const currLong = _currencyLongform();
+      const leadTable = _leadCurrency(entries).table || getCurrentCurrency();
+      const currLong = _currencyLongform(leadTable.code);
       const distAbbrev = isUs ? "mi" : "km";
       const fuelAbbrev = isUs ? "gal" : "L";
       const evEffAbbrev = isUs ? "kWh/100 mi" : "kWh/100 km";
@@ -1918,7 +1924,7 @@
       // Locale-correct currency + number formatters (Intl handles symbol-position,
       // thousand-separators and decimal-separator per locale automatically).
       const moneyFmt = new Intl.NumberFormat(fmtLocale, {
-        style: "currency", currency: cfg.currency,
+        style: "currency", currency: leadTable.code,
         minimumFractionDigits: 2, maximumFractionDigits: 2
       });
       const numFmt2 = new Intl.NumberFormat(fmtLocale, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -1960,7 +1966,7 @@
         evCost: isFinite(evAvg) ? numFmt2.format(_roundForDisplay(evAvg)) : "—",
         vbCost: isFinite(vbAvg) ? numFmt2.format(_roundForDisplay(vbAvg)) : "—",
         currency: currLong,
-        unit: distLong
+        unit: _currentLanguage() === "de" ? distLong : distLong.toLowerCase()
       });
 
       // BUG-B: Hinweis auf ausgeschlossene Fremdwährungs-Einträge (A11y-Text).
@@ -2325,7 +2331,21 @@
     });
   }
   function _setMarketVerlauf(code) {
-    const cfg = MARKET_CONFIG[code]; if (!cfg) return;
+    const cfg = MARKET_CONFIG[code]; if (!cfg) return false;
+    const oldMarket = _currentMarket();
+    const old = MARKET_CONFIG[oldMarket];
+    const compatible = old.currency === cfg.currency && old.units.distance === cfg.units.distance;
+    try {
+      const raw = localStorage.getItem("eaf.inputs.v2");
+      if (raw && !compatible && !confirm(_tv("marketResetWarn"))) return false;
+      if (raw) {
+        const saved = JSON.parse(raw);
+        if (saved && typeof saved === "object" && !Array.isArray(saved) && !saved._marketCode) {
+          saved._marketCode = oldMarket;
+          localStorage.setItem("eaf.inputs.v2", JSON.stringify(saved));
+        }
+      }
+    } catch (_) { return false; }
     try { localStorage.setItem(MARKET_KEY, code); } catch (_) {}
     try { localStorage.setItem(LANG_KEY, cfg.language); } catch (_) {}
     try { localStorage.setItem(CURR_KEY, cfg.currency); } catch (_) {}
@@ -2334,6 +2354,7 @@
     document.dispatchEvent(new CustomEvent("eaf:marketchange", { detail: { market: code } }));
     document.dispatchEvent(new CustomEvent("eaf:languagechange", { detail: { language: cfg.language } }));
     document.dispatchEvent(new CustomEvent("eaf:currencychange", { detail: { currency: cfg.currency } }));
+    return true;
   }
   (function initMarketPillVerlauf() {
     const btn  = document.getElementById("marketSwitch");
@@ -2374,7 +2395,7 @@
     // Ohne-Slash-Canonical (cleanUrls ohne trailingSlash) + ?query/#hash.
     // Markt VOR Navigation persistieren (lang-switch.js-Pattern).
     const gotoLocaleVerlauf = (code, path) => {
-      try { localStorage.setItem(MARKET_KEY, code); } catch (_) {}
+      if (_setMarketVerlauf(code) === false) return;
       location.href = path;
     };
     document.querySelectorAll("[data-market]").forEach((item) => {
@@ -2384,10 +2405,11 @@
         const p = location.pathname;
         const inTr = (p === "/tr" || p.indexOf("/tr/") === 0);
         const inEu = (p === "/en-eu" || p.indexOf("/en-eu/") === 0);
-        const navigates = (code === "tr" && !inTr) || (code === "eu" && !inEu);
+        const navigates = (code === "tr" && !inTr) || (code === "eu" && !inEu) || ((code === "de" || code === "us") && (inTr || inEu));
         closeAll(!navigates);
         if (code === "tr" && !inTr) return gotoLocaleVerlauf("tr", "/tr/verlauf");
         if (code === "eu" && !inEu) return gotoLocaleVerlauf("eu", "/en-eu/verlauf");
+        if ((code === "de" || code === "us") && (inTr || inEu)) return gotoLocaleVerlauf(code, "/verlauf.html?market=" + code);
         _setMarketVerlauf(code);
       });
     });

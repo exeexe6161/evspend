@@ -271,13 +271,13 @@ test("Langzeit Teilen enthält keine Nullstrecke und keine Nullkosten", () => {
   assert.match(text, /www\.evspendpure\.com/);
 });
 
-test("DE Langzeit Ergebnistext nutzt neutrale Formulierung statt guenstiger, EN/TR unveraendert", () => {
+test("Langzeit Ergebnistext bleibt neutral, englische Fahrzeugbegriffe sind konsistent", () => {
   const rt = createRuntime();
   metricInputs(rt);
   const text = rt.run("longtermActive=true; kmMonat=1000; longtermYears=5; longtermPremium=1000; buildShareTextCompare(_getCompareData())");
   assert.doesNotMatch(text, /günstiger/);
   assert.match(text, /E-Auto rechnerisch niedriger/);
-  assert.equal(rt.context.window.EAF_I18N.translations.en.shareLongtermEvAdvantage, "EV is lower in this calculation");
+  assert.equal(rt.context.window.EAF_I18N.translations.en.shareLongtermEvAdvantage, "Electric has lower costs in this calculation");
   assert.equal(rt.context.window.EAF_I18N.translations.tr.shareLongtermEvAdvantage, "Bu hesaplamada elektrikli daha düşük");
 });
 

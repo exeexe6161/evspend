@@ -126,3 +126,10 @@ test('EVS-050 URL Änderung erhält mitgelieferte Fragmente ohne neue Hashlogik'
     }
   }
 });
+
+test('explicit DE/US navigation overrides geo routing without cookies', () => {
+  for (const country of ['TR','FR','GB']) for (const market of ['de','us']) {
+    const request = new Request(`https://www.evspendpure.com/?market=${market}`, {headers:{'x-vercel-ip-country':country}});
+    assert.equal(middleware(request), undefined);
+  }
+});

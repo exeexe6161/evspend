@@ -1,0 +1,15 @@
+const {chromium}=require(process.env.PLAYWRIGHT_MODULE || '/Users/hakanguer/.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright');
+const fs=require('fs'),assert=require('assert/strict');
+const results=[];const check=(name,a,e)=>{assert.deepEqual(a,e,name);results.push({name,pass:true})};
+(async()=>{try{fs.unlinkSync('/private/tmp/evspend-grok/current')}catch(e){if(e.code!=='ENOENT')throw e}fs.symlinkSync('/private/tmp/evspend-grok/baseline','/private/tmp/evspend-grok/current');const b=await chromium.launch({headless:true,executablePath:process.env.CHROMIUM_PATH || '/Users/hakanguer/Library/Caches/ms-playwright/chromium-1228/chrome-mac-arm64/Google Chrome for Testing.app/Contents/MacOS/Google Chrome for Testing'}),c=await b.newContext({locale:'de-DE'}),p=await c.newPage();
+await p.goto('http://127.0.0.1:8767/');await p.evaluate(()=>navigator.serviceWorker.ready);await p.waitForFunction(()=>!!navigator.serviceWorker.controller);const old=await p.evaluate(()=>caches.keys());
+await p.evaluate(()=>{document.getElementById('strompreis').value='.45';document.getElementById('strompreis').dispatchEvent(new Event('input',{bubbles:true}));localStorage.setItem('audit-preserved','synthetic');});const inputs=await p.evaluate(()=>localStorage.getItem('eaf.inputs.v2'));
+fs.unlinkSync('/private/tmp/evspend-grok/current');fs.symlinkSync('/Users/hakanguer/Desktop/evspend','/private/tmp/evspend-grok/current');
+await p.evaluate(async()=>{const reg=await navigator.serviceWorker.getRegistration();await reg.update();});
+const version=fs.readFileSync('sw.js','utf8').match(/const CACHE_VERSION\s*=\s*'([^']+)'/)[1];
+for(let i=0;i<100;i++){const keys=await p.evaluate(()=>caches.keys());if(keys.includes('evspend-static-'+version)&&!keys.some(k=>k.startsWith('evspend-')&&!k.endsWith(version)))break;await p.waitForTimeout(100);}
+check('cache generation changed',await p.evaluate(v=>caches.keys().then(k=>k.includes('evspend-static-'+v)),version),true);
+await p.reload();check('saved inputs retained after update',await p.evaluate(()=>localStorage.getItem('eaf.inputs.v2')),inputs);
+check('fixed source bytes served',await p.evaluate(()=>fetch('/script.min.js?v=20261012-evspendpure').then(r=>r.text())),fs.readFileSync('script.min.js','utf8'));
+await c.setOffline(true);await p.goto('http://127.0.0.1:8767/verlauf');check('offline history loaded',await p.locator('#marketSwitchLabel').textContent(),'DE · €');await p.goto('http://127.0.0.1:8767/?market=de');check('offline calculator stored price',await p.locator('#strompreis').inputValue(),'0.45');check('other local storage retained',await p.evaluate(()=>localStorage.getItem('audit-preserved')),'synthetic');
+await b.close();fs.writeFileSync('/private/tmp/evspend-grok/cache-results.json',JSON.stringify({old,version,results},null,2));console.log(JSON.stringify({checks:results.length,pass:true}));})().catch(e=>{console.error(e);fs.writeFileSync('/private/tmp/evspend-grok/cache-results.json',JSON.stringify({results,error:e.stack},null,2));process.exit(1)});

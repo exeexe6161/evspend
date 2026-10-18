@@ -36,7 +36,7 @@ for (const cfg of markets) test(`money locale ${cfg.market}: current display, ne
   for (const field of ["km","consumption","price","costPer100","monthlyCost","yearlyCost"]) assert.equal(row[field],raw[field]);
   const original = rt.storage.get(historyKey);
   const hist = historyRuntime({storage:Object.fromEntries(rt.storage)});
-  assert.ok(headline(hist).includes(money(row.monthlyCost,cfg,0)));
+  assert.ok(headline(hist).includes(money(row.monthlyCost,cfg,2)));
   assert.equal(hist.elements.get("statEvAvgCost").textContent, money(row.costPer100 * (cfg.market === "us" ? 1.609344 : 1),cfg));
   assert.equal(hist.storage.get(historyKey),original);
   for (const [key,value] of Object.entries(prefs)) assert.equal(hist.storage.get(key),value);
@@ -59,8 +59,8 @@ test("money locale EU: old German EUR and stored English EUR formats remain dist
   for (const cfg of markets) {
     const original = JSON.stringify([german,english,legacy]);
     const rt = historyRuntime({storage:{"eaf.market":cfg.market,[historyKey]:original}});
-    assert.ok(headline(rt,0).includes(money(6,de,0)));
-    assert.ok(headline(rt,1).includes(money(6,eu,0)));
+    assert.ok(headline(rt,0).includes(money(6,de,2)));
+    assert.ok(headline(rt,1).includes(money(6,eu,2)));
     assert.ok(rt.elements.get("legacyList").children[0].children[0].children[1].textContent.includes(money(360,de,0)));
     assert.equal(rt.storage.get(historyKey),original);
     rt.elements.get("histExportBtn").click();

@@ -21,6 +21,8 @@ export default function middleware(request) {
   const url = new URL(request.url);
   // Use the same allowlist even if the host invokes us on another path.
   if (!config.matcher.includes(url.pathname)) return;
+  // Explicit market navigation must win over geo detection, without cookies.
+  if (['de', 'us'].includes(url.searchParams.get('market'))) return;
 
   const country = request.headers.get('x-vercel-ip-country') || '';
   const ua = request.headers.get('user-agent') || '';
