@@ -456,7 +456,7 @@ test("EVS-001 Speichern Laden und Import erhalten rohe Kosten und v2 Kompatibili
       const legacy = JSON.stringify([{schema: "v2", type, date: 1, km: 500, consumption: 17.5, price: .37, costPer100: 6.48, monthlyCost: 32.4, yearlyCost: 388.8}]);
       rt.localStorage.setItem("eautofakten_history", legacy);
       assert.equal(history.loadAll()[0].monthlyCost, 32.4);
-      assert.equal(history.fmtMoneyEntry(history.loadAll()[0].monthlyCost, history.loadAll()[0]), "32,40 €");
+      assert.equal(history.fmtMoneyEntry(history.loadAll()[0].monthlyCost, history.loadAll()[0]), "32,40 (Währung unbekannt)");
       assert.equal(rt.localStorage.getItem("eautofakten_history"), legacy);
     }
   }

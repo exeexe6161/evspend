@@ -4,12 +4,11 @@
 
   // ── Phase 3: Währungs-Darstellung im Verlauf ──────────────────────────────
   // Rohwerte werden NICHT umgerechnet (keine Wechselkurse). Lediglich die
-  // Anzeigeformatierung folgt der aktuellen Währungseinstellung (EAF_I18N,
-  // persistiert in localStorage["eaf.currency"]).
+  // Entry display follows saved provenance; aggregates follow the selected
+  // market currency. No currency conversion is performed.
   //
-  // Alte Einträge haben kein currencyMetadata — sie fallen weich auf EUR
-  // zurück. Neue Einträge bekommen { code, symbol } in entry.currencyMetadata
-  // und optional entry.language für künftige Darstellungslogik.
+  // Entry metadata determines its original currency and units. Unknown origin
+  // stays explicit; only documented original comparison snapshots imply EUR.
   const CURR_KEY = "eaf.currency";
   const LANG_KEY = "eaf.language";
   // Phase 6: Primärer Schlüssel — der Markt ist jetzt Single Source of Truth.
@@ -48,16 +47,46 @@
     GAL_TO_L: 3.785411784,
     l100kmToMpg: (l) => (isFinite(l) && l > 0) ? (100 * UNIT_CONV.GAL_TO_L / UNIT_CONV.MI_TO_KM) / l : NaN
   };
-  function _entryIsUs(entry) { return !!(entry && entry.marketCode === "us"); }
-  function _entryDistanceUnit(entry)  { return _entryIsUs(entry) ? "mi"           : "km"; }
-  function _entryIceEffUnit(entry)    { return _entryIsUs(entry) ? "mpg"          : "L/100 km"; }
-  function _entryEvEffUnit(entry)     { return _entryIsUs(entry) ? "kWh/100 mi"   : "kWh/100 km"; }
-  function _entryFuelVolumeUnit(entry){ return _entryIsUs(entry) ? "gal"          : "L"; }
+  // Presentation only. Stored history uses canonical metric quantities.
+  // Never infer an old record's origin from the currently selected UI market.
+  function _entryPresentation(entry) {
+    const e = entry || {};
+    const explicit = CURRENCY_TABLE[e.currencyMetadata?.code] || null;
+    const locale = _validLocale(e.currencyMetadata?.locale) ? e.currencyMetadata.locale
+      : _validLocale(e.sourceLocale) ? e.sourceLocale : null;
+    let market = MARKET_CONFIG[e.marketCode] || null;
+    let uncertain = false;
+    if (market && explicit && market.currency !== explicit.code) {
+      market = null;
+      uncertain = true;
+    } else if (!market) {
+      const locales = {"de-de":"de", "en-ie":"eu", "en-gb":"eu", "en-us":"us", "tr-tr":"tr"};
+      const inferred = locales[String(locale || "").toLowerCase()];
+      if (inferred && explicit && MARKET_CONFIG[inferred].currency !== explicit.code) uncertain = true;
+      else if (inferred) market = MARKET_CONFIG[inferred];
+      else if (explicit?.code === "USD") market = MARKET_CONFIG.us;
+      else if (explicit?.code === "TRY") market = MARKET_CONFIG.tr;
+    }
+    // Documented original comparison snapshots were metric and denominated in EUR.
+    const originalLegacy = !e.schema || e.schema === "v1";
+    if (!uncertain && !market && !explicit && originalLegacy && (e.inputs || e.ev || e.fuel)) market = MARKET_CONFIG.de;
+    const currency = explicit || (market ? CURRENCY_TABLE[market.currency] : null);
+    return {market, currency, locale: locale || market?.locale || currency?.locale || "de-DE", uncertain: uncertain || !market};
+  }
+  function _entryIsUs(entry) { return _entryPresentation(entry).market?.code === "us"; }
+  function _entryDistanceUnit(entry)  { return _entryIsUs(entry) ? "mi" : "km"; }
+  function _entryIceEffUnit(entry)    { return _entryIsUs(entry) ? "mpg" : "L/100 km"; }
+  function _entryEvEffUnit(entry)     { return _entryIsUs(entry) ? "kWh/100 mi" : "kWh/100 km"; }
+  function _entryFuelVolumeUnit(entry){ return _entryIsUs(entry) ? "gal" : "L"; }
   function _entryKmToDist(km, entry)        { return _entryIsUs(entry) ? km / UNIT_CONV.MI_TO_KM : km; }
   function _entryCostPer100(cPer100km, entry){ return _entryIsUs(entry) ? cPer100km * UNIT_CONV.MI_TO_KM : cPer100km; }
   function _entryIceCons(l100km, entry)     { return _entryIsUs(entry) ? UNIT_CONV.l100kmToMpg(l100km) : l100km; }
   function _entryEvCons(k100km, entry)      { return _entryIsUs(entry) ? k100km * UNIT_CONV.MI_TO_KM : k100km; }
   function _entryFuelPrice(pL, entry)       { return _entryIsUs(entry) ? pL * UNIT_CONV.GAL_TO_L : pL; }
+  function _entryNumber(value, decimals, entry) {
+    if (!isFinite(value)) return "—";
+    return Number(value).toLocaleString(_entryPresentation(entry).locale, {minimumFractionDigits:decimals, maximumFractionDigits:decimals});
+  }
 
   // Aktueller UI-Markt (für Stats-Aggregate): US → Konversion, sonst metrisch.
   function _currentIsUs() { return _currentMarket() === "us"; }
@@ -80,18 +109,16 @@
 
   // Phase 10: sprach-/marktneutraler Entry-Titel.
   // Keine hartcodierten deutschen Strings mehr im Render.
-  // Rohwerte (metrisch gespeichert) werden in die aktuelle UI-Einheit
-  // übersetzt, Symbol und Phrase folgen dem aktiven Markt/Sprache.
+  // Canonical metric values are displayed in the original entry units.
+  // Only the surrounding sentence follows the current UI language.
   function formatEntryTitle(entry) {
     if (!entry) return "";
     const lang  = _currentLanguage();
-    const unit  = _currentDistanceUnit();
-    const dist  = Math.round(_kmToCurrentDist(entry.km || 0));
+    const unit  = _entryDistanceUnit(entry);
+    const dist  = _entryNumber(_entryKmToDist(entry.km || 0, entry), 0, entry);
     const cost  = entry.monthlyCost;
-    // BUG-E: Geld in der Eintrags-Währung rendern, GEGATED auf currencyMetadata.
-    // Eintrag mit Metadata → dessen Währung/Symbol; ohne Metadata → null → heutiges
-    // UI-Markt-Verhalten (kein €-Flip für US/TR-Legacy/Import-Einträge).
-    const costStr = fmtMoneyEntry(cost, _pickEntryCurrency(entry) ? entry : null, 2);
+    // Resolve provenance without changing the saved monetary value.
+    const costStr = fmtMoneyEntry(cost, entry, 2);
     if (lang === "en") return `${costStr} for ${dist} ${unit}`;
     if (lang === "tr") return `${dist} ${unit} için ${costStr}`;
     return `${costStr} für ${dist} ${unit}`;
@@ -146,27 +173,25 @@
   // EUR sichtbar, wenn der Nutzer später auf TR umschaltet — weil die
   // Rohwerte damals in EUR erhoben wurden (keine Wechselkurs-Umrechnung).
   // Neue TR-Einträge werden entsprechend direkt in TRY gerendert.
-  // Alte Einträge ohne currencyMetadata fallen weich auf EUR.
+  // Missing provenance is resolved independently of the current UI market.
   function _pickEntryCurrency(entry) {
-    if (entry && entry.currencyMetadata && entry.currencyMetadata.code && CURRENCY_TABLE[entry.currencyMetadata.code]) {
-      const cfg = CURRENCY_TABLE[entry.currencyMetadata.code];
-      const locale = _validLocale(entry.currencyMetadata.locale) ? entry.currencyMetadata.locale : cfg.locale;
-      return {...cfg, locale};
-    }
-    return null;
+    if (!entry) return null;
+    const p = _entryPresentation(entry);
+    return p.currency ? {...p.currency, locale:p.locale} : null;
   }
 
   // Geldwert-Formatter mit defensivem Fallback. Signatur:
   //   fmtMoneyEntry(value, entry?, decimals = 2)
   // 1. Wenn entry.currencyMetadata vorhanden → dessen Locale/Symbol.
   // 2. Ohne entry → aktuelle UI-Markt-Währung (z. B. Stats-Aggregat).
-  // 3. Entry ohne Metadata → EUR-Default (Legacy-Einträge).
+  // 3. Entry without identifiable origin → explicitly unknown currency.
   function fmtMoneyEntry(value, entry, decimals) {
     if (!isFinite(value)) return "—";
     if (decimals == null) decimals = 2;
     value = _roundForDisplay(value, decimals);
     const fromEntry = _pickEntryCurrency(entry);
-    const cur = fromEntry || (entry ? CURRENCY_TABLE.EUR : getCurrentCurrency());
+    const cur = fromEntry || (entry ? null : getCurrentCurrency());
+    if (!cur) return _entryNumber(value, decimals, entry) + " (" + _tv("currencyUnknown") + ")";
     try {
       return new Intl.NumberFormat(cur.locale, {
         style: "currency",
@@ -197,42 +222,18 @@
   // Aggregate (Stats-Summen, Chart-Balken, A11y-Schnitt) dürfen nicht über
   // Währungsgrenzen summieren. Wir wählen EINE Leitwährung und aggregieren nur
   // Einträge dieser Währung; der Rest wird ausgeschlossen und per Caveat
-  // ausgewiesen. Währungscode je Eintrag aus currencyMetadata (Legacy → EUR).
+  // ausgewiesen. Unknown currency is excluded rather than assigned to EUR.
   function _entryCurrencyCode(entry) {
-    const c = _pickEntryCurrency(entry);
-    return (c && c.code) || "EUR";
+    return _pickEntryCurrency(entry)?.code || null;
   }
 
-  // Liefert { code, table, kept, excluded } für eine Eintragsmenge:
-  //   genau 1 distinct → diese Währung (Normalfall, excluded = 0)
-  //   >1 distinct      → Währung des aktuellen UI-Marktes falls vertreten,
-  //                      sonst die häufigste.
+  // Monetary aggregates consistently use the selected currency. Unknown origins
+  // are excluded explicitly, never silently assigned the UI currency or EUR.
   function _leadCurrency(entries) {
-    const counts = new Map();
-    entries.forEach((e) => {
-      const code = _entryCurrencyCode(e);
-      counts.set(code, (counts.get(code) || 0) + 1);
-    });
-    if (!counts.size) {
-      return { code: null, table: getCurrentCurrency(), kept: [], excluded: 0 };
-    }
-    let lead;
-    if (counts.size === 1) {
-      lead = counts.keys().next().value;
-    } else {
-      const ui = getCurrentCurrency().code;
-      lead = counts.has(ui)
-        ? ui
-        : Array.from(counts.entries()).sort((a, b) => b[1] - a[1])[0][0];
-    }
-    const kept = entries.filter((e) => _entryCurrencyCode(e) === lead);
-    const ui = getCurrentCurrency();
-    return {
-      code: lead,
-      table: lead === ui.code ? ui : (CURRENCY_TABLE[lead] || ui),
-      kept: kept,
-      excluded: entries.length - kept.length
-    };
+    const table = getCurrentCurrency();
+    const kept = entries.filter(e => _entryCurrencyCode(e) === table.code);
+    return {code:table.code, table, kept, excluded:entries.length-kept.length,
+      unknown:entries.filter(e => !_entryCurrencyCode(e)).length};
   }
 
   // Geld-Format in EINER bestimmten Währung statt blind getCurrentCurrency():
@@ -244,7 +245,7 @@
   // BUG-B: dezenter Hinweis, wenn Aggregate Fremdwährungs-Einträge ausschließen.
   // Element wird lazy erzeugt (wiederverwendete .stats-caveat-CSS) → keine
   // Struktur-Edits an verlauf.html / tr/ / en-eu/.
-  function _renderMixCaveat(where, excluded) {
+  function _renderMixCaveat(where, excluded, unknown = 0) {
     const anchorId = where === "chart" ? "chartWrap" : "statsCaveat";
     const id       = where === "chart" ? "chartMixCaveat" : "statsMixCaveat";
     let el = document.getElementById(id);
@@ -257,10 +258,12 @@
         el.className = "stats-caveat";
         anchor.parentNode.insertBefore(el, anchor.nextSibling);
       }
-      el.textContent = _tv("mixCurrencyNote", {
-        n: excluded,
-        noun: _tv(excluded === 1 ? "histEntrySingular" : "histEntryPlural")
-      });
+      const messages = [];
+      if (excluded > unknown) messages.push(_tv("mixCurrencyNote", {
+        n:excluded-unknown, noun:_tv(excluded-unknown === 1 ? "histEntrySingular" : "histEntryPlural")
+      }));
+      if (unknown) messages.push(_tv("unknownCurrencyNote", {n:unknown, noun:_tv(unknown === 1 ? "histEntrySingular" : "histEntryPlural")}));
+      el.textContent = messages.join(" ");
       el.hidden = false;
     } else if (el) {
       el.hidden = true;
@@ -272,6 +275,21 @@
   // Wenn Schlüssel fehlen, wird der Roh-Schlüssel als Fallback angezeigt.
   const VERLAUF_TRANSLATIONS = {
     de: {
+      chartHintCurrencyTitle: "Keine Einträge in dieser Währung",
+      chartHintCurrencySub: "Einträge in anderer oder unbekannter Währung sind unten weiterhin sichtbar. Für diese Statistik werden sie nicht einbezogen.",
+      ariaTheme: "Farbschema wechseln",
+      themeTitle: "Hell / Dunkel",
+      csvHeaderSourceLocale: "Gespeichertes Zahlenformat",
+      csvHeaderCostUnit: "Kosteneinheit pro 100",
+      csvHeaderPriceUnit: "Preiseinheit",
+      csvHeaderConsumptionUnit: "Verbrauchseinheit",
+      csvHeaderDistanceUnit: "Streckeneinheit",
+      csvHeaderDistance: "Strecke",
+      statsEntriesOf: "{included} von {total} Einträgen",
+      statsCountOf: "{included} von {total}",
+      unknownCurrencyNote: "{n} {noun} mit unbekannter Währung nicht einbezogen.",
+      originUnknown: "Herkunftsmarkt unbekannt",
+      currencyUnknown: "Währung unbekannt",
       marketResetWarn: "Dieser Markt verwendet andere Einheiten oder eine andere Währung. Rechnerwerte werden beim nächsten Öffnen zurückgesetzt. Gespeicherte Verlaufseinträge bleiben erhalten. Fortfahren?",
       // Phase B — Markt-Pill auf Verlauf
       marketDe: "DE · €",
@@ -379,6 +397,21 @@
       footerBarrierefreiheit: "Barrierefreiheit"
     },
     en: {
+      chartHintCurrencyTitle: "No entries in this currency",
+      chartHintCurrencySub: "Entries in another or unknown currency remain visible below. They are not included in these statistics.",
+      ariaTheme: "Toggle theme",
+      themeTitle: "Light / Dark",
+      csvHeaderSourceLocale: "Stored number format",
+      csvHeaderCostUnit: "Cost unit per 100",
+      csvHeaderPriceUnit: "Price unit",
+      csvHeaderConsumptionUnit: "Consumption unit",
+      csvHeaderDistanceUnit: "Distance unit",
+      csvHeaderDistance: "Distance",
+      statsEntriesOf: "{included} of {total} entries",
+      statsCountOf: "{included} of {total}",
+      unknownCurrencyNote: "{n} {noun} with unknown currency not included.",
+      originUnknown: "Unknown source market",
+      currencyUnknown: "Unknown currency",
       marketResetWarn: "This market uses different units or currency. Calculator inputs will reset on next opening. Saved history entries are preserved. Continue?",
       // Phase B — Market pill on Verlauf
       marketDe: "DE · €",
@@ -411,7 +444,7 @@
       statsNeedsTwoEntries: "At least 2 saved entries needed",
       statsCaveatFooter: "Values are based on your saved example calculations. Only energy/fuel costs. Maintenance, insurance, taxes, depreciation, charging losses and base fees are not included. No guarantee and no advice.",
       mixCurrencyNote: "{n} {noun} in another currency not included.",
-      statsEmpty: "No single-calculations saved yet",
+      statsEmpty: "No single calculations saved yet",
       legacyLabel: "Legacy compare entries",
       legacyClear: "Delete legacy entries",
       clearAll: "Clear all",
@@ -471,7 +504,7 @@
       chartHintPeriodSub: "Older saved entries are listed below. Change the period to include them in the statistics.",
       tableCaption: "Detailed history data",
       tableHeaderDate: "Date",
-      tableHeaderDistanceMetric: "Kilometers",
+      tableHeaderDistanceMetric: "Kilometres",
       tableHeaderDistanceImperial: "Miles",
       tableHeaderType: "Type",
       tableHeaderConsumption: "Consumption",
@@ -486,6 +519,21 @@
       footerBarrierefreiheit: "Accessibility"
     },
     tr: {
+      chartHintCurrencyTitle: "Bu para biriminde kayıt yok",
+      chartHintCurrencySub: "Farklı veya bilinmeyen para birimindeki kayıtlar aşağıda görünmeye devam eder. Bu istatistiklere dahil edilmezler.",
+      ariaTheme: "Temayı değiştir",
+      themeTitle: "Açık / Koyu",
+      csvHeaderSourceLocale: "Kayıtlı sayı biçimi",
+      csvHeaderCostUnit: "100 birim başına maliyet birimi",
+      csvHeaderPriceUnit: "Fiyat birimi",
+      csvHeaderConsumptionUnit: "Tüketim birimi",
+      csvHeaderDistanceUnit: "Mesafe birimi",
+      csvHeaderDistance: "Mesafe",
+      statsEntriesOf: "{total} kayıttan {included}",
+      statsCountOf: "{total} kayıttan {included}",
+      unknownCurrencyNote: "Para birimi bilinmeyen {n} kayıt dahil edilmedi.",
+      originUnknown: "Kaynak pazar bilinmiyor",
+      currencyUnknown: "Para birimi bilinmiyor",
       marketResetWarn: "Bu pazar farklı birim veya para birimi kullanıyor. Hesaplayıcı sonraki açılışta sıfırlanacak. Kaydedilmiş geçmiş korunur. Devam edilsin mi?",
       // Phase B — Verlauf üzerinde Pazar Pill
       marketDe: "DE · €",
@@ -509,12 +557,12 @@
       statsInPeriod: "Dönemdeki kayıt sayısı",
       statsTotalKm: "Toplam {unit}",
       statsTotalCost: "Toplam enerji/yakıt maliyeti",
-      statsAvgCost: "Ø maliyet / 100 {unit}",
-      statsAvgConsumption: "Ø tüketim",
+      statsAvgCost: "Ort. maliyet / 100 {unit}",
+      statsAvgConsumption: "Ort. tüketim",
       statsExampleTotal: "Kayıtlı örnek hesaplamaların toplamı",
-      statsAvgCostPer100: "Ø tahmini maliyet / 100 {unit}",
-      statsAvgPerEntry: "Kayıtlı hesap başına Ø",
-      statsLowestPer100: "Kaydedilen en düşük Ø/100 değeri",
+      statsAvgCostPer100: "Ort. tahmini maliyet / 100 {unit}",
+      statsAvgPerEntry: "Kayıt başına ort.",
+      statsLowestPer100: "Kaydedilen en düşük ort. maliyet / 100",
       statsNeedsTwoEntries: "En az 2 kayıt gerekli",
       statsCaveatFooter: "Değerler kaydettiğin örnek hesaplamalara dayanır. Yalnızca enerji/yakıt maliyetleri. Bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir. Garanti veya tavsiye değildir.",
       mixCurrencyNote: "{n} {noun} farklı para biriminde olduğu için dahil edilmedi.",
@@ -631,6 +679,12 @@
       const k = el.getAttribute("data-i18n-placeholder");
       const v = _tv(k);
       if (typeof v === "string") el.setAttribute("placeholder", sub(v));
+    });
+    ["aria", "title"].forEach(kind => {
+      document.querySelectorAll("[data-i18n-" + kind + "]").forEach(el => {
+        const key = el.getAttribute("data-i18n-" + kind);
+        el.setAttribute(kind === "aria" ? "aria-label" : "title", sub(_tv(key)));
+      });
     });
     const language = _currentLanguage();
     const pages = {footerImpressum:"impressum",footerDatenschutz:"datenschutz",footerTerms:"terms",footerHinweise:"hinweise",footerBarrierefreiheit:"barrierefreiheit"};
@@ -1099,36 +1153,25 @@
       return e && e.schema === "v2" && (e.type === "ev" || e.type === "vb");
     });
     if (!v2.length) return null;
-    var COL = [
-      _tv("tableHeaderDate"),
-      _tv("tableHeaderType"),
-      _tv("tableHeaderDistanceMetric"),
-      _tv("tableHeaderConsumption"),
-      _tv("tableHeaderPrice"),
-      _tv("tableHeaderCostPer100"),
-      _tv("csvHeaderCostTrip"),
-      _tv("csvHeaderCostYear"),
-      _tv("noteInlineLabel"),
-      _tv("csvHeaderCurrency"),
-      _tv("csvHeaderMarket"),
-      _tv("csvHeaderLanguage")
-    ];
-    var lines = [COL.map(_csvEscape).join(";")];
+    var COL = ["tableHeaderDate", "tableHeaderType", "csvHeaderDistance", "csvHeaderDistanceUnit",
+      "tableHeaderConsumption", "csvHeaderConsumptionUnit", "tableHeaderPrice", "csvHeaderPriceUnit",
+      "tableHeaderCostPer100", "csvHeaderCostUnit", "csvHeaderCostTrip", "noteInlineLabel",
+      "csvHeaderCurrency", "csvHeaderMarket", "csvHeaderLanguage", "csvHeaderSourceLocale"];
+    var lines = [COL.map(key => _csvEscape(_tv(key))).join(";")];
+    const number = (value, decimals) => _numCell(_roundForDisplay(Number(value), decimals));
     for (var i = 0; i < v2.length; i++) {
-      var e = v2[i];
+      var e = v2[i], ev = e.type === "ev", presentation = _entryPresentation(e);
+      var currency = _entryCurrencyCode(e) || _tv("currencyUnknown");
       var row = [
-        _csvFormatDate(e.date),
-        e.type || "",
-        _numCell(e.km),
-        _numCell(e.consumption),
-        _numCell(e.price, 4),
-        _numCell(e.costPer100, 2),
-        _numCell(e.monthlyCost, 2),
-        _numCell(e.yearlyCost, 2),
-        e.note || "",
-        (e.currencyMetadata && e.currencyMetadata.code) || "",
-        e.marketCode || "",
-        e.language || ""
+        _csvFormatDate(e.date), _tv(ev ? "typeEv" : "typeVb"),
+        number(_entryKmToDist(e.km, e), 6), _entryDistanceUnit(e),
+        number(ev ? _entryEvCons(e.consumption, e) : _entryIceCons(e.consumption, e), 2),
+        ev ? _entryEvEffUnit(e) : _entryIceEffUnit(e),
+        number(ev ? e.price : _entryFuelPrice(e.price, e), 4), currency + "/" + (ev ? "kWh" : _entryFuelVolumeUnit(e)),
+        number(_entryCostPer100(e.costPer100, e), 2), currency + "/100 " + _entryDistanceUnit(e),
+        _numCell(e.monthlyCost, 2), e.note || "", currency,
+        presentation.market?.code || _tv("originUnknown"), e.language || "",
+        e.sourceLocale || e.currencyMetadata?.locale || presentation.market?.locale || ""
       ];
       lines.push(row.map(_csvEscape).join(";"));
     }
@@ -1345,7 +1388,8 @@
     const start = periodStart(period);
     const filtered = v2Entries.filter(e => new Date(e.date) >= start);
     const n = filtered.length;
-    statCount.textContent = n;
+    const selected = _leadCurrency(filtered);
+    statCount.textContent = selected.excluded ? _tv("statsCountOf", {included:selected.kept.length,total:n}) : n;
 
     const evs = filtered.filter(e => e.type === "ev");
     const vbs = filtered.filter(e => e.type === "vb");
@@ -1381,7 +1425,7 @@
       const lead = _leadCurrency(items);
       const agg  = lead.kept;
 
-      nEl.textContent = agg.length + " " + (agg.length === 1 ? _tv("histEntrySingular") : _tv("histEntryPlural"));
+      nEl.textContent = lead.excluded ? _tv("statsEntriesOf", {included:agg.length,total:items.length}) : agg.length + " " + (agg.length === 1 ? _tv("histEntrySingular") : _tv("histEntryPlural"));
 
       // Period sum: Σ (costPer100 × km / 100), in Leitwährung.
       const total = sum(agg.map(e => Number(e.costPer100) * Number(e.km) / 100));
@@ -1428,7 +1472,7 @@
     const exVb = fillBlock(statBlockVb, statVbN, statVbTotal, statVbAvgCost, statVbAvgPerEntry, statVbLowest, vbs);
 
     // BUG-B: Hinweis, wenn Aggregate Fremdwährungs-Einträge ausgeschlossen haben.
-    _renderMixCaveat("stats", exEv + exVb);
+    _renderMixCaveat("stats", exEv + exVb, selected.unknown);
 
     // Caveat is shown whenever any block is visible — i.e. the user has at
     // least one saved example calculation in the active period.
@@ -1485,24 +1529,17 @@
 
     const meta = document.createElement("div");
     meta.className = "hist-meta";
-    // Phase 10: Meta-Chips ebenfalls gegen aktuellen UI-Markt rendern,
-    // damit keine gemischten Einheiten (km + mi) auf einer Seite erscheinen.
-    const distUnit  = _currentDistanceUnit();
-    const consUnit  = isEv ? _currentEvEffUnit() : _currentIceEffUnit();
-    // BUG-E: Preis-Symbol pro Eintrag, GEGATED — Eintrag mit currencyMetadata → dessen
-    // Symbol; ohne → getCurrentCurrency() (UI-Markt), exakt wie bisher. priceUnit (unten)
-    // bleibt unverändert; _currentFuelVolumeUnit bleibt UI-Markt → kein gal/L-Mix.
-    const consDisp  = isEv ? _evConsToCurrent(e.consumption) : _iceConsToCurrent(e.consumption);
-    const priceDisp = isEv ? e.price : _fuelPriceToCurrent(e.price);
-    const consDec   = isEv ? 1 : (_currentIsUs() ? 0 : 1);
-    const costPer100Disp = _currentIsUs() ? e.costPer100 * UNIT_CONV.MI_TO_KM : e.costPer100;
+    const distUnit = _entryDistanceUnit(e);
+    const consUnit = isEv ? _entryEvEffUnit(e) : _entryIceEffUnit(e);
+    const consDisp = isEv ? _entryEvCons(e.consumption, e) : _entryIceCons(e.consumption, e);
+    const priceDisp = isEv ? e.price : _entryFuelPrice(e.price, e);
+    const consDec = isEv ? 1 : (_entryIsUs(e) ? 0 : 1);
     const parts = [
-      fmt(consDisp, consDec) + " " + consUnit,
-      // BUG-E: Kosten/100 in Eintrags-Währung, GEGATED. costPer100Disp (Distanz-Skalierung,
-      // REGEL-B-safe) und distUnit bleiben UI-Markt-gekoppelt → kein km+mi-Mix.
-      fmtMoneyEntry(costPer100Disp, _pickEntryCurrency(e) ? e : null, 2) + " / 100 " + distUnit,
-      fmtMoneyEntry(priceDisp, _pickEntryCurrency(e) ? e : null, 2) + " / " + (isEv ? "kWh" : _currentFuelVolumeUnit()),
+      _entryNumber(consDisp, consDec, e) + " " + consUnit,
+      fmtMoneyEntry(_entryCostPer100(e.costPer100, e), e, 2) + " / 100 " + distUnit,
+      fmtMoneyEntry(priceDisp, e, 2) + " / " + (isEv ? "kWh" : _entryFuelVolumeUnit(e))
     ];
+    if (_entryPresentation(e).uncertain) parts.push(_tv("originUnknown"));
     parts.forEach(p => {
       const s = document.createElement("span");
       s.textContent = p;
@@ -1562,7 +1599,7 @@
     const diff = typeof diffRaw === "number" && Number.isFinite(diffRaw) ? diffRaw : NaN;
     // Original comparison snapshots used EUR. An explicit validated currency
     // remains authoritative; never relabel old values with the current market.
-    const moneyEntry = _pickEntryCurrency(e) ? e : {currencyMetadata: CURRENCY_TABLE.EUR};
+    const moneyEntry = e;
     const diffEl = document.createElement("div");
     diffEl.className = "hist-diff " + (diff >= 0 ? "c-green" : "c-red");
     diffEl.textContent = Number.isFinite(diff)
@@ -1575,17 +1612,18 @@
     const fuel = e.fuel || {};
     const parts = [];
     const kmEv = e.kmEv, kmVb = e.kmVb, km = e.km;
-    // Phase 10: Legacy-Kosten-Chips ebenfalls in aktueller UI-Einheit.
-    const distUnit2 = _currentDistanceUnit();
-    const toCur = function (c) { return _currentIsUs() ? c * UNIT_CONV.MI_TO_KM : c; };
-    const toDist = function (k) { return _currentIsUs() ? k / UNIT_CONV.MI_TO_KM : k; };
+    // Legacy units follow saved provenance, never the current UI market.
+    const distUnit2 = _entryDistanceUnit(e);
+    const toCur = c => _entryCostPer100(c, e);
+    const toDist = k => _entryNumber(_entryKmToDist(k, e), 0, e);
     if (isFinite(kmEv) && isFinite(kmVb) && kmEv !== kmVb) {
-      parts.push(_tv("typeEv") + " " + fmt(toDist(kmEv), 0) + " · " + _tv("typeVb") + " " + fmt(toDist(kmVb), 0) + " " + distUnit2);
+      parts.push(_tv("typeEv") + " " + toDist(kmEv) + " · " + _tv("typeVb") + " " + toDist(kmVb) + " " + distUnit2);
     } else if (isFinite(km) || isFinite(kmEv)) {
-      parts.push(fmt(toDist(isFinite(km) ? km : kmEv), 0) + " " + distUnit2);
+      parts.push(toDist(isFinite(km) ? km : kmEv) + " " + distUnit2);
     }
     if (typeof ev.costPer100 === "number" && Number.isFinite(ev.costPer100)) parts.push(_tv("typeEv") + " " + fmtMoneyEntry(toCur(ev.costPer100), moneyEntry, 2) + " / 100 " + distUnit2);
     if (typeof fuel.costPer100 === "number" && Number.isFinite(fuel.costPer100)) parts.push(_tv("typeVb") + " " + fmtMoneyEntry(toCur(fuel.costPer100), moneyEntry, 2) + " / 100 " + distUnit2);
+    if (_entryPresentation(e).uncertain) parts.push(_tv("originUnknown"));
     parts.forEach(p => {
       const s = document.createElement("span");
       s.textContent = p;
@@ -1886,7 +1924,7 @@
   //   Symbole und Kürzel inkonsistent interpretieren.
   // - Tabellen-Zellen: Symbole und Kürzel zulässig, da Spaltenheader den Kontext
   //   liefert und Screenreader-Tabellen-Navigation den Header vor der Zelle vorliest.
-  function _updateChartAccessibility(entries, range, excluded) {
+  function _updateChartAccessibility(entries, range, excluded = 0, unknown = 0) {
     const cap = document.getElementById("chartCaption");
     const tbody = document.getElementById("chartDataTableBody");
     const distHeader = document.getElementById("chartTableHeaderDistance");
@@ -1894,13 +1932,11 @@
     try {
       // Distance-Header is market-aware (not language-aware in single key).
       if (distHeader) {
-        distHeader.textContent = _currentIsUs()
-          ? _tv("tableHeaderDistanceImperial")
-          : _tv("tableHeaderDistanceMetric");
+        distHeader.textContent = _tv("csvHeaderDistance");
       }
 
       if (!entries || !entries.length) {
-        cap.textContent = _tv("chartA11yEmpty");
+        cap.textContent = _tv(excluded ? "chartHintCurrencyTitle" : "chartA11yEmpty");
         tbody.innerHTML = "";
         return;
       }
@@ -1970,56 +2006,26 @@
       });
 
       // BUG-B: Hinweis auf ausgeschlossene Fremdwährungs-Einträge (A11y-Text).
-      if (excluded > 0) {
+      if (excluded > unknown) {
         cap.textContent += " " + _tv("mixCurrencyNote", {
-          n: excluded,
-          noun: _tv(excluded === 1 ? "histEntrySingular" : "histEntryPlural")
+          n: excluded-unknown,
+          noun: _tv(excluded-unknown === 1 ? "histEntrySingular" : "histEntryPlural")
         });
       }
 
-      // Build table rows. Symbols/abbreviations are fine here (header context).
-      const escHtml = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+      if (unknown) cap.textContent += " " + _tv("unknownCurrencyNote", {n:unknown, noun:_tv(unknown === 1 ? "histEntrySingular" : "histEntryPlural")});
+
+      // Each row carries its own units; the aggregate above remains in the selected market.
+      const escHtml = s => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
       const rows = entries.map(e => {
-        const dEntry = new Date(e.date);
-        const dStr = !isNaN(dEntry.getTime()) ? dEntry.toLocaleDateString(locale, dOpts) : "";
-        const km = Number(e.km) || 0;
-        const distVal = isUs ? km / UNIT_CONV.MI_TO_KM : km;
-        const distStr = intFmt.format(Math.round(distVal)) + " " + distAbbrev;
-        const typeStr = e.type === "ev" ? _tv("typeEv") : _tv("typeVb");
-
-        let consStr = "—";
-        if (isFinite(Number(e.consumption))) {
-          const cons = Number(e.consumption);
-          if (e.type === "ev") {
-            const v = isUs ? cons * UNIT_CONV.MI_TO_KM : cons;
-            consStr = numFmt1.format(v) + " " + evEffAbbrev;
-          } else if (isUs) {
-            const mpg = UNIT_CONV.l100kmToMpg(cons);
-            consStr = isFinite(mpg) ? intFmt.format(Math.round(mpg)) + " " + iceEffAbbrev : "—";
-          } else {
-            consStr = numFmt1.format(cons) + " " + iceEffAbbrev;
-          }
-        }
-
-        let priceStr = "—";
-        if (isFinite(Number(e.price))) {
-          const price = Number(e.price);
-          if (e.type === "ev") {
-            priceStr = moneyFmt.format(_roundForDisplay(price)) + "/kWh";
-          } else {
-            const p = isUs ? price * UNIT_CONV.GAL_TO_L : price;
-            priceStr = moneyFmt.format(_roundForDisplay(p)) + "/" + fuelAbbrev;
-          }
-        }
-
-        let costStr = "—";
-        if (isFinite(Number(e.costPer100))) {
-          costStr = moneyFmt.format(_roundForDisplay(Number(e.costPer100) * conv));
-        }
-
-        return "<tr><td>" + escHtml(dStr) + "</td><td>" + escHtml(distStr) + "</td><td>"
-          + escHtml(typeStr) + "</td><td>" + escHtml(consStr) + "</td><td>"
-          + escHtml(priceStr) + "</td><td>" + escHtml(costStr) + "</td></tr>";
+        const isEv = e.type === "ev", p = _entryPresentation(e);
+        const date = new Date(e.date).toLocaleDateString(p.locale, dOpts);
+        const dist = _entryNumber(_entryKmToDist(e.km, e), 0, e) + " " + _entryDistanceUnit(e);
+        const consumption = _entryNumber(isEv ? _entryEvCons(e.consumption,e) : _entryIceCons(e.consumption,e), isEv || !_entryIsUs(e) ? 1 : 0, e)
+          + " " + (isEv ? _entryEvEffUnit(e) : _entryIceEffUnit(e));
+        const price = fmtMoneyEntry(isEv ? e.price : _entryFuelPrice(e.price,e),e,2) + "/" + (isEv ? "kWh" : _entryFuelVolumeUnit(e));
+        const cost = fmtMoneyEntry(_entryCostPer100(e.costPer100,e),e,2) + "/100 " + _entryDistanceUnit(e);
+        return "<tr>" + [date,dist,_tv(isEv ? "typeEv" : "typeVb"),consumption,price,cost].map(v=>"<td>"+escHtml(v)+"</td>").join("") + "</tr>";
       }).join("");
       tbody.innerHTML = rows;
     } catch (err) {
@@ -2040,7 +2046,7 @@
     // BUG-B: eine Leitwährung für den ganzen Chart (Balken, Achse, Tooltip, A11y).
     const lead     = _leadCurrency(filtered);
     const series   = lead.kept.length ? _buildChartSeries(lead.kept, range) : { labels: [], evData: [], iceData: [] };
-    _renderMixCaveat("chart", lead.excluded);
+    _renderMixCaveat("chart", lead.excluded, lead.unknown);
 
     // ── EMPTY-STATE: no entries in this period ─────────────────────────────
     // Empty-State NUR wenn wirklich 0 Einträge im Zeitraum liegen — 1 Eintrag
@@ -2058,14 +2064,15 @@
         const hasAnyEntries = (entries || []).length > 0;
         const titleEl = hintEl.querySelector(".chart-hint-title");
         const subEl   = hintEl.querySelector(".chart-hint-sub");
-        if (titleEl) titleEl.textContent = _tv(hasAnyEntries ? "chartHintPeriodTitle" : "chartHintSingleTitle");
-        if (subEl)   subEl.textContent   = _tv(hasAnyEntries ? "chartHintPeriodSub"   : "chartHintSingleSub");
+        const currencyExcluded = filtered.length > 0 && !lead.kept.length;
+        if (titleEl) titleEl.textContent = _tv(currencyExcluded ? "chartHintCurrencyTitle" : hasAnyEntries ? "chartHintPeriodTitle" : "chartHintSingleTitle");
+        if (subEl)   subEl.textContent   = _tv(currencyExcluded ? "chartHintCurrencySub" : hasAnyEntries ? "chartHintPeriodSub" : "chartHintSingleSub");
         hintEl.hidden = false;
         hintEl.removeAttribute("hidden");
       }
       wrap.hidden = false;
       _updateChartTitle(range);
-      _updateChartAccessibility([], range);
+      _updateChartAccessibility([], range, lead.excluded, lead.unknown);
       return;
     }
 
@@ -2202,7 +2209,7 @@
 
     _updateChartTitle(range);
     wrap.hidden = false;
-    _updateChartAccessibility(lead.kept, range, lead.excluded);
+    _updateChartAccessibility(lead.kept, range, lead.excluded, lead.unknown);
   }
 
   periodBtns.forEach(btn => {

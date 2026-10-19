@@ -37,7 +37,7 @@ test('B07/B08/B09: weighted statistic, cent precision, lead currency count and n
  const raw=JSON.stringify(rows),rt=historyRuntime({storage:{[historyKey]:raw}});
  assert.equal(rt.elements.get('statEvAvgCost').textContent,'9,90 €');
  assert.equal(rt.elements.get('statEvTotal').textContent,'49,50 €');
- assert.equal(rt.elements.get('statEvN').textContent,'2 Einträge');
+ assert.equal(rt.elements.get('statEvN').textContent,'2 von 3 Einträgen');
  assert.equal(rt.storage.get(historyKey),raw);
 });
 test('B06/B17: no premium renders operating advantage; zero years and losses stay correct',()=>{

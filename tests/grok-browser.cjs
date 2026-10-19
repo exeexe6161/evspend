@@ -70,14 +70,15 @@ for(const m of Object.keys(profiles)){
  await p.goto(base+'/verlauf.html');
  check('B07 weighted visible statistic',await p.locator('#statEvAvgCost').textContent(),'9,90\u00a0€');
  check('B08 visible cents',await p.locator('#statEvTotal').textContent(),'49,50\u00a0€');
- check('B09 lead-currency count',await p.locator('#statEvN').textContent(),'2 Einträge');
+ check('B09 lead-currency count',await p.locator('#statEvN').textContent(),'2 von 3 Einträgen');
  check('B04 no history mutation during mixed rendering',await p.evaluate(()=>localStorage.getItem('eautofakten_history')),raw);
  await c.close();
 }
 {
  const raw=JSON.stringify([row('us',100,6)]),{p,c}=await pageFor('de',{'eautofakten_history':raw,'eaf.verlauf.period':'all'});await p.goto(base+'/verlauf.html');
- check('N01 accessible chart follows USD entry currency',(await p.locator('#chartCaption').textContent()).includes('US-Dollar'),true);
- check('N01 accessible table uses dollar',(await p.locator('#chartDataTableBody').textContent()).includes('$'),true);await c.close();
+ check('B09 foreign-only chart has no false selected-currency total',(await p.locator('#chartCaption').textContent()).includes('US-Dollar'),false);
+ check('B04 foreign-only list retains dollar',(await p.locator('#histList').textContent()).includes('$'),true);
+ check('B09 foreign-only total unavailable',await p.locator('#statEvTotal').textContent(),'—');await c.close();
 }
 for(const m of Object.keys(profiles)){
  const {p,c}=await pageFor(m,{'eaf.longtermKmMonat':'1234.5','eaf.longtermPremium':'1050'});

@@ -1545,14 +1545,13 @@ function calcSingle() {
     const consDisp = isEv ? _evConsumptionToMarket(d.consumption) : _iceConsumptionToMarket(d.consumption);
     const priceDisp = isEv ? d.price : _fuelPriceToMarket(d.price);
     const consUnit  = " " + (isEv ? _evEffUnit() : _iceEffUnit());
-    const priceUnit = isEv ? " " + _currencySymbol() + " / kWh"
-                           : " " + _currencySymbol() + " / " + _fuelVolumeUnit();
+    const priceUnit = isEv ? "kWh" : _fuelVolumeUnit();
     // Dezimalstellen: EV = 1; ICE = 1 (L/100km) oder 0 (mpg ist Integer)
     const consDec = isEv ? 1 : (_isUsMarket() ? 0 : 1);
     metaEl.innerHTML =
       `<span>${fmt(_kmToDist(d.km), 0)} ${_distanceUnit()}</span>` +
       `<span>${fmt(consDisp, consDec)}${consUnit}</span>` +
-      `<span>${fmt(priceDisp, 2)}${priceUnit}</span>`;
+      `<span>${_fmtMoney(priceDisp, 2)}/${priceUnit}</span>`;
   }
 
   if (empty) empty.hidden = true;
@@ -3098,6 +3097,7 @@ setTimeout(() => {
       exampleValuesHint: "Voreingestellte Werte sind Beispiele. Trage deine eigenen Werte ein.",
       ariaSettings: "Einstellungen",
       ariaTheme: "Farbschema wechseln",
+      themeTitle: "Hell / Dunkel",
       ariaFeatures: "Funktionen",
       ariaMode: "Berechnungsmodus",
       ariaVehicle: "Fahrzeugtyp",
@@ -3279,16 +3279,16 @@ setTimeout(() => {
       shareImgExclusions: "Nur Energie-/Kraftstoffkosten; Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.",
       shareTextDisclaimer: "Hinweis: Unverbindliche Schätzung auf Basis deiner Eingaben. Bitte Eingaben und Ergebnis prüfen. Nur Energie-/Kraftstoffkosten; Wartung, Versicherung, Steuern, Wertverlust, Ladeverluste und Grundgebühren sind nicht enthalten.",
       // Result sentence (legally qualified, "you" perspective — used in result + share image)
-      sentenceCompareSavings:  "Geschätzte Differenz: {val} auf {km} (laut deinen Eingaben)",
-      sentenceCompareExtra:    "Laut deiner Berechnung liegt der Verbrenner-Wert um {val} niedriger auf {km}",
+      sentenceCompareSavings:  "Geschätzte Differenz: {val} für {km} (laut deinen Eingaben)",
+      sentenceCompareExtra:    "Laut deiner Berechnung liegt der Verbrenner-Wert um {val} niedriger für {km}",
       sentenceCompareEqual:    "Laut deiner Berechnung sind beide Optionen ähnlich teuer",
       sentenceCompareLongterm: "Laut deiner Berechnung: Kostenunterschied über den gewählten Zeitraum",
       sentenceSingle:          "Laut deiner Berechnung betragen deine Kosten {val} für {km}",
       sentenceSingleCarpool:   "Laut deiner Eingabe betragen die Kosten pro Person {val} für {km}",
       sentenceCarpoolSuffix:   "(pro Person, {n} Personen)",
       // Share-text variant ("I" perspective — used only in share text bodies)
-      shareCompareSavings:     "Geschätzte Differenz: {val} auf {km} (laut meinen Eingaben)",
-      shareCompareExtra:       "Laut meiner Berechnung liegt der Verbrenner-Wert um {val} niedriger auf {km}",
+      shareCompareSavings:     "Geschätzte Differenz: {val} für {km} (laut meinen Eingaben)",
+      shareCompareExtra:       "Laut meiner Berechnung liegt der Verbrenner-Wert um {val} niedriger für {km}",
       shareCompareEqual:       "Laut meiner Berechnung sind beide Optionen ähnlich teuer",
       shareCompareLongterm:    "Laut meiner Berechnung: Kostenunterschied über den gewählten Zeitraum",
       shareSingle:             "Laut meiner Berechnung betragen meine Kosten {val} für {km}",
@@ -3348,6 +3348,7 @@ setTimeout(() => {
       labelIceConsumptionUs: "Fuel economy",
       ariaSettings: "Settings",
       ariaTheme: "Toggle theme",
+      themeTitle: "Light / Dark",
       ariaFeatures: "Features",
       ariaMode: "Calculation mode",
       ariaVehicle: "Vehicle type",
@@ -3600,6 +3601,7 @@ setTimeout(() => {
       exampleValuesHint: "Ön tanımlı değerler örnektir. Kendi değerlerini gir.",
       ariaSettings: "Ayarlar",
       ariaTheme: "Temayı değiştir",
+      themeTitle: "Açık / Koyu",
       ariaFeatures: "Özellikler",
       ariaMode: "Hesaplama modu",
       ariaVehicle: "Araç türü",
@@ -3610,7 +3612,7 @@ setTimeout(() => {
       ariaResult: "Sonuç",
       ariaChart: "Enerji ve yakıt maliyeti karşılaştırması",
       heroTitle: "EVSpendPure",
-      heroSubtitle1: "Electric & Fuel Cost Calculator",
+      heroSubtitle1: "Elektrik ve yakıt maliyeti hesaplayıcı",
       heroSubtitle2: "",
       trustNoSignup: "Kayıt gerekmez",
       trustLocal: "Girdiler yerel olarak saklanır",
@@ -3716,7 +3718,7 @@ setTimeout(() => {
       toastRestoreFailed: "Kayıtlı senaryo açılamadı",
       saveCooldown: "Lütfen biraz bekle. Kısa bir aradan sonra tekrar kaydedebilirsin.",
       marketResetWarn: "“{market}” farklı birim/para birimi kullanıyor. Girdiğin değerler bu pazarın varsayılan değerlerine sıfırlanacak. Devam edilsin mi?",
-      toastCalcFirst: "Önce hesaplama yapın",
+      toastCalcFirst: "Önce hesaplama yap.",
       toastImageReady: "Resim paylaşıma hazır",
       toastClipboard: "Panoya kopyalandı",
       toastShareFailed: "Paylaşım başarısız",
@@ -3820,8 +3822,8 @@ setTimeout(() => {
       statsInPeriod: "Dönemdeki kayıt sayısı",
       statsTotalKm: "Toplam km",
       statsTotalCost: "Toplam enerji/yakıt maliyeti",
-      statsAvgCost: "Ø maliyet / 100 km",
-      statsAvgConsumption: "Ø tüketim",
+      statsAvgCost: "Ort. maliyet / 100 km",
+      statsAvgConsumption: "Ort. tüketim",
       statsEmpty: "Henüz kayıtlı tekli hesaplama yok",
       legacyLabel: "Eski karşılaştırma kayıtları",
       legacyClear: "Eski kayıtları sil",
@@ -4192,6 +4194,10 @@ setTimeout(() => {
       const suffix = currentLanguage === "de" ? "" : "." + currentLanguage;
       const target = currentMarket === "eu" && currentLanguage === "en" ? "/en-eu/" + page : "/" + page + suffix;
       document.querySelectorAll('a[data-i18n="' + key + '"]').forEach(el => el.setAttribute("href", target + ".html"));
+    });
+    document.querySelectorAll("[data-i18n-title]").forEach(function (el) {
+      var val = _resolveKey(dict, fallback, el.getAttribute("data-i18n-title"));
+      if (typeof val === "string") el.setAttribute("title", sub(val));
     });
     document.querySelectorAll("[data-i18n-aria]").forEach(function (el) {
       var key = el.getAttribute("data-i18n-aria");

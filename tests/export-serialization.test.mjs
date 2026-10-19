@@ -58,7 +58,7 @@ test("shared CSV neutralizes LF CRLF and whitespace formula prefixes without cha
     const original = JSON.stringify(records);
     const rt = runtime("us", records);
     const csv = rt.context.window.EAF_HISTORY_EXPORT.csv().data;
-    assert.ok(csv.includes(";" + cell + ";EUR;de;de\r\n"), JSON.stringify(note));
+    assert.ok(csv.includes(";" + cell + ";EUR;de;de;de-DE\r\n"), JSON.stringify(note));
     assert.equal(JSON.parse(rt.context.window.EAF_HISTORY_EXPORT.json().data).entries[0].note, note);
     assert.equal(rt.storage.get(historyKey), original);
   }
@@ -73,7 +73,7 @@ test("shared CSV keeps true numeric notes including signed and control prefixed 
   for (const [note, cell] of cases) {
     const rt = runtime("us", [entry({note})]);
     const original = rt.storage.get(historyKey);
-    assert.ok(rt.context.window.EAF_HISTORY_EXPORT.csv().data.includes(";" + cell + ";EUR;de;de\r\n"), JSON.stringify(note));
+    assert.ok(rt.context.window.EAF_HISTORY_EXPORT.csv().data.includes(";" + cell + ";EUR;de;de;de-DE\r\n"), JSON.stringify(note));
     assert.equal(rt.storage.get(historyKey), original);
   }
 });
@@ -83,7 +83,7 @@ test("shared Turkish CSV preserves Unicode and whitespace notes with CSV quotes"
   const rt = runtime("tr", [entry({note})]);
   const original = rt.storage.get(historyKey);
   const cell = '"  İstanbul, ölçüm: Şarj; ""çığır"" 🌿\r\nİkinci satır  "';
-  assert.ok(rt.context.window.EAF_HISTORY_EXPORT.csv().data.includes(";" + cell + ";EUR;de;de\r\n"));
+  assert.ok(rt.context.window.EAF_HISTORY_EXPORT.csv().data.includes(";" + cell + ";EUR;de;de;de-DE\r\n"));
   assert.equal(JSON.parse(rt.context.window.EAF_HISTORY_EXPORT.json().data).entries[0].note, note);
   assert.equal(rt.storage.get(historyKey), original);
 });
@@ -108,9 +108,10 @@ for (const [market, separator] of [["de",","], ["us","."], ["tr",","]]) {
     const file = rt.context.window.EAF_HISTORY_EXPORT.csv();
     const cells = file.data.split("\r\n")[1].split(";");
     assert.equal(cells[2], "177.02784".replace(".", separator));
-    assert.equal(cells[3], "18.64113576712".replace(".", separator));
-    assert.ok(Math.abs(Number(cells[3].replace(",", ".")) - records[0].consumption) < 3e-14);
-    assert.equal(cells[3].includes("64113576712"), true, "consumption keeps meaningful precision beyond cents");
+    assert.equal(cells[4], "18.64".replace(".", separator));
+    assert.equal(cells[3], "km");
+    assert.equal(cells[5], "kWh/100 km");
+    assert.equal(cells[10], "5.40".replace(".", separator), "stored trip result, independent of displayed input precision");
     rt.elements.get("histCsvExportBtn").click();
     assert.deepEqual(Buffer.from(await rt.blobs[0].arrayBuffer()), Buffer.from(file.data, "utf8"));
     assert.equal(rt.storage.get(historyKey), original);
