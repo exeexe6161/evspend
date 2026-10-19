@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {ready, historyRuntime, entry, historyKey} from './history-runtime.mjs';
 import {distanceRuntime} from './distance-runtime.mjs';
 const close=(a,e)=>assert.ok(Math.abs(a-e)<1e-10*Math.max(1,Math.abs(e)),`${a} != ${e}`);
-for(const [market,price,fuel,cons,premium] of [['de',.37,1.85,7,5000],['eu',.30,1.70,6.5,5000],['us',.16,3.20,26,5500],['tr',3.40,63,7,250000]]) {
+for(const [market,price,fuel,cons,premium] of [['de',.37,2.15,7,5000],['eu',.30,1.70,6.5,5000],['us',.16,3.20,26,5500],['tr',3.40,63,7,250000]]) {
  test(`B01 ${market}: first visit uses existing market defaults without touching history`,()=>{
   const rt=ready({storage:{'eaf.market':market}}),before=rt.storage.get(historyKey);
   close(Number(rt.elements.get('strompreis').value),price);

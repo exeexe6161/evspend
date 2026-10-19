@@ -1164,11 +1164,11 @@
       var currency = _entryCurrencyCode(e) || _tv("currencyUnknown");
       var row = [
         _csvFormatDate(e.date), _tv(ev ? "typeEv" : "typeVb"),
-        number(_entryKmToDist(e.km, e), 6), _entryDistanceUnit(e),
-        number(ev ? _entryEvCons(e.consumption, e) : _entryIceCons(e.consumption, e), 2),
+        number(_entryKmToDist(e.km, e), 3), _entryDistanceUnit(e),
+        number(ev ? _entryEvCons(e.consumption, e) : _entryIceCons(e.consumption, e), 3),
         ev ? _entryEvEffUnit(e) : _entryIceEffUnit(e),
-        number(ev ? e.price : _entryFuelPrice(e.price, e), 4), currency + "/" + (ev ? "kWh" : _entryFuelVolumeUnit(e)),
-        number(_entryCostPer100(e.costPer100, e), 2), currency + "/100 " + _entryDistanceUnit(e),
+        _numCell(ev ? e.price : _entryFuelPrice(e.price, e), 2), currency + "/" + (ev ? "kWh" : _entryFuelVolumeUnit(e)),
+        _numCell(_entryCostPer100(e.costPer100, e), 2), currency + "/100 " + _entryDistanceUnit(e),
         _numCell(e.monthlyCost, 2), e.note || "", currency,
         presentation.market?.code || _tv("originUnknown"), e.language || "",
         e.sourceLocale || e.currencyMetadata?.locale || presentation.market?.locale || ""

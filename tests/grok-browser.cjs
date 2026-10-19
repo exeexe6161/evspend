@@ -20,7 +20,7 @@ async function pageFor(m,storage={},serviceWorkers='block'){
 }
 for(const m of Object.keys(profiles)){
  const {p,c}=await pageFor(m);let s=await snapshot(p);
- const defaults=m==='us'?[.16,3.2,26,30,600,75,5500]:m==='tr'?[3.4,63,7,17,1000,60,250000]:m==='eu'?[.3,1.7,6.5,17,1000,60,5000]:[.37,1.85,7,17,1000,60,5000];
+ const defaults=m==='us'?[.16,3.2,26,30,600,75,5500]:m==='tr'?[3.4,63,7,17,1000,60,250000]:m==='eu'?[.3,1.7,6.5,17,1000,60,5000]:[.37,2.15,7,17,1000,60,5000];
  const init=await p.evaluate(()=>['strompreis','benzinpreis','verbrauchVerbrenner','evVerbrauch','kmShared','batteryKwh','longtermPremium'].map(id=>Number(document.getElementById(id).value)));
  check(m+' B01 defaults',init,defaults);check(m+' B11 monthly state/slider',await p.locator('#kmMonat').inputValue(),String(s.kmMonat));
  check(m+' mobile no horizontal overflow',await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth),true);

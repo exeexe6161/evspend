@@ -3178,8 +3178,8 @@ setTimeout(() => {
       evCheaper: "E-Auto geschätzt günstiger",
       vbCheaper: "Verbrenner geschätzt günstiger",
       costsEqual: "Kosten ähnlich (laut Eingaben)",
-      savingsFor: "Geschätzte Differenz auf {km}",
-      extraCostFor: "Geschätzte Mehrkosten auf {km}",
+      savingsFor: "Geschätzte Differenz für {km}",
+      extraCostFor: "Geschätzte Mehrkosten für {km}",
       differenceFor: "Geschätzte Differenz für {km}",
       costForKm: "Geschätzte Energie-/Kraftstoffkosten für {km}",
       perPersonPrefix: "Pro Person ({n})",
@@ -3639,7 +3639,7 @@ setTimeout(() => {
       rideshareHint: "Maliyetler tüm kişilere bölünür.",
       longtermLabel: "Uzun vadeli analiz",
       calculate: "Sonucu göster",
-      staleHint: "Girdiler değişti, sonucu güncelleyin",
+      staleHint: "Girdiler değişti, sonucu güncelle",
       shareImage: "Resim olarak paylaş",
       shareText: "Metin olarak paylaş",
       saveToHistory: "Geçmişe kaydet",
@@ -3653,12 +3653,12 @@ setTimeout(() => {
       emptySingleTitle: "Maliyet hesaplamadan sonra görünür",
       emptyCompareSub: "Verilerini gir, sonucu anında gör.",
       yourCosts: "Tahmini enerji/yakıt maliyetleri",
-      hintCompareFoot: "Girdilerine ve önceden tanımlanmış örnek değerlere dayalı bağlayıcı olmayan tahmindir. Girdileri ve sonuçları kontrol edin. Gerçek maliyetler değişebilir.",
-      hintSingleFoot: "Girdilerine ve önceden tanımlanmış örnek değerlere dayalı bağlayıcı olmayan tahmindir. Girdileri ve sonuçları kontrol edin. Gerçek maliyetler değişebilir.",
+      hintCompareFoot: "Girdilerine ve önceden tanımlanmış örnek değerlere dayalı bağlayıcı olmayan tahmindir. Girdileri ve sonuçları kontrol et. Gerçek maliyetler değişebilir.",
+      hintSingleFoot: "Girdilerine ve önceden tanımlanmış örnek değerlere dayalı bağlayıcı olmayan tahmindir. Girdileri ve sonuçları kontrol et. Gerçek maliyetler değişebilir.",
       hintCompareExclusions: "Yalnızca enerji/yakıt maliyetleri. Bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
       hintSingleExclusions:  "Yalnızca enerji/yakıt maliyetleri. Bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
-      calcInfoBlock: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Hesaplama Bilgisi</span></summary><div class=\"calc-info-body\"><p>Gösterilen değerler, girdilerine ve önceden tanımlanmış örnek değerlere (sürgü varsayılanları) dayalı tahminlerdir. Gerçek maliyetler sürüş tarzına, araç tipine, enerji fiyatlarına, bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretlere göre değişebilir.</p><p><strong>Nasıl hesaplanır:</strong><br>Maliyet = (tüketim × fiyat × mesafe) ÷ 100</p><p>Bu araç yönlendirme amaçlı bağlayıcı olmayan bir örnek hesaplama sunar. Ekonomik kararlar öncesinde girdileri ve sonuçları kontrol edin. Danışmanlık veya garanti sunmaz.</p></div></details>",
-      calcInfoBlockUs: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Hesaplama Bilgisi</span></summary><div class=\"calc-info-body\"><p>Gösterilen değerler, girdilerine ve önceden tanımlanmış örnek değerlere (sürgü varsayılanları) dayalı tahminlerdir. Gerçek maliyetler sürüş tarzına, araç tipine, enerji fiyatlarına, bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretlere göre değişebilir.</p><p><strong>Nasıl hesaplanır:</strong><br>Elektrikli maliyeti = (kWh/100 mi cinsinden tüketim × kWh başına elektrik fiyatı × mi cinsinden mesafe) ÷ 100<br>İçten yanmalı maliyeti = (mi cinsinden mesafe ÷ mpg cinsinden verimlilik) × ABD galonu başına yakıt fiyatı</p><p>Bu araç yönlendirme amaçlı bağlayıcı olmayan bir örnek hesaplama sunar. Ekonomik kararlar öncesinde girdileri ve sonuçları kontrol edin. Danışmanlık veya garanti sunmaz.</p></div></details>",
+      calcInfoBlock: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Hesaplama Bilgisi</span></summary><div class=\"calc-info-body\"><p>Gösterilen değerler, girdilerine ve önceden tanımlanmış örnek değerlere (sürgü varsayılanları) dayalı tahminlerdir. Gerçek maliyetler sürüş tarzına, araç tipine, enerji fiyatlarına, bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretlere göre değişebilir.</p><p><strong>Nasıl hesaplanır:</strong><br>Maliyet = (tüketim × fiyat × mesafe) ÷ 100</p><p>Bu araç yönlendirme amaçlı bağlayıcı olmayan bir örnek hesaplama sunar. Ekonomik kararlar öncesinde girdileri ve sonuçları kontrol et. Danışmanlık veya garanti sunmaz.</p></div></details>",
+      calcInfoBlockUs: "<details><summary><span aria-hidden=\"true\">ℹ</span><span>Hesaplama Bilgisi</span></summary><div class=\"calc-info-body\"><p>Gösterilen değerler, girdilerine ve önceden tanımlanmış örnek değerlere (sürgü varsayılanları) dayalı tahminlerdir. Gerçek maliyetler sürüş tarzına, araç tipine, enerji fiyatlarına, bakım, sigorta, vergi, değer kaybı, şarj kayıpları ve sabit ücretlere göre değişebilir.</p><p><strong>Nasıl hesaplanır:</strong><br>Elektrikli maliyeti = (kWh/100 mi cinsinden tüketim × kWh başına elektrik fiyatı × mi cinsinden mesafe) ÷ 100<br>İçten yanmalı maliyeti = (mi cinsinden mesafe ÷ mpg cinsinden verimlilik) × ABD galonu başına yakıt fiyatı</p><p>Bu araç yönlendirme amaçlı bağlayıcı olmayan bir örnek hesaplama sunar. Ekonomik kararlar öncesinde girdileri ve sonuçları kontrol et. Danışmanlık veya garanti sunmaz.</p></div></details>",
       footerImpressum: "Künye",
       footerDatenschutz: "Gizlilik",
       footerTerms: "Kullanım Koşulları",
@@ -3671,7 +3671,7 @@ setTimeout(() => {
       ariaKmEv: "Elektrikli araç mesafesi",
       ariaKmVb: "İçten yanmalı araç mesafesi",
       footerVerlauf: "Geçmiş",
-      footerNote: "Bağlayıcı olmayan örnek hesaplama. Karar vermeden önce girdileri ve sonuçları kontrol edin. Tam toplam maliyet hesabı değildir. Girdiler yerel olarak saklanır.",
+      footerNote: "Bağlayıcı olmayan örnek hesaplama. Karar vermeden önce girdileri ve sonuçları kontrol et. Tam toplam maliyet hesabı değildir. Girdiler yerel olarak saklanır.",
       privacyNotice: "Hesaplayıcı girdileri tarayıcıda kalır. Web sitesi yüklenirken teknik bağlantı verileri barındırma sağlayıcısı tarafından işlenebilir.",
       marketDe: "DE · €",
       marketEu: "EU · €",
@@ -3779,9 +3779,9 @@ setTimeout(() => {
       shareImgPerPersonCtx: "kişi başı · {km}",
       shareImgTotalCosts: "Tahmini enerji/yakıt maliyeti: {val}",
       shareImgTotalCostsBoth: "Tahmini enerji/yakıt maliyeti: {ev} / {vb}",
-      shareImgDisclaimer: "Bağlayıcı olmayan örnek hesaplama · Girdileri kontrol edin.",
+      shareImgDisclaimer: "Bağlayıcı olmayan örnek hesaplama · Girdileri kontrol et.",
       shareImgExclusions: "Yalnızca enerji/yakıt maliyetleri; bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
-      shareTextDisclaimer: "Not: Girdilerine dayalı bağlayıcı olmayan tahmindir. Girdileri ve sonucu kontrol edin. Yalnızca enerji/yakıt maliyetleri; bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
+      shareTextDisclaimer: "Not: Girdilerine dayalı bağlayıcı olmayan tahmindir. Girdileri ve sonucu kontrol et. Yalnızca enerji/yakıt maliyetleri; bakım, sigorta, vergiler, değer kaybı, şarj kayıpları ve sabit ücretler dahil değildir.",
       // Result sentence (legally qualified, used in result/share/share-image)
       sentenceCompareSavings:  "Tahmini fark: {km} için {val} (girdilerine göre)",
       sentenceCompareExtra:    "Girdilerine göre içten yanmalı aracın maliyeti {km} için {val} daha düşük",
@@ -3869,7 +3869,7 @@ setTimeout(() => {
       defaults: {
         // DE-Marktdefaults (EUR, km, L, L/100 km, kWh/100 km) — manuell pflegbar
         strompreis:          { value: 0.37,   min: 0.10,  max: 1.00,    step: 0.01 },  // €/kWh
-        benzinpreis:         { value: 1.85,   min: 1.00,  max: 3.00,    step: 0.01 },  // €/L
+        benzinpreis:         { value: 2.15,   min: 1.00,  max: 3.00,    step: 0.01 },  // €/L
         verbrauchVerbrenner: { value: 7.0,    min: 3,     max: 20,      step: 0.1 },   // L/100 km
         evVerbrauch:         { value: 17,     min: 8,     max: 35,      step: 0.5 },   // kWh/100 km
         // Phase P Sprint 4 (F6.1): km* sliders harmonised at 0-10000 step 1

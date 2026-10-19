@@ -107,8 +107,8 @@ for (const [market, separator] of [["de",","], ["us","."], ["tr",","]]) {
     const rt = runtime(market, records);
     const file = rt.context.window.EAF_HISTORY_EXPORT.csv();
     const cells = file.data.split("\r\n")[1].split(";");
-    assert.equal(cells[2], "177.02784".replace(".", separator));
-    assert.equal(cells[4], "18.64".replace(".", separator));
+    assert.equal(cells[2], "177.028".replace(".", separator));
+    assert.equal(cells[4], "18.641".replace(".", separator));
     assert.equal(cells[3], "km");
     assert.equal(cells[5], "kWh/100 km");
     assert.equal(cells[10], "5.40".replace(".", separator), "stored trip result, independent of displayed input precision");
