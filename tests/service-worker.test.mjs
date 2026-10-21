@@ -656,7 +656,7 @@ test("EVS-052 nicht gecachte Navigation hält HTTP Fehler getrennt von Offline 5
 });
 
 test("EVS-052 statische Assets behalten die Static vor Runtime Cachepriorität", async () => {
-  const routes = ["/script.min.js?v=20261012-evspendpure", "/styles-app.min.css?v=20260601-audit-fix-2",
+  const routes = ["/script.min.js?v=20261012-evspendpure", "/styles-app.min.css?v=20261021-splash",
     "/extra.js", "/extra.css", "/favicon.ico", "/fonts/InterVariable.woff2", "/site.webmanifest"];
   const caches = new MemoryCacheStorage();
   for (const name of ["evspend-static-vAsset", "evspend-runtime-vAsset"]) {
@@ -798,7 +798,7 @@ test("Precache Liste ist eindeutig und verweist auf vorhandene Produktionsdateie
   }
   for (const asset of [
     "/history-store.js?v=20260927-h1", "/script.min.js?v=20261012-evspendpure", "/verlauf.min.js?v=20261012-evspendpure",
-    "/styles-app.min.css?v=20260601-audit-fix-2", "/theme-init.js?v=20261012-evspendpure",
+    "/styles-app.min.css?v=20261021-splash", "/theme-init.js?v=20261012-evspendpure",
     "/vendor/chart-4.4.6.umd.js", "/fonts/InterVariable.woff2"
   ]) assert.ok(required.includes(asset), asset);
   for (const asset of [

@@ -3731,24 +3731,18 @@ body[data-result-stale="true"] .stale-hint {
 }
 [data-theme="dark"] .calc-info-body strong{color:var(--l1);}
 
-/* ══ EVSpendPure Splash · EV with Signature Cut ══════════════════════
-   First-paint splash. Frame 0 equals the native launch image: EV small form,
-   width 17.573vh (168 pt on a 956 pt screen), centred on the full screen,
-   same background per appearance. JS adds `.run`, then `.is-hidden` (fade).
-   Safety fallback drops the overlay at 4 s (only if the splash JS never runs).
-   In the native app `.run` starts when the native launch screen is removed.
-   Sequence:
-     0.00s        EV visible (static, matches launch image)
-     0.10–0.52s   a fine light line runs along the Signature Cut
-     0.22–0.42s   the cut opens
-     0.30–0.80s   Spend, then the pure part with the Pure-P Riss rise in
-     ~1.00s       fade-out via .is-hidden (JS), 0.32 s
-   Reduced motion: overlay removed at once (unchanged). */
+/* ══ EVSpendPure Splash · minimal wordmark ══════════════════════════
+   First-paint splash in the WeatherPure manner: only the horizontal wordmark
+   (EV with Signature Cut plus Spendpure), centred, min(62vw, 300px). JS adds
+   `.run` (one soft wipe from left to right with a quiet fade, 0.8 s), then
+   `.is-hidden` after ~1 s (fade 0.32 s). Before `.run` only the brand ground is
+   visible, identical to the native launch image. Safety fallback drops the
+   overlay at 4 s (only if the splash JS never runs). */
 .evspend-splash{
-  --evs-bg:#F5F7F6; --evs-bar:#0A0F0D; --evs-v:#0A9E74; --evs-text:#0A0F0D; --evs-light:#FFFFFF; --evs-glow:rgba(10,158,116,.55);
-  --evs-mark-w:17.573vh;
+  --evs-bg:#F5F7F6; --evs-bar:#0A0F0D; --evs-v:#0A9E74; --evs-text:#0A0F0D;
   position:fixed; inset:0;
   z-index:2000;
+  display:flex; align-items:center; justify-content:center;
   background:var(--evs-bg);
   box-sizing:border-box;
   -webkit-user-select:none;user-select:none;
@@ -3758,50 +3752,26 @@ body[data-result-stale="true"] .stale-hint {
   animation:evspendSplashFallback 0ms ease-in 4000ms forwards;
 }
 [data-theme="dark"] .evspend-splash{
-  --evs-bg:#0A0F0D; --evs-bar:#FFFFFF; --evs-v:#10E0A0; --evs-text:#FFFFFF; --evs-light:#FFFFFF; --evs-glow:rgba(16,224,160,.85);
+  --evs-bg:#0A0F0D; --evs-bar:#FFFFFF; --evs-v:#10E0A0; --evs-text:#FFFFFF;
 }
 .evspend-splash.is-hidden{opacity:0;pointer-events:none;}
-.evspend-splash__mark,
-.evspend-splash__wm{
-  position:absolute; left:50%; display:block; overflow:visible;
-}
-.evspend-splash__mark{
-  top:50%;
-  width:var(--evs-mark-w); height:calc(var(--evs-mark-w) * 0.70583);
-  transform:translate(-50%,-50%);
-}
-.evspend-splash__wm{
-  top:calc(50% + var(--evs-mark-w) * 0.54318);
-  width:calc(var(--evs-mark-w) * 1.82762); height:calc(var(--evs-mark-w) * 0.39161);
-  margin-left:calc(var(--evs-mark-w) * 0.00000);
-  transform:translate(-50%,0);
+.evspend-splash__logo{
+  display:block; width:min(62vw,300px); height:auto; aspect-ratio:5.5266; overflow:visible;
+  opacity:0; -webkit-clip-path:inset(0 100% 0 0); clip-path:inset(0 100% 0 0);
 }
 .evs-c3-bar{fill:var(--evs-bar);}
 .evs-c3-v{fill:var(--evs-v);}
-.evs-cut{fill:var(--evs-bg);opacity:0;}
-.evs-cut-light{stroke:var(--evs-light);stroke-width:2.6;stroke-linecap:round;fill:none;opacity:0;
-  filter:drop-shadow(0 0 3px var(--evs-glow));}
-.evs-wm{fill:var(--evs-text);opacity:0;}
-.evspend-splash.run .evs-cut-light{animation:evsCutLight 420ms cubic-bezier(.4,0,.2,1) 100ms both;}
-.evspend-splash.run .evs-cut{animation:evsCutOpen 200ms ease-out 220ms both;}
-.evspend-splash.run .evs-wm-spend{animation:evsWordIn 380ms cubic-bezier(.2,.7,.2,1) 300ms both;}
-.evspend-splash.run .evs-wm-pure{animation:evsWordIn 380ms cubic-bezier(.2,.7,.2,1) 420ms both;}
-@keyframes evsCutLight{
-  0%  { opacity:0; stroke-dashoffset:56.51; }
-  20% { opacity:1; }
-  62% { opacity:1; stroke-dashoffset:0; }
-  100%{ opacity:0; stroke-dashoffset:0; }
-}
-@keyframes evsCutOpen{ from{opacity:0} to{opacity:1} }
-@keyframes evsWordIn{
-  from{ opacity:0; transform:translateY(6px); }
-  to  { opacity:1; transform:translateY(0); }
+.evs-wm{fill:var(--evs-text);}
+/* one soft reveal: wipe from left to right with a quiet fade, calm and short */
+.evspend-splash.run .evspend-splash__logo{animation:evsReveal 800ms cubic-bezier(.45,.05,.2,1) both;}
+@keyframes evsReveal{
+  from{ opacity:.5; -webkit-clip-path:inset(0 100% 0 0); clip-path:inset(0 100% 0 0); }
+  to  { opacity:1;  -webkit-clip-path:inset(0 0 0 0);    clip-path:inset(0 0 0 0); }
 }
 @keyframes evspendSplashFallback{ to { opacity:0; pointer-events:none; visibility:hidden; } }
 
 @media (prefers-reduced-motion: reduce){
-  .evs-cut,.evs-wm{ opacity:1 !important; animation:none !important; }
-  .evs-cut-light{ display:none; }
+  .evspend-splash__logo{ opacity:1 !important; -webkit-clip-path:none !important; clip-path:none !important; animation:none !important; }
   .evspend-splash{ opacity:0; pointer-events:none; visibility:hidden; animation:none; }
 }
 
