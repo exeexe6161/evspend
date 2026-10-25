@@ -206,8 +206,11 @@ body::before{
   box-shadow:var(--shadow-1);
 }
 /* Auf Handybreite eigene Zeile für die fixen Top-Controls freihalten,
-   damit Markt-Pille und Theme-Button die Wortmarke nicht überdecken. */
-@media (max-width:640px){
+   damit Markt-Pille und Theme-Button die Wortmarke nicht überdecken.
+   iPhone Duo: Bis 880px reicht der zentrierte Banner (max 560px) unter die
+   rechts fixierten Controls (Innendisplay hochkant = 669px). Darum gilt die
+   freie Zeile bis 880px. Pro/Max (402/440px) sind unverändert. */
+@media (max-width:880px){
   .hero-banner{margin-top:calc(68px + var(--safe-top));}
 }
 [data-theme="dark"] .hero-banner{
@@ -816,7 +819,7 @@ button .ico,a .ico{margin-right:6px;}
 /* ══ PWA Install Bottom Bar (stage 1) ══ */
 .pwa-bar{
   position:fixed;left:0;right:0;bottom:0;z-index:650;
-  padding:0 12px calc(12px + env(safe-area-inset-bottom,0px));
+  padding:0 calc(12px + var(--safe-r)) calc(12px + env(safe-area-inset-bottom,0px)) calc(12px + var(--safe-l));
   opacity:0;transform:translateY(calc(100% + 28px));
   transition:opacity .28s ease,transform .42s cubic-bezier(.32,1.18,.45,1);
   pointer-events:none;
@@ -872,7 +875,7 @@ button .ico,a .ico{margin-right:6px;}
 .pwa-popup{
   position:fixed;inset:0;z-index:700;
   display:flex;align-items:flex-end;justify-content:center;
-  padding:0 12px calc(14px + env(safe-area-inset-bottom,0px));
+  padding:0 calc(12px + var(--safe-r)) calc(14px + env(safe-area-inset-bottom,0px)) calc(12px + var(--safe-l));
   background:rgba(0,0,0,.55);   /* Phase L.2 — kein backdrop-blur, dafür kräftigeres Overlay */
   opacity:0;pointer-events:none;
   transition:opacity .22s ease;
@@ -3545,7 +3548,10 @@ body[data-longterm="on"] .sl-row--km{
    ist nur Positioner; die Drop-Shadow-Tiefe wandert auf .calc-btn. */
 .sticky-cta-wrapper{
   position:fixed;
-  left:50%;
+  /* iPhone Duo: seitliche Safe Areas sind asymmetrisch (Statusleiste rechts
+     am Außendisplay). Mitte des sicheren Bereichs statt der Viewport-Mitte.
+     Bei gleichen oder null Insets identisch mit left:50%. */
+  left:calc(50% + (var(--safe-l) - var(--safe-r)) / 2);
   bottom:calc(14px + var(--safe-bot));
   transform:translateX(-50%);
   z-index:150;
@@ -3583,7 +3589,7 @@ body[data-pwa-bar="visible"] .sticky-cta-wrapper{
 .calc-btn {
   width: auto;
   min-width: 200px;
-  max-width: min(360px, calc(100vw - 32px));
+  max-width: min(360px, calc(100vw - 32px - var(--safe-l) - var(--safe-r)));
   display: block;
   padding: 13px 28px;
   min-height: var(--h-btn-md);
@@ -3846,6 +3852,8 @@ body[data-result-stale="true"] .stale-hint {
 }
 
 /* Prevent input focus zoom on mobile without disabling user zoom. */
-@media (max-width: 767px){
+@media (max-width: 767px), (pointer: coarse){
+  /* pointer:coarse deckt iPhone Duo Innendisplay quer (951px) ab, wo iOS
+     sonst beim Fokus zoomt. Desktop mit Maus bleibt unverändert. */
   .note-input,.hist-search{font-size:16px;}
 }
