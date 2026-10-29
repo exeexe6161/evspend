@@ -27,7 +27,7 @@
       ]
     },
     {
-      "source": "/(styles-app\\.min\\.css|styles-pages\\.min\\.css|script\\.min\\.js|verlauf\\.min\\.js|theme-init\\.js|lang-switch\\.js|en-eu/init-eu\\.js|en-eu/styles-en-eu\\.css|tr/init-tr\\.js|tr/styles-tr\\.css)",
+      "source": "/(styles-app\\.min\\.css|styles-duo\\.min\\.css|styles-pages\\.min\\.css|script\\.min\\.js|verlauf\\.min\\.js|theme-init\\.js|lang-switch\\.js|en-eu/init-eu\\.js|en-eu/styles-en-eu\\.css|tr/init-tr\\.js|tr/styles-tr\\.css)",
       "headers": [
         { "key": "Cache-Control", "value": "no-cache, must-revalidate" }
       ]

@@ -56,6 +56,7 @@ export const PUBLIC_FILES = Object.freeze([
   'site.webmanifest',
   'sitemap.xml',
   'styles-app.min.css',
+  'styles-duo.min.css',
   'styles-pages.min.css',
   'sw.js',
   'terms.en.html',

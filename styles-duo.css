@@ -1,0 +1,47 @@
+/* EVSpendPure Web: zweispaltiges Layout fuer breite Touch Fenster (aufgeklapptes Foldable, breites Tablet quer).
+   Regelkoerper identisch zum geprueften iOS Duo Prototyp (Commit 6ca5b3f, app-overrides/ios_duo_layout.css). Nur das Gate ist anders.
+   Gate: screen, mindestens 840 x 480 CSS Pixel, primaerer Zeiger grob (pointer: coarse) und ohne Hover (hover: none).
+   Maus Desktops, normale Smartphones und der Druck bleiben dadurch unveraendert. Kein HTML, kein JavaScript, keine Berechnung.
+   Jede Regel ist mit body:not([data-longterm="on"]) begrenzt: die Langzeitanalyse zeigt ihr Ergebnis im
+   Eingabebereich und bleibt deshalb einspaltig wie bisher. Dokumentation: DUO_LAYOUT.md */
+@media screen and (min-width: 840px) and (min-height: 480px) and (pointer: coarse) and (hover: none) {
+  body:not([data-longterm="on"]) { max-width: 1120px; padding-bottom: calc(28px + var(--safe-bot)); }
+
+  /* Kopfbereich: Banner links, Text rechts, Platz fuer die feste Marktauswahl oben rechts */
+  body:not([data-longterm="on"]) .hero { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 6fr); column-gap: 8px; align-items: start; padding: 0 12px; }
+  body:not([data-longterm="on"]) .hero > picture { grid-column: 1; grid-row: 1 / span 3; align-self: center; }
+  body:not([data-longterm="on"]) .hero .hero-banner { width: 100%; max-width: none; margin: calc(14px + var(--safe-top)) 0 14px; }
+  body:not([data-longterm="on"]) .hero .hdr { grid-column: 2; grid-row: 1; padding-top: calc(64px + var(--safe-top)); padding-bottom: 0; }
+  body:not([data-longterm="on"]) .hero .hdr p { margin-top: 4px; }
+  body:not([data-longterm="on"]) .hero .trust-list { grid-column: 2; grid-row: 2; padding-top: 10px; padding-bottom: 0; }
+  body:not([data-longterm="on"]) .hero .disclaimer { grid-column: 2; grid-row: 3; padding-top: 8px; padding-bottom: 12px; }
+
+  /* Zwei Spalten: links Eingaben und Aktionen, rechts Ergebnis (bleibt beim Scrollen stehen) */
+  body:not([data-longterm="on"]) .app-main { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); column-gap: 0; align-items: start; }
+  body:not([data-longterm="on"]) .app-main > .mode-toggle, body:not([data-longterm="on"]) .app-main > .type-toggle, body:not([data-longterm="on"]) .app-main > .calc-section, body:not([data-longterm="on"]) .app-main > .cta-section { grid-column: 1; }
+  body:not([data-longterm="on"]) .app-main > .result-section {
+    grid-column: 2; grid-row: 1 / span 4; align-self: start; margin-top: 0;
+    position: sticky; top: calc(var(--safe-top) + 62px);
+    max-height: calc(100vh - var(--safe-top) - 62px - 12px - var(--safe-bot));
+    max-height: calc(100dvh - var(--safe-top) - 62px - 12px - var(--safe-bot));
+    overflow-y: auto; overscroll-behavior: auto; scroll-padding-bottom: 32px; -webkit-overflow-scrolling: touch;
+    padding-bottom: 30px;
+    /* Hinweis auf weiteren Inhalt: weicher Rand unten, nur im Fenster, nicht im Inhalt */
+    -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
+    mask-image: linear-gradient(to bottom, #000 calc(100% - 26px), transparent);
+  }
+
+  /* Ergebnis Knopf: im Fluss statt schwebend, verdeckt nichts */
+  body:not([data-longterm="on"]) .sticky-cta-wrapper { position: static; transform: none; left: auto; bottom: auto; width: auto; margin: 14px var(--gutter) 0; }
+  body:not([data-longterm="on"]) .sticky-cta-wrapper > .calc-btn { width: 100%; max-width: none; }
+
+  /* ===== NUR WEB (nicht Teil des iOS Prototyps): feste Installationsleiste "App installieren" ===== */
+  /* Die Leiste (position: fixed, unten, rund 79 px) erscheint nur im Web, ab dem zweiten Besuch und nur kurz nach dem Laden.
+     Solange sie sichtbar ist (body[data-pwa-bar="visible"]), endet die Ergebnisspalte oberhalb der Leiste
+     und das Seitenende bleibt frei erreichbar. Ohne Leiste gilt exakt der geprueften iOS Regelkoerper oben. */
+  body:not([data-longterm="on"])[data-pwa-bar="visible"] { padding-bottom: calc(104px + var(--safe-bot)); }
+  body:not([data-longterm="on"])[data-pwa-bar="visible"] .app-main > .result-section {
+    max-height: calc(100vh - var(--safe-top) - 62px - 12px - var(--safe-bot) - 79px);
+    max-height: calc(100dvh - var(--safe-top) - 62px - 12px - var(--safe-bot) - 79px);
+  }
+}

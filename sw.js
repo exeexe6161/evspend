@@ -42,6 +42,7 @@ const REQUIRED_PRECACHE_URLS = [
   '/tr/verlauf.html',
   '/site.webmanifest',
   '/styles-app.min.css?v=20261021-splash',
+  '/styles-duo.min.css?v=d1-03f0a3d87bea',
   '/theme-init.js?v=20261012-evspendpure',
   '/script.min.js?v=20261012-evspendpure',
   '/verlauf.min.js?v=20261012-evspendpure',

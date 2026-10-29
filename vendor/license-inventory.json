@@ -68,6 +68,7 @@
       "script.min.js",
       "site.webmanifest",
       "styles-app.min.css",
+      "styles-duo.min.css",
       "styles-pages.min.css",
       "theme-init.js",
       "tr/init-tr.js",
