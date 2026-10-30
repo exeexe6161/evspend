@@ -2,6 +2,7 @@
   "buildCommand": "node build-licenses.mjs --check && node build-sw.mjs && node build-vercel.mjs",
   "outputDirectory": ".vercel-static",
   "cleanUrls": true,
+  "git": { "deploymentEnabled": { "cf-*": false } },
   "headers": [
     {
       "source": "/(.*)",

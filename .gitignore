@@ -18,3 +18,4 @@ Inter-4/
 # Secrets / lokale Tool-Configs (präventiv, Secret-Scan 2026-06-10)
 .env*
 .claude/
+.cloudflare-static/

@@ -2,7 +2,7 @@
 /* Generate the Service-Worker cache key at build time and bake it into sw.js.
  *
  * Source of truth, in order of precedence:
- *   1. process.env.VERCEL_GIT_COMMIT_SHA  (first 12 chars) — stable per deploy
+ *   1. process.env.VERCEL_GIT_COMMIT_SHA or CF_PAGES_COMMIT_SHA (first 12 chars) — stable per deploy
  *   2. Date.now()                          — fallback for local/offline builds
  *
  * Deliberately never shells out to `git`: VERCEL_GIT_COMMIT_SHA may be unset
@@ -11,7 +11,8 @@
  */
 import { readFile, writeFile } from 'node:fs/promises';
 
-const sha = process.env.VERCEL_GIT_COMMIT_SHA;
+// Vercel exposes VERCEL_GIT_COMMIT_SHA, Cloudflare Pages exposes CF_PAGES_COMMIT_SHA.
+const sha = process.env.VERCEL_GIT_COMMIT_SHA || process.env.CF_PAGES_COMMIT_SHA;
 const token = sha ? sha.slice(0, 12) : String(Date.now());
 const version = 'v' + token;
 
