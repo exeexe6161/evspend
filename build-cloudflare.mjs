@@ -10,6 +10,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { CLOUDFLARE_HSTS } from './lib/cloudflare-security.mjs';
 import { buildStaticOutput, ROOT } from './build-vercel.mjs';
 
 export const OUT_NAME = '.cloudflare-static';
@@ -30,7 +31,7 @@ export function buildHeadersFile(vercelJson, { noindex = false } = {}) {
     // Global Cache-Control is dropped: Pages already answers "public, max-age=0, must-revalidate" (revalidate on every use).
     const headers = rule.headers
       .filter(h => !(global && h.key === 'Cache-Control'))
-      .map(h => `  ${h.key}: ${h.value}`);
+      .map(h => `  ${h.key}: ${h.key.toLowerCase() === 'strict-transport-security' ? CLOUDFLARE_HSTS : h.value}`);
     if (global && noindex) headers.push('  X-Robots-Tag: noindex, nofollow, noarchive');
     for (const pattern of toPatterns(rule.source)) out.push('', pattern, ...headers);
   }

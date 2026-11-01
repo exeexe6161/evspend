@@ -38,9 +38,11 @@ test('_headers keeps every vercel header and stays within the Pages limit', () =
   const rules = file.split('\n').filter(l => l.startsWith('/'));
   assert.ok(rules.length <= MAX_HEADER_RULES, `${rules.length} rules`);
   const global = vercel.headers.find(r => r.source === '/(.*)');
-  for (const h of global.headers.filter(h => h.key !== 'Cache-Control')) {
+  for (const h of global.headers.filter(h => h.key !== 'Cache-Control' && h.key !== 'Strict-Transport-Security')) {
     assert.ok(file.includes(`  ${h.key}: ${h.value}\n`), h.key);
   }
+  assert.match(file, /^  Strict-Transport-Security: max-age=300$/m);
+  assert.doesNotMatch(file, /includeSubDomains|preload/i);
   assert.ok(file.includes('Content-Security-Policy: default-src \'none\''));
   assert.ok(file.includes('/sw.js\n  Cache-Control: no-cache, no-store, must-revalidate\n  Service-Worker-Allowed: /'));
   assert.ok(file.includes('/fonts/*\n  Cache-Control: public, max-age=31536000, immutable'));
@@ -89,4 +91,69 @@ test('global noindex runtime flag covers function and avoids suffix spoofing', a
     assert.equal(response.headers.has('X-Robots-Tag'), expected);
     assert.equal(response.headers.get('X-Frame-Options'), 'DENY');
   }
+});
+
+test('geo function redirects keep the existing security policy and indexing rules', async () => {
+  const { onRequest: start } = await import('../functions/index.js');
+  const { onRequest: history } = await import('../functions/verlauf.js');
+  const globalHeaders = vercel.headers.find(rule => rule.source === '/(.*)').headers;
+  const value = name => globalHeaders.find(header => header.key === name).value;
+  for (const [path, fn] of [['/', start], ['/verlauf', history]]) {
+    for (const host of ['www.evspendpure.com', 'evspendpure.pages.dev', 'cf-index-03-preview.evspendpure.pages.dev', '0f5716bd.evspendpure.pages.dev']) {
+      for (const flag of ['0', '1']) {
+        for (const [country, prefix] of [['FR', '/en-eu'], ['TR', '/tr']]) {
+          const request = new Request(`https://${host}${path}?id=probe&x=2`);
+          Object.defineProperty(request, 'cf', { value: { country } });
+          const response = await fn({ request, env: { CF_NOINDEX: flag }, next: () => { throw Error('unexpected pass-through'); } });
+          assert.equal(response.status, 302);
+          assert.equal(response.headers.get('location'), `https://${host}${prefix}${path}?id=probe&x=2`);
+          assert.equal(response.headers.get('strict-transport-security'), 'max-age=300');
+          assert.equal(response.headers.get('referrer-policy'), value('Referrer-Policy'));
+          assert.equal(response.headers.get('x-content-type-options'), value('X-Content-Type-Options'));
+          assert.equal(response.headers.get('cache-control'), null);
+          assert.equal(response.headers.get('x-robots-tag'), flag === '1' || host.endsWith('.pages.dev') ? 'noindex, nofollow, noarchive' : null);
+          assert.equal([...response.headers].filter(([name]) => name === 'x-robots-tag').length, flag === '1' || host.endsWith('.pages.dev') ? 1 : 0);
+        }
+      }
+    }
+  }
+});
+
+test('HTTP redirect does not introduce HSTS', () => {
+  const request = new Request('http://www.evspendpure.com/verlauf?id=42');
+  Object.defineProperty(request, 'cf', { value: { country: 'TR' } });
+  const response = geoRedirect(request);
+  assert.equal(response.status, 302);
+  assert.equal(response.headers.get('location'), 'http://www.evspendpure.com/tr/verlauf?id=42');
+  assert.equal(response.headers.get('strict-transport-security'), null);
+});
+
+test('pass-through retains HTML, error, and caching headers on known and unknown paths', async () => {
+  for (const path of ['/', '/verlauf', '/unknown']) {
+    for (const status of [200, 404, 503]) {
+      for (const [host, flag] of [['evspendpure.pages.dev', '0'], ['www.evspendpure.com', '1'], ['www.evspendpure.com', '0']]) {
+        const request = new Request(`https://${host}${path}?market=de`);
+        const headers = { 'Content-Security-Policy': "default-src 'none'; script-src 'self'", 'Cache-Control': 'private, max-age=0', 'Strict-Transport-Security': 'max-age=3600', 'X-Robots-Tag': 'noarchive' };
+        const response = await handleGeoRequest({ request, env: { CF_NOINDEX: flag }, next: async () => new Response('test', { status, headers }) });
+        assert.equal(response.status, status);
+        assert.equal(await response.text(), 'test');
+        for (const name of ['Content-Security-Policy', 'Cache-Control', 'Strict-Transport-Security']) {
+          assert.equal(response.headers.get(name), headers[name]);
+        }
+        assert.equal(response.headers.get('X-Robots-Tag'), host.endsWith('.pages.dev') || flag === '1' ? 'noindex, nofollow, noarchive' : 'noarchive');
+      }
+    }
+  }
+});
+
+
+test('Cloudflare HSTS is consistent across static builds and both geo functions', async () => {
+  for (const noindex of [false, true]) {
+    const headers = buildHeadersFile(vercel, { noindex });
+    const global = headers.split('\n\n').find(block => block.startsWith('/*\n'));
+    assert.match(global, /^  Strict-Transport-Security: max-age=300$/m);
+    assert.equal((global.match(/^  Strict-Transport-Security:/gm) || []).length, 1);
+    assert.doesNotMatch(global, /includeSubDomains|preload/i);
+  }
+  assert.equal(vercel.headers.find(rule => rule.source === '/(.*)').headers.find(h => h.key === 'Strict-Transport-Security').value, 'max-age=63072000; includeSubDomains; preload');
 });
