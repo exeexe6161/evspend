@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import fs from 'node:fs';
-import { toPatterns, buildHeadersFile, MAX_HEADER_RULES } from '../build-cloudflare.mjs';
+import { toPatterns, buildHeadersFile, stripNelEnabled, MAX_HEADER_RULES } from '../build-cloudflare.mjs';
 import { geoRedirect } from '../lib/geo-redirect.mjs';
 
 const vercel = JSON.parse(fs.readFileSync(new URL('../vercel.json', import.meta.url), 'utf8'));
@@ -56,4 +56,28 @@ test('noindex flag adds X-Robots-Tag only to the global rule', () => {
 
 test('functions are limited to the two geo routes', () => {
   assert.deepEqual(fs.readdirSync(new URL('../functions', import.meta.url)).sort(), ['index.js', 'verlauf.js']);
+});
+
+test('NEL detach is opt-in, touches only the global rule and changes no other header (CF-NEL-01)', () => {
+  const base = buildHeadersFile(vercel);
+  assert.ok(!/NEL|Report-To/.test(base), 'default output carries no NEL/Report-To line');
+  const nel = buildHeadersFile(vercel, { stripNel: true });
+  assert.equal(nel.split('  ! NEL\n').length - 1, 1);
+  assert.equal(nel.split('  ! Report-To\n').length - 1, 1);
+  assert.match(nel, /^\/\*\n(?:  .+\n)*  ! NEL\n  ! Report-To\n/m);
+  assert.equal(nel.replace('  ! NEL\n  ! Report-To\n', ''), base, 'removing the two lines yields the unchanged default file');
+  const rules = f => f.split('\n').filter(l => l.startsWith('/')).length;
+  assert.equal(rules(nel), rules(base));
+  const both = buildHeadersFile(vercel, { noindex: true, stripNel: true });
+  assert.ok(both.includes('X-Robots-Tag: noindex, nofollow, noarchive'));
+  assert.ok(both.includes('Content-Security-Policy: default-src \'none\''));
+});
+
+test('stripNelEnabled reads only CF_STRIP_NEL=1 or the cf-nel-test branch', () => {
+  assert.equal(stripNelEnabled({}), false);
+  assert.equal(stripNelEnabled({ CF_STRIP_NEL: '0' }), false);
+  assert.equal(stripNelEnabled({ CF_PAGES_BRANCH: 'cf-pages-prod' }), false);
+  assert.equal(stripNelEnabled({ CF_PAGES_BRANCH: 'cf-test' }), false);
+  assert.equal(stripNelEnabled({ CF_STRIP_NEL: '1' }), true);
+  assert.equal(stripNelEnabled({ CF_PAGES_BRANCH: 'cf-nel-test' }), true);
 });

@@ -23,7 +23,13 @@ export function toPatterns(source) {
   return m[1].split('|').map(alt => '/' + alt.replace(/\\\./g, '.').replace(/\/\.\+$/, '/*'));
 }
 
-export function buildHeadersFile(vercelJson, { noindex = false } = {}) {
+/** Opt-in NEL test (CF-NEL-01): detach the headers Cloudflare adds by default. Active only if CF_STRIP_NEL=1 or on branch cf-nel-test. */
+export const NEL_DETACH = ['NEL', 'Report-To'];
+export function stripNelEnabled(env = process.env) {
+  return env.CF_STRIP_NEL === '1' || env.CF_PAGES_BRANCH === 'cf-nel-test';
+}
+
+export function buildHeadersFile(vercelJson, { noindex = false, stripNel = false } = {}) {
   const out = ['# GENERATED from vercel.json by build-cloudflare.mjs. Do not edit by hand.'];
   for (const rule of vercelJson.headers) {
     const global = rule.source === '/(.*)';
@@ -32,6 +38,7 @@ export function buildHeadersFile(vercelJson, { noindex = false } = {}) {
       .filter(h => !(global && h.key === 'Cache-Control'))
       .map(h => `  ${h.key}: ${h.value}`);
     if (global && noindex) headers.push('  X-Robots-Tag: noindex, nofollow, noarchive');
+    if (global && stripNel) for (const h of NEL_DETACH) headers.push(`  ! ${h}`);
     for (const pattern of toPatterns(rule.source)) out.push('', pattern, ...headers);
   }
   return out.join('\n') + '\n';
@@ -44,14 +51,15 @@ export function buildCloudflareOutput(root = ROOT, env = process.env) {
   fs.rmSync(target, { recursive: true, force: true });
   fs.cpSync(staged.output, target, { recursive: true });
   const vercelJson = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
-  const headers = buildHeadersFile(vercelJson, { noindex: env.CF_NOINDEX === '1' });
+  const stripNel = stripNelEnabled(env);
+  const headers = buildHeadersFile(vercelJson, { noindex: env.CF_NOINDEX === '1', stripNel });
   const rules = headers.split('\n').filter(line => line.startsWith('/')).length;
   if (rules > MAX_HEADER_RULES) throw new Error(`_headers has ${rules} rules, Cloudflare Pages allows ${MAX_HEADER_RULES}`);
   fs.writeFileSync(path.join(target, '_headers'), headers);
-  return { output: target, files: staged.files.length, rules, noindex: env.CF_NOINDEX === '1' };
+  return { output: target, files: staged.files.length, rules, noindex: env.CF_NOINDEX === '1', stripNel };
 }
 
 if (process.argv[1] && fs.realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const r = buildCloudflareOutput();
-  console.log(`cloudflare-package: ${r.files} files + _headers (${r.rules} rules${r.noindex ? ', noindex' : ''}) -> ${OUT_NAME}`);
+  console.log(`cloudflare-package: ${r.files} files + _headers (${r.rules} rules${r.noindex ? ', noindex' : ''}${r.stripNel ? ', strip-nel' : ''}) -> ${OUT_NAME}`);
 }
