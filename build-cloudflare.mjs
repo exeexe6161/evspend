@@ -34,6 +34,11 @@ export function buildHeadersFile(vercelJson, { noindex = false } = {}) {
     if (global && noindex) headers.push('  X-Robots-Tag: noindex, nofollow, noarchive');
     for (const pattern of toPatterns(rule.source)) out.push('', pattern, ...headers);
   }
+  if (!noindex) {
+    for (const host of ['evspendpure.pages.dev', 'evspendpure-cf-test.pages.dev']) {
+      out.push('', `https://${host}/*`, '  X-Robots-Tag: noindex, nofollow, noarchive');
+    }
+  }
   return out.join('\n') + '\n';
 }
 
@@ -45,7 +50,7 @@ export function buildCloudflareOutput(root = ROOT, env = process.env) {
   fs.cpSync(staged.output, target, { recursive: true });
   const vercelJson = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
   const headers = buildHeadersFile(vercelJson, { noindex: env.CF_NOINDEX === '1' });
-  const rules = headers.split('\n').filter(line => line.startsWith('/')).length;
+  const rules = headers.split('\n').filter(line => line.startsWith('/') || line.startsWith('https://')).length;
   if (rules > MAX_HEADER_RULES) throw new Error(`_headers has ${rules} rules, Cloudflare Pages allows ${MAX_HEADER_RULES}`);
   fs.writeFileSync(path.join(target, '_headers'), headers);
   return { output: target, files: staged.files.length, rules, noindex: env.CF_NOINDEX === '1' };
