@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<meta name="description" content="EVSpendPure Privacy Policy, short summary for app store review.">
+<meta name="description" content="How EVSpendPure stores inputs and history in your browser and processes information when you visit the site or email the operator.">
 <link rel="canonical" href="https://www.evspendpure.com/privacy-policy">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
@@ -36,7 +36,7 @@
   <div class="page-header">
     <div class="page-meta">
       <span class="page-tag">Privacy</span>
-      <span class="page-stand">As of June 10, 2026</span>
+      <span class="page-stand">As of November 2, 2026</span>
     </div>
     <h1 class="page-title">Privacy Policy</h1>
     <p class="page-subtitle">Short summary for app store reviewers and end users</p>
@@ -51,6 +51,7 @@
     <h2>Operator</h2>
     <p>Hakan Gür · c/o COCENTER · Koppoldstr. 1 · 86551 Aichach · Germany<br>
     Email: <a href="mailto:hello@iamguer.com">hello@iamguer.com</a></p>
+    <p>If you email us, we receive your sender address, message and any attachments. We use united-domains to receive and answer enquiries. For general enquiries our legitimate interest is to respond to your request (Article 6(1)(f) GDPR). Providing these details is voluntary. We need a return address to reply by email. To request a callback, you may voluntarily include your phone number and a preferred callback time in your email. We use these voluntarily provided contact details only to handle your specific enquiry and arrange the callback you requested. We have decided to review completed contact requests once a month and to delete them where no retention reasons apply.</p>
   </div>
 
   <div class="card">
@@ -58,15 +59,17 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><line x1="22" x2="2" y1="12" y2="12" /><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z" /><line x1="6" x2="6.01" y1="16" y2="16" /><line x1="10" x2="10.01" y1="16" y2="16" /></svg>
     </div>
     <h2>Data Collection</h2>
-    <p>Calculations take place locally on the device. In the website and installed PWA, calculator inputs (vehicle consumption, prices, mileage, saved history) are stored in the browser's local storage and are not automatically transmitted to the operator. This storage is technically necessary for the features you use, so no consent is requested. When the website is loaded, technically necessary connection data (IP address, user agent, timestamp, request URL, referrer) is processed by the hosting provider. See "Hosting" below.</p>
-    <p>When you share a calculation or export the history, contents may reach a recipient or storage location you choose as text, an image or a file. A history backup also includes saved notes. This is an action you initiate. Website history links may include entry identifiers (<code>id</code>, <code>entryKey</code> or <code>entryIndex</code>) in request URLs sent to the hosting provider. These links do not embed calculator values or notes in the URL.</p>
-    <p>The website and installed PWA use a Service Worker to cache static resources. Clearing that cache alone removes cached assets. Clearing all website data may also delete localStorage containing saved calculations, notes and settings. The hosting and country-based redirects described in the full policy apply to the website and installed PWA. Native iOS storage and export are described below.</p>
-    <p>No registration, no sign-in, no user accounts. The app is usable anonymously.</p>
-  </div>
+    <p>Current storage: calculator inputs are by default held only in the memory of the open page and discarded on close or reload. A history entry with an optional note is created only when you explicitly save it and is kept locally in the browser (not automatically transmitted to the operator). Settings such as market or theme are stored only after your explicit choice. Voluntarily enabled storage: only if you enable "Remember inputs on this device" is the input draft (without the note) stored in LocalStorage. Possible legacy data: earlier versions could store inputs automatically and write markers for a start animation, an install-prompt visit counter and a <code>lastSaveTime</code> timestamp; these functions no longer exist, and existing legacy data is not deleted or converted without your say-so.</p>
+    <p>When you share a calculation or export the history, contents may reach a recipient or storage location you choose as text, an image or a file. A history backup also includes saved notes. This is an action you initiate. New website history links carry the entry identifier in the URL fragment (after <code>#</code>), which browsers do not send to the server; historical links with <code>id</code>, <code>entryKey</code> or <code>entryIndex</code> parameters remain supported and may send these identifiers to the hosting provider. The links do not embed calculator values or notes in the URL.</p>
+    <p>Offline mode is voluntary: the website registers a Service Worker only after your action "Make available offline", and "Remove offline mode" removes the registration and this website's caches. Clearing that cache alone removes cached assets. Clearing all website data may also delete localStorage containing saved calculations and remembered settings. The hosting and country-based redirects described in the full policy apply to the website and installed PWA. Native iOS storage and export are described below.</p>
+    <p>You can use the calculator without creating an account.</p>
+    <p>There is no start animation and no visit counter any more; the install help is an instruction page you open yourself and stores no choice.</p>
+    <p>After activation, pages and static resources may be stored in the browser's cache; identifiers of history links are not stored in cache keys, and calculator inputs and notes are not written to the cache. A Service Worker registered automatically by an earlier version, and its cache, may continue to exist until removed.</p>
+    </div>
 
   <div class="card" id="native-ios-privacy">
     <h2>Native iOS App</h2>
-    <p>The native iOS app loads its bundled pages and resources locally in a WebView. Saved calculations, notes and settings are held in local WebView storage in the app container, separately from the browser's website data. Starting these local contents does not use the website's Vercel hosting, Service Worker or country-based redirect. External links and sharing destinations you choose may use network connections.</p>
+    <p>The native iOS app loads its bundled pages and resources locally in a WebView. Saved calculations, notes and settings are held in local WebView storage in the app container, separately from the browser's website data. Starting these local contents does not use the website's hosting, Service Worker or country-based redirect. External links and sharing destinations you choose may use network connections.</p>
     <p>Imported JSON backups are processed locally. For a JSON or CSV export, the app writes a temporary file to its cache directory (<code>CACHE</code>) and opens the native share dialog. You choose the recipient or storage location. After the sharing attempt, the app tries to delete its temporary file. If cleanup is interrupted or fails, the file may remain. Copies already shared or saved elsewhere are not removed by this cleanup or by deleting the app's history.</p>
   </div>
 
@@ -83,12 +86,15 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" x2="12.01" y1="20" y2="20"/></svg>
     </div>
     <h2>Hosting</h2>
-    <p>This website is hosted by <strong>Vercel Inc.</strong> When accessed online, technically necessary connection data (in particular <strong>IP address, user agent, timestamp, request URL and referrer, if sent by the browser</strong>) are processed by the hosting provider to deliver the website, defend against attacks and ensure service stability. The legal basis is <strong>Art. 6(1)(f) GDPR</strong> (legitimate interest in the secure operation of the website). For personal usage data and metadata generated through the operation of its services, Vercel describes processing as a controller.</p>
-    <p>Technical request data may be stored in Vercel's operational and security logs. Vercel's Privacy Notice describes purpose-based retention criteria, but does not specify a single deletion period for all log data.</p>
-    <p>According to Vercel's Privacy Notice, personal data may be processed in the United States and other countries. When this website is accessed online, this concerns technical request data such as the IP address. This does not automatically transmit locally stored calculations or notes to Vercel.</p>
-    <p>Vercel states in its Privacy Notice that it participates in the <strong>EU-U.S. Data Privacy Framework (DPF)</strong>.</p>
-    <p>Vercel describes using Standard Contractual Clauses or other appropriate mechanisms for international transfers where required by law. The applicable basis for individual transfers in the operation of EVSpendPure still requires legal review.</p>
-    <p>Further information: <a href="https://vercel.com/legal/dpa" target="_blank" rel="noopener">Vercel Data Processing Agreement</a> · <a href="https://vercel.com/legal/privacy-notice" target="_blank" rel="noopener">Vercel Privacy Notice</a></p>
+    <p>This website is hosted on <strong>Cloudflare Pages</strong>, a service of <strong>Cloudflare, Inc.</strong> (101 Townsend St., San Francisco, CA 94107, USA). When accessed online, technically necessary connection data (in particular <strong>IP address, user agent, timestamp, request URL and referrer, if sent by the browser</strong>) are processed by the hosting provider to deliver the website, defend against attacks and ensure service stability. The legal basis is <strong>Art. 6(1)(f) GDPR</strong> (legitimate interest in the secure operation of the website).</p>
+    <p>Cloudflare’s terms incorporate a data processing addendum for covered customer data. Cloudflare identifies customer logs and content transmitted through its network as examples of processing on a customer’s behalf. Cloudflare may act as controller for its own purposes.</p>
+    <p>Cloudflare may process operational records to deliver and protect the service. The country redirect function does not write logs of its own. We have no verified fixed deletion period covering all provider request records for this site. Cloudflare describes retention criteria including purpose and legal obligations.</p>
+    <p>On a static Cloudflare test page, the <code>NEL</code> and <code>Report-To</code> headers supplied a policy that supporting browsers may retain for up to seven days. On connection failures the browser may send a report to <code>a.nel.cloudflare.com</code>. The reporting rate for successful requests was zero in the test. Reports may include the requested URL and its parameters, the referrer and error details. Cloudflare says it uses the client IP to identify network characteristics and does not log it in this reporting pipeline. For evspendpure.com this function is switched off in the domain settings.</p>
+    <p>Cloudflare operates a global network and also processes personal data outside the EU and EEA, including in the United States; Cloudflare also uses sub-processors in several countries. When this website is accessed online, this concerns technical request data such as the IP address. This does not automatically transmit locally stored calculations or notes to Cloudflare.</p>
+    <p>Cloudflare states in its Privacy Policy that it is certified under the <strong>EU-U.S. Data Privacy Framework (DPF)</strong>, the UK Extension to the EU-U.S. DPF and the Swiss-U.S. DPF.</p>
+    <p>For transfers not covered by the DPF, Cloudflare's Data Processing Addendum provides for the EU Standard Contractual Clauses (Modules Two and Three) with the supplements for the United Kingdom and Switzerland.</p>
+    <p>Further information: <a href="https://www.cloudflare.com/cloudflare-customer-dpa/" target="_blank" rel="noopener">Cloudflare Data Processing Addendum</a> · <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare Privacy Policy</a> · <a href="https://www.cloudflare.com/gdpr/subprocessors/cloudflare-services/" target="_blank" rel="noopener">Cloudflare sub-processors</a></p>
+    <p>These hosting details apply to evspendpure.com and www.evspendpure.com. An online request requires connection data. The country code selects a language route and does not produce a decision with legal or similarly significant effects under Article 22 GDPR. The former addresses evspend.com and www.evspend.com stay on Vercel during the transition, with their own hosting notice.</p>
   </div>
 
   <div class="card">
@@ -96,7 +102,7 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" /><path d="M14 2v4a2 2 0 0 0 2 2h4" /><path d="M10 9H8" /><path d="M16 13H8" /><path d="M16 17H8" /></svg>
     </div>
     <h2>California Residents (CCPA / CPRA)</h2>
-    <p>We do not sell or share personal information within the meaning of the CCPA/CPRA. California residents may contact us at <a href="mailto:hello@iamguer.com">hello@iamguer.com</a> to exercise their rights.</p>
+    <p>EVSpendPure does not sell calculator histories or use them for cross-context advertising. You can send privacy requests to <a href="mailto:hello@iamguer.com">hello@iamguer.com</a>.</p>
   </div>
 
   <div class="card">

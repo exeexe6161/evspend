@@ -16,7 +16,7 @@
 <link rel="alternate" hreflang="tr" href="https://www.evspendpure.com/datenschutz.tr">
 <link rel="alternate" hreflang="en-150" href="https://www.evspendpure.com/en-eu/datenschutz">
 <link rel="alternate" hreflang="x-default" href="https://www.evspendpure.com/datenschutz">
-<meta name="description" content="EVSpendPure Privacy Policy, local-only data, no tracking, hosted on Vercel.">
+<meta name="description" content="How EVSpendPure stores inputs and history in your browser and processes information when you visit the site or email the operator.">
 <link rel="icon" type="image/svg+xml" href="/favicon.svg">
 <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
 <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
@@ -43,7 +43,7 @@
   <div class="page-header">
     <div class="page-meta">
       <span class="page-tag">Legal</span>
-      <span class="page-stand">As of June 10, 2026</span>
+      <span class="page-stand">As of 2 November 2026</span>
       <div class="lang-switch" role="group" aria-label="Language">
         <a href="/datenschutz" class="lang-switch__btn" data-set-locale="de" lang="de">DE</a>
         <a href="/datenschutz.en" class="lang-switch__btn" data-set-locale="us" lang="en">EN</a>
@@ -69,7 +69,6 @@
     86551 Aichach<br>
     Germany<br>
     Email: <a href="mailto:hello@iamguer.com">hello@iamguer.com</a></p>
-    <p>The competent data protection supervisory authority is the <strong>Hessian Commissioner for Data Protection and Freedom of Information</strong>, P.O. Box 3163, 65021 Wiesbaden, Germany, <a href="https://datenschutz.hessen.de" target="_blank" rel="noopener">datenschutz.hessen.de</a>. Individuals with data protection concerns may contact this authority directly.</p>
   </div>
 
   <div class="card">
@@ -77,7 +76,7 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     </div>
     <h2>General</h2>
-    <p>Calculations take place locally on the device. Calculator inputs are not automatically transmitted to the operator. No registration or sign-in is required. When the website is loaded, however, technically necessary connection data is processed by the hosting provider (Vercel Inc.). See the "Hosting" section below for details. The operator does not perform any personal evaluation of these connection data.</p>
+    <p>Calculations take place locally on the device. Calculator inputs are not automatically transmitted to the operator. No registration or sign-in is required. When the website is loaded, however, technically necessary connection data is processed by the hosting provider (Cloudflare, Inc.). See the "Hosting" section below for details. The operator does not perform any personal evaluation of these connection data.</p>
     <p>The descriptions of browser storage, the Service Worker, hosting and country-based redirects refer to the website and installed PWA. Local storage and export in the native iOS app are described in the "Native iOS App" section.</p>
   </div>
 
@@ -86,14 +85,16 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="2" y1="12" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" x2="6.01" y1="16" y2="16"/><line x1="10" x2="10.01" y1="16" y2="16"/></svg>
     </div>
     <h2>Local Data Storage</h2>
-    <p>In the website and installed PWA, values entered by the user (such as consumption, prices, and mileage) and saved calculations are stored <strong>locally in the browser's storage</strong> (LocalStorage). These contents are not automatically transmitted to the operator.</p>
+    <p><strong>Current storage.</strong> Calculator inputs (consumption, prices, mileage) are by default held only in the memory of the open page and discarded when you close or reload it. A history entry with an optional note is created only when you explicitly save it; it is kept locally in the browser and can be removed individually. Settings such as market, theme or history period are stored only after your explicit choice. A one-minute guard against double saving is kept in memory only. No additional automatic copy of the note is created. These contents are not automatically transmitted to the operator.</p>
+    <p><strong>Voluntarily enabled storage.</strong> Only if you explicitly enable "Remember inputs on this device" is the input draft (without the note) stored in the browser's LocalStorage. While the option is off, existing remembered inputs are not loaded automatically; they are offered for loading or deletion. Switching the option off does not delete them; "Delete remembered inputs" (two steps) does.</p>
+    <p><strong>Possible legacy data.</strong> Earlier versions could store inputs automatically (keys <code>eaf.inputs</code>, <code>eaf.inputs.v1</code>, <code>eaf.inputs.v2</code>) and write markers for the start animation, a visit counter for the install prompt and a timestamp <code>lastSaveTime</code>. These functions no longer exist; the current version neither writes nor reads those values. Existing legacy data is not deleted or converted without your say-so. Old input stores (<code>eaf.inputs</code>, <code>eaf.inputs.v1</code>) can be exported or deleted in the calculator interface; other legacy values can be removed through the browser's site data. Browser data can also be cleared by the browser itself.</p>
     <p>When you share a calculation or export the history, contents may reach a recipient or storage location you choose as text, an image or a file. A history backup also includes saved notes. This is an action you initiate.</p>
-    <p>The legal basis for storing strictly necessary data on your device (local storage and the service worker cache) is Article 6(1)(f) GDPR. No consent is required because this storage is essential for the functionality you actively request, in line with the ePrivacy rules on strictly necessary storage.</p>
-  </div>
+    <p>There is no start animation and no visit counter any more. The install help is an instruction page you open yourself via "Install app (instructions)"; no choice is stored for it.</p>
+    </div>
 
   <div class="card" id="native-ios-privacy">
     <h2>Native iOS App</h2>
-    <p>The native iOS app loads its bundled pages and resources locally in a WebView. Saved calculations, notes and settings are held in local WebView storage in the app container, separately from the browser's website data. Starting these local contents does not use the website's Vercel hosting, Service Worker or country-based redirect. External links and sharing destinations you choose may use network connections.</p>
+    <p>The native iOS app loads its bundled pages and resources locally in a WebView. Saved calculations, notes and settings are held in local WebView storage in the app container, separately from the browser's website data. Starting these local contents does not use the website's hosting, Service Worker or country-based redirect. External links and sharing destinations you choose may use network connections.</p>
     <p>Imported JSON backups are processed locally. For a JSON or CSV export, the app writes a temporary file to its cache directory (<code>CACHE</code>) and opens the native share dialog. You choose the recipient or storage location. After the sharing attempt, the app tries to delete its temporary file. If cleanup is interrupted or fails, the file may remain. Copies already shared or saved elsewhere are not removed by this cleanup or by deleting the app's history.</p>
   </div>
 
@@ -102,8 +103,9 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2v8" /><path d="m16 6-4 4-4-4" /><rect width="20" height="8" x="2" y="14" rx="2" /><path d="M6 18h.01" /><path d="M10 18h.01" /></svg>
     </div>
     <h2>Service Worker / Offline Cache</h2>
-    <p>This website uses a <strong>Service Worker</strong>, a standardised browser feature that caches HTML pages and static resources (CSS, JavaScript, fonts, images) in the user's browser. The sole purpose is faster revisits and offline availability of the app.</p>
-    <p>The Service-Worker cache holds only static assets (HTML, CSS, JavaScript, fonts, images) and does not store calculator inputs. Beyond the connection data already processed by the hosting provider when those assets are originally requested, the cache itself does not transmit anything. It is held in the user's browser. Clearing this cache alone removes the cached assets. Clearing all website data may also delete LocalStorage containing saved calculations, notes and settings.</p>
+    <p>The website can use a <strong>Service Worker</strong> at your explicit request, a standardised browser feature that caches HTML pages and static resources (CSS, JavaScript, fonts, images) in the user's browser. The purpose is availability of the app without an active internet connection. Offline mode is voluntary: a Service Worker is registered only after your action "Make available offline"; without it the website registers none when loaded.</p>
+    <p>After activation, pages and static resources may be stored in the browser's cache. Identifiers of history links (fragment or the parameters <code>id</code>, <code>entryKey</code>, <code>entryIndex</code>) are not stored in cache keys. Calculator inputs and notes are not written to the cache. "Remove offline mode" removes the registration and this website's caches; caches of other applications are left untouched. A Service Worker registered automatically by an earlier version, and its cache, may continue to exist until you remove it this way or through the browser's site data.</p>
+    <p>Clearing this cache alone removes cached pages and resources. Clearing all website data may also delete localStorage containing saved calculations, notes and settings.</p>
   </div>
 
   <div class="card">
@@ -111,9 +113,11 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" x2="12.01" y1="20" y2="20"/></svg>
     </div>
     <h2>Hosting</h2>
-    <p>This website is hosted by <strong>Vercel Inc.</strong> When the website is accessed online, technically necessary connection data (in particular <strong>IP address, user agent, timestamp, requested resource (request URL) and referrer, if sent by the browser</strong>) are processed by the hosting provider to deliver the website, defend against attacks and ensure service stability. The legal basis is <strong>Art. 6(1)(f) GDPR</strong> (legitimate interest in the secure operation of the website). For personal usage data and metadata generated through the operation of its services, Vercel describes processing as a controller.</p>
-    <p>Technical request data may be stored in Vercel's operational and security logs. Vercel's Privacy Notice describes purpose-based retention criteria, but does not specify a single deletion period for all log data.</p>
-    <p>The operator does not directly link this connection data to identifiable individuals.</p>
+    <p>This website is hosted on <strong>Cloudflare Pages</strong>, a service of <strong>Cloudflare, Inc.</strong> (101 Townsend St., San Francisco, CA 94107, USA). When the website is accessed online, technically necessary connection data (in particular <strong>IP address, user agent, timestamp, requested resource (request URL) and referrer, if sent by the browser</strong>) are processed by the hosting provider to deliver the website, defend against attacks and ensure service stability. The legal basis is <strong>Art. 6(1)(f) GDPR</strong> (legitimate interest in the secure operation of the website).</p>
+    <p>Cloudflare’s terms incorporate a data processing addendum for covered customer data. Cloudflare identifies customer logs and content transmitted through its network as examples of processing on a customer’s behalf. Cloudflare may act as controller for its own purposes.</p>
+    <p>Cloudflare may process operational records to deliver and protect the service. The country redirect function does not write logs of its own. We have no verified fixed deletion period covering all provider request records for this site. Cloudflare describes retention criteria including purpose and legal obligations.</p>
+    <p>On a static Cloudflare test page, the <code>NEL</code> and <code>Report-To</code> headers supplied a policy that supporting browsers may retain for up to seven days. On connection failures the browser may send a report to <code>a.nel.cloudflare.com</code>. The reporting rate for successful requests was zero in the test. Reports may include the requested URL and its parameters, the referrer and error details. Cloudflare says it uses the client IP to identify network characteristics and does not log it in this reporting pipeline. For evspendpure.com this function is switched off in the domain settings.</p>
+    <p>These hosting details apply to evspendpure.com and www.evspendpure.com. An online request requires connection data. The country code selects a language route and does not produce a decision with legal or similarly significant effects under Article 22 GDPR. The former addresses evspend.com and www.evspend.com stay on Vercel during the transition, with their own hosting notice.</p>
   </div>
 
   <div class="card">
@@ -121,17 +125,7 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
     </div>
     <h2>Technical and Organizational Measures</h2>
-    <p>To protect data processed via this website, the following technical and organizational measures pursuant to <strong>Art. 32 GDPR</strong> are implemented:</p>
-    <ul>
-      <li>Encrypted transmission of all data between browser and server via HTTPS (TLS)</li>
-      <li>Strict Content Security Policy (CSP) to prevent cross-site scripting and unauthorized third-party scripts</li>
-      <li>No server-side processing of calculator inputs by the operator: all calculations occur exclusively in the user's browser</li>
-      <li>No tracking, analytics, or advertising technologies</li>
-      <li>No cookies (features such as market or history storage operate exclusively via the browser's LocalStorage without data transmission)</li>
-      <li>Regular updates of libraries and frameworks in use</li>
-      <li>Hosting with an ISO 27001 and SOC 2 Type II certified provider (Vercel Inc.)</li>
-    </ul>
-    <p>Beyond the infrastructure security mentioned above, the operator's safeguards consist in avoiding any data collection that goes beyond what is technically necessary.</p>
+    <p>The calculator processes inputs locally. The website configuration provides for HTTPS and a Content Security Policy. The headers on the affected routes must be verified before the switch.</p>
   </div>
 
   <div class="card">
@@ -139,10 +133,10 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
     </div>
     <h2>International Data Transfers</h2>
-    <p>According to Vercel's Privacy Notice, personal data may be processed in the United States and other countries. When this website is accessed online, this concerns technical request data such as the IP address. This does not automatically transmit locally stored calculations or notes to Vercel.</p>
-    <p>Vercel states in its Privacy Notice that it participates in the <strong>EU-U.S. Data Privacy Framework (DPF)</strong>.</p>
-    <p>Vercel describes using Standard Contractual Clauses or other appropriate mechanisms for international transfers where required by law. The applicable basis for individual transfers in the operation of EVSpendPure still requires legal review.</p>
-    <p>Further information: <a href="https://vercel.com/legal/dpa" target="_blank" rel="noopener">Vercel Data Processing Agreement</a> · <a href="https://vercel.com/legal/privacy-notice" target="_blank" rel="noopener">Vercel Privacy Notice</a></p>
+    <p>Cloudflare operates a global network and also processes personal data outside the EU and EEA, including in the United States; Cloudflare also uses sub-processors in several countries. When this website is accessed online, this concerns technical request data such as the IP address. This does not automatically transmit locally stored calculations or notes to Cloudflare.</p>
+    <p>Cloudflare states in its Privacy Policy that it is certified under the <strong>EU-U.S. Data Privacy Framework (DPF)</strong>, the UK Extension to the EU-U.S. DPF and the Swiss-U.S. DPF.</p>
+    <p>For transfers not covered by the DPF, Cloudflare's Data Processing Addendum provides for the EU Standard Contractual Clauses (Modules Two and Three) with the supplements for the United Kingdom and Switzerland.</p>
+    <p>Further information: <a href="https://www.cloudflare.com/cloudflare-customer-dpa/" target="_blank" rel="noopener">Cloudflare Data Processing Addendum</a> · <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare Privacy Policy</a> · <a href="https://www.cloudflare.com/gdpr/subprocessors/cloudflare-services/" target="_blank" rel="noopener">Cloudflare sub-processors</a></p>
   </div>
 
   <div class="card">
@@ -157,10 +151,10 @@
     <div class="card-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></svg>
     </div>
-    <h2>No Cookies</h2>
-    <p>EVSpendPure does <strong>not set any cookies</strong>. Functional state (your selected market, theme, saved calculations and similar preferences) is held in your browser's <code>localStorage</code>. When you open a history link, entry identifiers such as <code>id</code>, <code>entryKey</code> or <code>entryIndex</code> may reach the hosting provider in the requested URL. These links do not embed calculator values or notes in the URL.</p>
-    <p>On first visit to the website, a server-side middleware may use the country header provided by Vercel (<code>x-vercel-ip-country</code>) to redirect to a matching language version: visitors from Türkiye to <code>/tr/</code>, visitors from most other countries to <code>/en-eu/</code>. Visitors from Germany, Austria, Switzerland and a few other countries stay on the default path. No cookies are set in this step, and no locally stored calculator inputs are read or processed on the server.</p>
-    <p>Market and language selection then happen in the browser, based on the page path, browser language and any locally stored choice from the in-app market selector. The selection is held only in <code>localStorage</code>.</p>
+    <h2>Cookies and local settings</h2>
+    <p>The calculator uses local browser storage for explicitly chosen settings and the history. New history links carry the entry identifier in the URL fragment (after the <code>#</code> character), which browsers do not send to the server. Historical links with the parameters <code>id</code>, <code>entryKey</code> or <code>entryIndex</code> remain supported; for them the identifiers may reach the hosting provider in the requested URL, and the page removes them from the address bar after opening successfully. These links do not embed calculator values or notes in the URL.</p>
+    <p>When the start page (<code>/</code>) or the history page (<code>/verlauf</code>) is requested, a server-side function (Cloudflare Pages Function) may use the country code determined by Cloudflare's IP geolocation (<code>request.cf.country</code>) to redirect to a matching language version: visitors from Türkiye to <code>/tr/</code>, visitors from most other countries to <code>/en-eu/</code>. Visitors from Germany, Austria, Switzerland and a few other countries stay on the default path. The function does not store the country code. No cookies are set in this step, and no locally stored calculator inputs are read or processed on the server.</p>
+    <p>Market and language are then determined in the browser from an explicit link parameter (<code>market</code>), the path of the opened language version (<code>/tr/</code>, <code>/en-eu/</code>), the browser language and an explicit choice in the in-app market selector, which is held in <code>localStorage</code>. Merely opening pages, switching language on legal pages and opening a history entry do not change that stored choice.</p>
     <p>You can clear the website's localStorage via your browser's site settings. This also removes the calculations, notes and settings stored there. This deletion does not transmit additional calculator contents to the servers.</p>
   </div>
 
@@ -169,14 +163,8 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 18v-7" /><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z" /><path d="M14 18v-7" /><path d="M18 18v-7" /><path d="M3 22h18" /><path d="M6 18v-7" /></svg>
     </div>
     <h2>Supervisory Authority</h2>
-    <p>The competent supervisory authority for data protection matters is:</p>
-    <p><strong>Der Hessische Beauftragte für Datenschutz und Informationsfreiheit</strong><br>
-    Postfach 3163<br>
-    65021 Wiesbaden<br>
-    Germany<br>
-    Email: poststelle@datenschutz.hessen.de<br>
-    Website: <a href="https://datenschutz.hessen.de" rel="noopener noreferrer">datenschutz.hessen.de</a></p>
-    <p>You may also contact the supervisory authority in your EU member state of residence.</p>
+    <p>You may lodge a complaint with a supervisory authority, particularly in the Member State of your habitual residence, place of work or the alleged infringement (Article 77 GDPR).</p>
+    <p><a href="https://www.edpb.europa.eu/about-edpb/our-members_en" rel="noopener" target="_blank">Directory of supervisory authorities</a></p>
   </div>
 
   <div class="card">
@@ -193,6 +181,7 @@
     </div>
     <h2>Contact</h2>
     <p>For privacy-related questions, the operator can be contacted using the details listed in the <a href="/en-eu/impressum">Legal Notice</a>.</p>
+    <p>If you email us, we receive your sender address, message and any attachments. We use united-domains to receive and answer enquiries. For general enquiries our legitimate interest is to respond to your request (Article 6(1)(f) GDPR). Providing these details is voluntary. We need a return address to reply by email. To request a callback, you may voluntarily include your phone number and a preferred callback time in your email. We use these voluntarily provided contact details only to handle your specific enquiry and arrange the callback you requested. We have decided to review completed contact requests once a month and to delete them where no retention reasons apply.</p>
   </div>
 
   <div class="card">
@@ -206,12 +195,12 @@
       <li><strong>Right to rectification (Art. 16 GDPR):</strong> You may request the correction of inaccurate or completion of incomplete data.</li>
       <li><strong>Right to erasure (Art. 17 GDPR):</strong> You may request the deletion of your personal data, provided the statutory conditions are met.</li>
       <li><strong>Right to restriction of processing (Art. 18 GDPR):</strong> You may request restriction of the processing of your personal data.</li>
-      <li><strong>Right to data portability (Art. 20 GDPR):</strong> You may receive your personal data in a structured, commonly used and machine-readable format.</li>
+      <li>Portability applies under the conditions of Article 20 GDPR, in particular to automated processing based on consent or contract.</li>
       <li><strong>Right to object (Art. 21 GDPR):</strong> You may object to the processing of your personal data on grounds relating to your particular situation.</li>
       <li><strong>Right to lodge a complaint with a supervisory authority (Art. 77 GDPR):</strong> You have the right to lodge a complaint with a data protection supervisory authority.</li>
     </ul>
-    <p>The competent authority in Hesse, Germany, is the <strong>Hessian Commissioner for Data Protection and Freedom of Information</strong>, P.O. Box 3163, 65021 Wiesbaden, <a href="https://datenschutz.hessen.de" target="_blank" rel="noopener">datenschutz.hessen.de</a>.</p>
-    <p>To exercise these rights, please contact the address provided in the <a href="/en-eu/impressum">Legal Notice</a>. Calculations are performed locally in your browser. When the website is accessed online, however, Vercel processes technical request data that may be included in provider logs. Retention information is provided in the “Hosting” section.</p>
+
+    <p>To exercise these rights, please contact the address provided in the <a href="/en-eu/impressum">Legal Notice</a>. Calculations are performed locally in your browser. When the website is accessed online, however, Cloudflare processes technical request data that may be included in provider logs. Retention information is provided in the “Hosting” section.</p>
   </div>
 
   </main>

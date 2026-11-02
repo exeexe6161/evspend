@@ -10,7 +10,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#f2f2f7" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#000000" media="(prefers-color-scheme: dark)">
-<meta name="description" content="Datenschutzerklärung von EVSpendPure nach DSGVO: Rechner-Eingaben lokal im Browser, technisch notwendige Verbindungsdaten beim Hosting-Anbieter, keine Cookies, kein Tracking.">
+<meta name="description" content="Wie EVSpendPure Eingaben und Verlauf im Browser speichert und welche Daten beim Websiteaufruf und beim Kontakt per E-Mail verarbeitet werden.">
 <link rel="canonical" href="https://www.evspendpure.com/datenschutz">
 <link rel="alternate" hreflang="de" href="https://www.evspendpure.com/datenschutz">
 <link rel="alternate" hreflang="en" href="https://www.evspendpure.com/datenschutz.en">
@@ -42,7 +42,7 @@
   <div class="page-header">
     <div class="page-meta">
       <span class="page-tag">Rechtliche Informationen</span>
-      <span class="page-stand">Stand: 10. Juni 2026</span>
+      <span class="page-stand">Stand: 2. November 2026</span>
       <div class="lang-switch" role="group" aria-label="Language">
         <a href="/datenschutz" class="lang-switch__btn lang-switch__btn--active" data-set-locale="de" lang="de" aria-current="page">DE</a>
         <a href="/datenschutz.en" class="lang-switch__btn" data-set-locale="us" lang="en">EN</a>
@@ -68,7 +68,6 @@
     86551 Aichach<br>
     Deutschland<br>
     E-Mail: <a href="mailto:hello@iamguer.com">hello@iamguer.com</a></p>
-    <p>Die zuständige Datenschutz-Aufsichtsbehörde ist der <strong>Hessische Beauftragte für Datenschutz und Informationsfreiheit</strong>, Postfach 3163, 65021 Wiesbaden, <a href="https://datenschutz.hessen.de" target="_blank" rel="noopener">datenschutz.hessen.de</a>. Personen mit datenschutzrechtlichen Bedenken können sich direkt an diese Behörde wenden.</p>
   </div>
 
   <div class="card">
@@ -76,7 +75,7 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
     </div>
     <h2>Allgemeines</h2>
-    <p>Die Berechnungen erfolgen lokal auf dem Gerät. Rechner-Eingaben werden nicht automatisch an den Betreiber übertragen. Eine Registrierung oder Anmeldung ist nicht erforderlich. Beim Aufruf der Website werden allerdings technisch notwendige Verbindungsdaten durch den Hosting-Anbieter (Vercel Inc.) verarbeitet. Details siehe Abschnitt „Hosting" weiter unten. Eine personenbezogene Auswertung dieser Verbindungsdaten durch den Betreiber findet nicht statt.</p>
+    <p>Die Berechnungen erfolgen lokal auf dem Gerät. Rechner-Eingaben werden nicht automatisch an den Betreiber übertragen. Eine Registrierung oder Anmeldung ist nicht erforderlich. Beim Aufruf der Website werden allerdings technisch notwendige Verbindungsdaten durch den Hosting-Anbieter (Cloudflare, Inc.) verarbeitet. Details siehe Abschnitt „Hosting" weiter unten. Eine personenbezogene Auswertung dieser Verbindungsdaten durch den Betreiber findet nicht statt.</p>
     <p>Die Beschreibungen zu Browser-Speicherung, Service Worker, Hosting und Länderweiterleitung beziehen sich auf die Website und die installierte PWA. Die lokale Speicherung und der Export in der nativen iOS-App sind im Abschnitt „Native iOS-App“ beschrieben.</p>
   </div>
 
@@ -85,14 +84,16 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" x2="2" y1="12" y2="12"/><path d="M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/><line x1="6" x2="6.01" y1="16" y2="16"/><line x1="10" x2="10.01" y1="16" y2="16"/></svg>
     </div>
     <h2>Lokale Datenspeicherung</h2>
-    <p>In der Website und der installierten PWA werden eingegebene Werte wie Verbrauch, Preise und Fahrleistung sowie gespeicherte Berechnungen <strong>lokal im Browser</strong> des Nutzers gespeichert (LocalStorage). Diese Inhalte werden nicht automatisch an den Betreiber übertragen.</p>
+    <p><strong>Aktuelle Speicherung.</strong> Eingaben im Rechner (Verbrauch, Preise, Fahrleistung) werden standardmäßig nur im Arbeitsspeicher der geöffneten Seite gehalten und beim Schließen oder Neuladen verworfen. Einen Verlaufseintrag mit optionaler Notiz legt die App nur an, wenn Sie ihn ausdrücklich speichern; er liegt lokal im Browser und kann einzeln entfernt werden. Einstellungen wie Markt, Design oder Verlaufszeitraum werden nur nach Ihrer ausdrücklichen Auswahl gespeichert. Eine Sperre gegen doppeltes Speichern (eine Minute) wird nur im Arbeitsspeicher geführt. Eine zusätzliche automatische Kopie der Notiz wird nicht angelegt. Diese Inhalte werden nicht automatisch an den Betreiber übertragen.</p>
+    <p><strong>Freiwillig aktivierte Speicherung.</strong> Nur wenn Sie „Eingaben auf diesem Gerät merken“ ausdrücklich aktivieren, wird der Eingabeentwurf (ohne Notiz) im LocalStorage des Browsers gespeichert. Ist die Option aus, werden vorhandene gemerkte Eingaben nicht automatisch geladen; sie werden zum Laden oder Löschen angeboten. Das Ausschalten der Option löscht sie nicht; dafür gibt es „Gemerkte Eingaben löschen“ (zweistufig).</p>
+    <p><strong>Mögliche Altbestände.</strong> Frühere Versionen konnten Eingaben automatisch speichern (Schlüssel <code>eaf.inputs</code>, <code>eaf.inputs.v1</code>, <code>eaf.inputs.v2</code>) sowie Merker für Startanimation, einen Besuchszähler für den Installationshinweis und einen Zeitstempel <code>lastSaveTime</code> schreiben. Diese Funktionen gibt es nicht mehr; die aktuelle Version schreibt und liest diese Werte nicht. Vorhandene Altdaten werden nicht ungefragt gelöscht oder umgewandelt. Alte Eingabebestände (<code>eaf.inputs</code>, <code>eaf.inputs.v1</code>) lassen sich in der Rechner-Oberfläche exportieren oder löschen; übrige Altwerte können über die Websitedaten des Browsers entfernt werden. Browserdaten können auch durch den Browser selbst gelöscht werden.</p>
     <p>Wenn Sie eine Berechnung teilen oder den Verlauf exportieren, können Inhalte als Text, Bild oder Datei an einen von Ihnen gewählten Empfänger oder Speicherort gelangen. Ein Verlaufs-Backup enthält auch gespeicherte Notizen. Das ist eine von Ihnen ausgelöste Aktion.</p>
-    <p>Rechtsgrundlage für die ausschließlich technisch erforderliche Speicherung im Endgerät (LocalStorage, Cache des Service Workers) ist Paragraf 25 Absatz 2 Nummer 2 TDDDG in Verbindung mit Artikel 6 Absatz 1 Buchstabe f DSGVO. Eine Einwilligung ist nicht erforderlich, da die Speicherung für die vom Nutzer ausdrücklich gewünschte Funktion unbedingt erforderlich ist.</p>
-  </div>
+    <p>Es gibt keinen Startbildschirm und keinen Besuchszähler mehr. Die Installationshilfe ist eine Anleitung, die Sie selbst über „App installieren (Anleitung)“ öffnen; dafür wird keine Auswahl gespeichert.</p>
+    </div>
 
   <div class="card" id="native-ios-privacy">
     <h2>Native iOS-App</h2>
-    <p>Die native iOS-App lädt ihre gebündelten Seiten und Ressourcen lokal in einer WebView. Gespeicherte Berechnungen, Notizen und Einstellungen liegen im lokalen WebView-Speicher im Appcontainer, getrennt von den Websitedaten des Browsers. Für den Start dieser lokalen Inhalte werden weder das Vercel-Hosting noch der Service Worker oder die Länderweiterleitung der Website verwendet. Beim Öffnen externer Links oder beim Teilen können Netzwerkverbindungen verwendet werden.</p>
+    <p>Die native iOS-App lädt ihre gebündelten Seiten und Ressourcen lokal in einer WebView. Gespeicherte Berechnungen, Notizen und Einstellungen liegen im lokalen WebView-Speicher im Appcontainer, getrennt von den Websitedaten des Browsers. Für den Start dieser lokalen Inhalte werden weder das Hosting der Website noch der Service Worker oder die Länderweiterleitung der Website verwendet. Beim Öffnen externer Links oder beim Teilen können Netzwerkverbindungen verwendet werden.</p>
     <p>Importierte JSON-Backups werden lokal verarbeitet. Für einen JSON- oder CSV-Export schreibt die App eine temporäre Datei in ihren Cachebereich (<code>CACHE</code>) und öffnet den nativen Teilen-Dialog. Sie wählen den Empfänger oder Speicherort. Nach dem Teilenversuch versucht die App, ihre temporäre Datei zu löschen. Wenn die Bereinigung unterbrochen wird oder fehlschlägt, kann die Datei zurückbleiben. Bereits geteilte oder anderweitig gespeicherte Kopien werden dadurch oder durch das Löschen des App-Verlaufs nicht entfernt.</p>
   </div>
 
@@ -101,8 +102,9 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 2v8" /><path d="m16 6-4 4-4-4" /><rect width="20" height="8" x="2" y="14" rx="2" /><path d="M6 18h.01" /><path d="M10 18h.01" /></svg>
     </div>
     <h2>Service Worker / Offline-Cache</h2>
-    <p>Diese Website verwendet einen <strong>Service Worker</strong>, eine standardisierte Browser-Funktion, die HTML-Seiten und statische Ressourcen (CSS, JavaScript, Schriftarten, Bilder) im Cache des Browsers ablegt. Ziel ist ausschließlich der schnellere Wiederbesuch und die Verfügbarkeit der App ohne aktive Internet­verbindung.</p>
-    <p>Im Service-Worker-Cache werden nur statische Dateien gespeichert (HTML, CSS, JavaScript, Schriften, Bilder), keine Rechner-Eingaben. Abgesehen von den Verbindungsdaten, die der Hosting-Anbieter beim ursprünglichen Abruf dieser Dateien ohnehin verarbeitet, überträgt der Cache selbst nichts. Er liegt im Browser des Nutzers. Das gezielte Leeren dieses Caches entfernt die zwischengespeicherten Dateien. Das Löschen sämtlicher Websitedaten kann zusätzlich den LocalStorage mit gespeicherten Berechnungen, Notizen und Einstellungen löschen.</p>
+    <p>Die Website kann auf Ihren ausdrücklichen Wunsch einen <strong>Service Worker</strong> verwenden, eine standardisierte Browser-Funktion, die HTML-Seiten und statische Ressourcen (CSS, JavaScript, Schriftarten, Bilder) im Cache des Browsers ablegt. Ziel ist die Verfügbarkeit der App ohne aktive Internetverbindung. Der Offline-Modus ist freiwillig: Erst nach Ihrer Aktion „Offline verfügbar machen“ wird ein Service Worker registriert; ohne diese Aktion registriert die Website beim Aufruf keinen.</p>
+    <p>Nach der Aktivierung können Seiten und statische Ressourcen im Cache des Browsers abgelegt werden. Kennungen von Verlaufslinks (Fragment oder die Parameter <code>id</code>, <code>entryKey</code>, <code>entryIndex</code>) werden nicht in Cache-Schlüsseln gespeichert. Rechner-Eingaben und Notizen werden nicht in den Cache geschrieben. Mit „Offline-Modus entfernen“ werden Registrierung und Caches dieser Website entfernt; fremde Caches anderer Anwendungen bleiben unberührt. Ein in einer früheren Version automatisch registrierter Service Worker und dessen Cache können weiter bestehen, bis Sie ihn auf diese Weise oder über die Websitedaten des Browsers entfernen.</p>
+    <p>Das gezielte Leeren dieses Caches entfernt die zwischengespeicherten Dateien. Das Löschen sämtlicher Websitedaten kann zusätzlich den LocalStorage mit gespeicherten Berechnungen, Notizen und Einstellungen löschen.</p>
   </div>
 
   <div class="card">
@@ -110,9 +112,11 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.55a11 11 0 0 1 14.08 0"/><path d="M1.42 9a16 16 0 0 1 21.16 0"/><path d="M8.53 16.11a6 6 0 0 1 6.95 0"/><line x1="12" x2="12.01" y1="20" y2="20"/></svg>
     </div>
     <h2>Hosting</h2>
-    <p>Diese Website wird über <strong>Vercel Inc.</strong> bereitgestellt. Beim Onlineabruf werden technisch notwendige Verbindungsdaten (insbesondere <strong>IP-Adresse, User-Agent, Zeitstempel, angeforderte Ressource (Request-URL) und Referrer, sofern vom Browser gesendet</strong>) durch den Hosting-Anbieter verarbeitet, um die Auslieferung der Website, die Abwehr von Angriffen und die Stabilität des Dienstes zu gewährleisten. Rechtsgrundlage ist <strong>Art. 6 Abs. 1 lit. f DSGVO</strong> (berechtigtes Interesse am sicheren Betrieb der Website). Für personenbezogene Nutzungs- und Metadaten, die beim Betrieb seiner Dienste entstehen, beschreibt Vercel eine Verarbeitung in eigener Verantwortlichkeit.</p>
-    <p>Technische Anfragedaten können in Betriebs- und Sicherheitsprotokollen von Vercel gespeichert werden. Vercel nennt in seiner Datenschutzerklärung zweckbezogene Kriterien für die Aufbewahrung, aber keine einheitliche Löschfrist für sämtliche Protokolldaten.</p>
-    <p>Eine direkte Zuordnung dieser Verbindungsdaten zu einzelnen Personen durch den Betreiber erfolgt nicht.</p>
+    <p>Diese Website wird über <strong>Cloudflare Pages</strong> bereitgestellt, einen Dienst der <strong>Cloudflare, Inc.</strong> (101 Townsend St., San Francisco, CA 94107, USA). Beim Onlineabruf werden technisch notwendige Verbindungsdaten (insbesondere <strong>IP-Adresse, User-Agent, Zeitstempel, angeforderte Ressource (Request-URL) und Referrer, sofern vom Browser gesendet</strong>) durch den Hosting-Anbieter verarbeitet, um die Auslieferung der Website, die Abwehr von Angriffen und die Stabilität des Dienstes zu gewährleisten. Rechtsgrundlage ist <strong>Art. 6 Abs. 1 lit. f DSGVO</strong> (berechtigtes Interesse am sicheren Betrieb der Website).</p>
+    <p>Cloudflares Vertragsbedingungen beziehen für erfasste Kundendaten einen Auftragsverarbeitungsvertrag ein. Cloudflare nennt Kundenprotokolle und übermittelte Inhalte als Beispiele für Verarbeitung im Auftrag. Für eigene Verarbeitungszwecke kann Cloudflare selbst verantwortlich sein.</p>
+    <p>Bei der Auslieferung und zum Schutz des Dienstes können bei Cloudflare Betriebsdaten anfallen. Die Funktion zur Länderweiterleitung schreibt selbst keine Protokolle. Eine feste Frist für die Löschung sämtlicher beim Anbieter anfallender Anfragedaten ist für diesen Dienst nicht belegt. Die Dauer richtet sich laut Anbieter unter anderem nach Zweck und gesetzlichen Verpflichtungen.</p>
+    <p>Im Test auf einer statischen Cloudflare Seite lieferten die Header <code>NEL</code> und <code>Report-To</code> eine Anweisung für unterstützende Browser. Sie kann bis zu sieben Tage gespeichert werden. Bei Verbindungsfehlern kann der Browser einen Bericht an <code>a.nel.cloudflare.com</code> senden. Für erfolgreiche Abrufe lag die Meldequote im Test bei null. Berichte können die angefragte Adresse samt Parametern, den Referrer und Fehlerdetails enthalten. Cloudflare gibt an, die Client-IP zur Netzeinordnung zu verwenden und in diesem Meldeweg nicht zu protokollieren. Für evspendpure.com ist diese Funktion in den Einstellungen der Domain deaktiviert.</p>
+    <p>Diese Hostingangaben gelten für evspendpure.com und www.evspendpure.com. Ohne Verbindungsdaten ist ein Onlineabruf nicht möglich. Die Länderkennung dient der Sprachweiterleitung. Eine Entscheidung mit rechtlicher oder ähnlich erheblicher Wirkung nach Art. 22 DSGVO erfolgt dabei nicht. Die bisherigen Adressen evspend.com und www.evspend.com bleiben während der Übergangszeit bei Vercel. Dort gelten die Informationen des bisherigen Angebots.</p>
   </div>
 
   <div class="card">
@@ -120,17 +124,7 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
     </div>
     <h2>Technische und organisatorische Maßnahmen</h2>
-    <p>Zum Schutz der über diese Website verarbeiteten Daten werden folgende technische und organisatorische Maßnahmen gemäß <strong>Art. 32 DSGVO</strong> eingesetzt:</p>
-    <ul>
-      <li>Verschlüsselte Übertragung sämtlicher Daten zwischen Browser und Server über HTTPS (TLS)</li>
-      <li>Strikte Content Security Policy (CSP) zur Verhinderung von Cross-Site-Scripting und unerwünschten Drittanbieter-Skripten</li>
-      <li>Verzicht auf serverseitige Verarbeitung der Rechner-Eingaben durch den Betreiber: alle Berechnungen erfolgen ausschließlich lokal im Browser des Nutzers</li>
-      <li>Verzicht auf Tracking-, Analyse- und Werbe-Technologien</li>
-      <li>Verzicht auf Cookies (Funktionen wie Markt- oder Verlauf-Speicherung erfolgen ausschließlich über LocalStorage des Browsers ohne Datenübertragung)</li>
-      <li>Regelmäßige Aktualisierung der eingesetzten Bibliotheken und Frameworks</li>
-      <li>Hosting bei einem ISO 27001- und SOC 2 Type II-zertifizierten Anbieter (Vercel Inc.)</li>
-    </ul>
-    <p>Über die genannte Infrastruktur-Sicherheit hinaus beschränken sich die Schutzmaßnahmen auf die Vermeidung jeder über das technisch Notwendige hinausgehenden Datensammlung durch den Betreiber.</p>
+    <p>Der Rechner verarbeitet Eingaben lokal. Für die Website sind HTTPS und eine Content Security Policy vorgesehen. Die tatsächlichen Antwortheader werden vor dem Wechsel auf den betroffenen Routen geprüft.</p>
   </div>
 
   <div class="card">
@@ -138,10 +132,10 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
     </div>
     <h2>Internationale Datenübermittlungen</h2>
-    <p>Nach Vercels Datenschutzerklärung können personenbezogene Daten in den USA und weiteren Ländern verarbeitet werden. Beim Onlineabruf dieser Website betrifft dies technische Anfragedaten wie die IP-Adresse. Lokal gespeicherte Berechnungen und Notizen werden dadurch nicht automatisch an Vercel übertragen.</p>
-    <p>Vercel erklärt in seiner Datenschutzerklärung, am <strong>EU-U.S. Data Privacy Framework (DPF)</strong> teilzunehmen.</p>
-    <p>Vercel nennt Standardvertragsklauseln oder andere geeignete Mechanismen für internationale Übermittlungen, soweit dies gesetzlich erforderlich ist. Welche Grundlage für die einzelnen Übermittlungen beim Betrieb von EVSpendPure gilt, muss noch rechtlich geklärt werden.</p>
-    <p>Weitere Informationen: <a href="https://vercel.com/legal/dpa" target="_blank" rel="noopener">Vercel Data Processing Agreement</a> · <a href="https://vercel.com/legal/privacy-notice" target="_blank" rel="noopener">Vercel Privacy Notice</a></p>
+    <p>Cloudflare betreibt ein weltweites Netz und verarbeitet personenbezogene Daten auch außerhalb der EU und des EWR, unter anderem in den USA; zudem setzt Cloudflare Unterauftragsverarbeiter in mehreren Ländern ein. Beim Onlineabruf dieser Website betrifft dies technische Anfragedaten wie die IP-Adresse. Lokal gespeicherte Berechnungen und Notizen werden dadurch nicht automatisch an Cloudflare übertragen.</p>
+    <p>Cloudflare erklärt in seiner Datenschutzerklärung, nach dem <strong>EU-U.S. Data Privacy Framework (DPF)</strong>, der UK-Erweiterung zum EU-U.S. DPF und dem Swiss-U.S. DPF zertifiziert zu sein.</p>
+    <p>Für Übermittlungen, die nicht vom DPF erfasst sind, sieht das Cloudflare Data Processing Addendum die EU-Standardvertragsklauseln (Module 2 und 3) mit den Ergänzungen für das Vereinigte Königreich und die Schweiz vor.</p>
+    <p>Weitere Informationen: <a href="https://www.cloudflare.com/cloudflare-customer-dpa/" target="_blank" rel="noopener">Cloudflare Data Processing Addendum</a> · <a href="https://www.cloudflare.com/privacypolicy/" target="_blank" rel="noopener">Cloudflare-Datenschutzerklärung</a> · <a href="https://www.cloudflare.com/gdpr/subprocessors/cloudflare-services/" target="_blank" rel="noopener">Cloudflare-Unterauftragsverarbeiter</a></p>
   </div>
 
   <div class="card">
@@ -156,10 +150,10 @@
     <div class="card-icon">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a10 10 0 1 0 10 10 4 4 0 0 1-5-5 4 4 0 0 1-5-5"/><path d="M8.5 8.5v.01"/><path d="M16 15.5v.01"/><path d="M12 12v.01"/><path d="M11 17v.01"/><path d="M7 14v.01"/></svg>
     </div>
-    <h2>Keine Cookies</h2>
-    <p>EVSpendPure setzt <strong>keinerlei Cookies</strong>. Funktionaler Zustand (gewählter Markt, Theme, gespeicherte Berechnungen und ähnliche Präferenzen) wird im <code>localStorage</code> des Browsers gehalten. Beim Öffnen eines Verlaufslinks können Eintragskennungen wie <code>id</code>, <code>entryKey</code> oder <code>entryIndex</code> in der angeforderten URL beim Hosting-Anbieter ankommen. Diese Links betten keine Rechnerwerte oder Notizen in die URL ein.</p>
-    <p>Beim ersten Aufruf der Website kann eine Server-Middleware anhand des von Vercel bereitgestellten Länder-Headers (<code>x-vercel-ip-country</code>) auf eine passende Sprachfassung weiterleiten: Besucher aus der Türkei nach <code>/tr/</code>, Besucher aus den meisten anderen Ländern nach <code>/en-eu/</code>. Besucher aus Deutschland, Österreich, der Schweiz und einigen weiteren Ländern bleiben auf dem Standardpfad. Dabei werden keine Cookies gesetzt, und keine lokal gespeicherten Rechner-Eingaben werden serverseitig gelesen oder ausgewertet.</p>
-    <p>Markt- und Sprachauswahl erfolgen anschließend im Browser, anhand des Seitenpfads, der Browsersprache und ggf. einer lokal gespeicherten Auswahl aus dem In-App-Marktwähler. Die Auswahl wird ausschließlich im <code>localStorage</code> gehalten.</p>
+    <h2>Cookies und lokale Einstellungen</h2>
+    <p>Der Rechner verwendet für ausdrücklich gewählte Einstellungen und den Verlauf den lokalen Browserspeicher. Neue Verlaufslinks tragen die Eintragskennung im URL-Fragment (nach dem Zeichen <code>#</code>), das Browser nicht an den Server senden. Historische Links mit den Parametern <code>id</code>, <code>entryKey</code> oder <code>entryIndex</code> werden weiter unterstützt; bei ihnen können die Kennungen in der angeforderten URL beim Hosting-Anbieter ankommen, und die Seite entfernt sie nach erfolgreichem Öffnen aus der Adresszeile. Diese Links betten keine Rechnerwerte oder Notizen in die URL ein.</p>
+    <p>Beim Aufruf der Startseite (<code>/</code>) oder der Verlaufsseite (<code>/verlauf</code>) kann eine serverseitige Funktion (Cloudflare Pages Function) anhand der Länderkennung, die Cloudflare über seine IP-Geolokalisierung ermittelt (<code>request.cf.country</code>), auf eine passende Sprachfassung weiterleiten: Besucher aus der Türkei nach <code>/tr/</code>, Besucher aus den meisten anderen Ländern nach <code>/en-eu/</code>. Besucher aus Deutschland, Österreich, der Schweiz und einigen weiteren Ländern bleiben auf dem Standardpfad. Die Funktion speichert die Länderkennung nicht. Dabei werden keine Cookies gesetzt, und keine lokal gespeicherten Rechner-Eingaben werden serverseitig gelesen oder ausgewertet.</p>
+    <p>Markt und Sprache ergeben sich anschließend im Browser aus einem ausdrücklichen Link-Parameter (<code>market</code>), dem Pfad der geöffneten Sprachfassung (<code>/tr/</code>, <code>/en-eu/</code>), der Browsersprache und einer ausdrücklichen Auswahl im In-App-Marktwähler, die im <code>localStorage</code> gehalten wird. Das bloße Öffnen von Seiten, der Sprachwechsel auf Rechtsseiten und das Öffnen eines Verlaufseintrags ändern diese gespeicherte Auswahl nicht.</p>
     <p>Der localStorage der Website kann über die Browser-Einstellungen gelöscht werden. Dadurch werden auch die dort gespeicherten Berechnungen, Notizen und Einstellungen entfernt. Diese Löschung übermittelt keine zusätzlichen Rechnerinhalte an die Server.</p>
   </div>
 
@@ -168,14 +162,8 @@
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M10 18v-7" /><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z" /><path d="M14 18v-7" /><path d="M18 18v-7" /><path d="M3 22h18" /><path d="M6 18v-7" /></svg>
     </div>
     <h2>Aufsichtsbehörde</h2>
-    <p>Die zuständige Aufsichtsbehörde für den Datenschutz ist:</p>
-    <p><strong>Der Hessische Beauftragte für Datenschutz und Informationsfreiheit</strong><br>
-    Postfach 3163<br>
-    65021 Wiesbaden<br>
-    Deutschland<br>
-    E-Mail: poststelle@datenschutz.hessen.de<br>
-    Website: <a href="https://datenschutz.hessen.de" rel="noopener noreferrer">datenschutz.hessen.de</a></p>
-    <p>Sie können sich auch an die Aufsichtsbehörde in Ihrem EU-Mitgliedstaat des Wohnsitzes wenden.</p>
+    <p>Sie können sich bei einer Datenschutzaufsichtsbehörde beschweren, insbesondere im Mitgliedstaat Ihres gewöhnlichen Aufenthalts, Ihres Arbeitsplatzes oder des mutmaßlichen Verstoßes (Art. 77 DSGVO).</p>
+    <p><a href="https://www.edpb.europa.eu/about-edpb/our-members_en" rel="noopener" target="_blank">Verzeichnis der Aufsichtsbehörden</a></p>
   </div>
 
   <div class="card">
@@ -192,6 +180,7 @@
     </div>
     <h2>Kontakt</h2>
     <p>Bei Fragen zum Datenschutz kann der Betreiber über die im <a href="./impressum">Impressum</a> angegebenen Kontaktdaten erreicht werden.</p>
+    <p>Wenn Sie uns schreiben, erhalten wir Ihre Absenderadresse, Ihre Nachricht und gegebenenfalls Anhänge. Für den Empfang und die Beantwortung nutzen wir united-domains. Bei allgemeinen Anfragen ist unser berechtigtes Interesse die Bearbeitung Ihres Anliegens (Art. 6 Abs. 1 Buchst. f DSGVO). Die Angabe ist freiwillig. Ohne Rückadresse können wir per E-Mail nicht antworten. Wenn Sie einen Rückruf wünschen, können Sie uns per E-Mail freiwillig Ihre Telefonnummer und eine bevorzugte Rückrufzeit mitteilen. Wir verwenden diese freiwillig mitgeteilten Kontaktdaten ausschließlich zur Bearbeitung Ihrer jeweiligen Anfrage und zur Abwicklung des gewünschten Rückrufs. Wir haben festgelegt, erledigte Kontaktanfragen einmal im Monat zu prüfen und zu löschen, soweit keine Aufbewahrungsgründe bestehen.</p>
   </div>
 
   <div class="card">
@@ -205,12 +194,12 @@
       <li><strong>Recht auf Berichtigung (Art. 16 DSGVO):</strong> Sie können die Berichtigung unrichtiger oder die Vervollständigung unvollständiger Daten verlangen.</li>
       <li><strong>Recht auf Löschung (Art. 17 DSGVO):</strong> Sie können die Löschung Ihrer personenbezogenen Daten verlangen, sofern die gesetzlichen Voraussetzungen vorliegen.</li>
       <li><strong>Recht auf Einschränkung der Verarbeitung (Art. 18 DSGVO):</strong> Sie können die Einschränkung der Verarbeitung Ihrer personenbezogenen Daten verlangen.</li>
-      <li><strong>Recht auf Datenübertragbarkeit (Art. 20 DSGVO):</strong> Sie können Ihre personenbezogenen Daten in einem strukturierten, gängigen und maschinenlesbaren Format erhalten.</li>
+      <li>Datenübertragbarkeit gilt unter den Voraussetzungen von Art. 20 DSGVO, insbesondere bei automatisierter Verarbeitung auf Grundlage einer Einwilligung oder eines Vertrags.</li>
       <li><strong>Widerspruchsrecht (Art. 21 DSGVO):</strong> Sie können der Verarbeitung Ihrer personenbezogenen Daten aus Gründen, die sich aus Ihrer besonderen Situation ergeben, widersprechen.</li>
       <li><strong>Recht auf Beschwerde bei einer Aufsichtsbehörde (Art. 77 DSGVO):</strong> Sie haben das Recht, sich bei einer Datenschutz-Aufsichtsbehörde zu beschweren.</li>
     </ul>
-    <p>Zuständige Aufsichtsbehörde in Hessen ist der <strong>Hessische Beauftragte für Datenschutz und Informationsfreiheit</strong>, Postfach 3163, 65021 Wiesbaden, <a href="https://datenschutz.hessen.de" target="_blank" rel="noopener">datenschutz.hessen.de</a>.</p>
-    <p>Zur Ausübung dieser Rechte wenden Sie sich an die im <a href="./impressum">Impressum</a> angegebene Kontaktadresse. Die Berechnungen erfolgen lokal im Browser. Bei Onlineabrufen verarbeitet Vercel jedoch technische Anfragedaten, die in Providerlogs enthalten sein können. Informationen zur Aufbewahrung stehen im Abschnitt „Hosting“.</p>
+
+    <p>Zur Ausübung dieser Rechte wenden Sie sich an die im <a href="./impressum">Impressum</a> angegebene Kontaktadresse. Die Berechnungen erfolgen lokal im Browser. Bei Onlineabrufen verarbeitet Cloudflare jedoch technische Anfragedaten, die in Providerlogs enthalten sein können. Informationen zur Aufbewahrung stehen im Abschnitt „Hosting“.</p>
   </div>
 
   </main>
