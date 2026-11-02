@@ -20,8 +20,8 @@ function untouched(rt, before) {
 }
 function openRow(rt, index = 0, list = "histList") {
   rt.elements.get(list).children[index].children[0].click();
-  const search = new URL(rt.context.location.href, "https://example.test/").search;
-  return ready({search, storage: Object.fromEntries(rt.storage)});
+  const u = new URL(rt.context.location.href, "https://example.test/");
+  return ready({search: u.search, hash: u.hash, storage: Object.fromEntries(rt.storage)});
 }
 async function deleteRow(rt, index = 0, list = "histList") {
   rt.elements.get(list).children[index].children[1].click();
@@ -254,8 +254,8 @@ test("EVS-007 ID Generator erholt sich nach Kollision und verweigert fehlende Zu
 });
 test("EVS-007 verschobene alte Zeile wird über Inhalt statt über ihre alte Position geöffnet", () => {
   const rt=historyRuntime({storage:{[historyKey]:JSON.stringify([entry({date:fixedDate,km:10}),entry({date:fixedDate,km:20})])}});
-  rt.elements.get("histList").children[1].children[0].click();const search=new URL(rt.context.location.href,"https://example.test/").search;
-  const rearranged=stored(rt).reverse();const opened=ready({search,storage:{...Object.fromEntries(rt.storage),[historyKey]:JSON.stringify(rearranged)}});
+  rt.elements.get("histList").children[1].children[0].click();const _u=new URL(rt.context.location.href,"https://example.test/");const search=_u.search,hash=_u.hash;
+  const rearranged=stored(rt).reverse();const opened=ready({search,hash,storage:{...Object.fromEntries(rt.storage),[historyKey]:JSON.stringify(rearranged)}});
   assert.equal(Number(opened.elements.get("kmEv").value),20);
 });
 

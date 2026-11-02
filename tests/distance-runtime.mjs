@@ -4,7 +4,7 @@ import { createRuntime } from "./history-runtime.mjs";
 // handler. This is not a browser range implementation or a device proof.
 function distanceRuntime(market = "us", storage = {}) {
   const rt = createRuntime({
-    storage: { "eaf.appVersion": "20260428-1", "eaf.market": market, ...storage },
+    storage: { "eaf.appVersion": "20260428-1", "eaf.market": market, "eaf.rememberInputs": "1", ...storage },
     inputs: {
       evVerbrauch: 17, strompreis: .37, benzinpreis: 1.85, verbrauchVerbrenner: 7,
       kmEv: 50, kmVb: 50, kmShared: 1000, batteryKwh: 60,

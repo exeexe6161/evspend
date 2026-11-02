@@ -104,11 +104,12 @@ function createRuntime(options = {}) {
   };
   const navigator = {
     userAgent: "test", platform: "MacIntel", maxTouchPoints: 0,
-    locks, language: options.language || "de-DE", languages: options.languages || [options.language || "de-DE"]
+    locks, serviceWorker: options.serviceWorker, language: options.language || "de-DE", languages: options.languages || [options.language || "de-DE"]
   };
   const windowObject = {
-    document, localStorage, sessionStorage: localStorage, navigator, crypto: options.crypto ?? webcrypto,
-    location: { search: options.search || "", pathname: options.pathname || "/", href: "https://www.evspendpure.com/" },
+    ...(options.pageMarket ? {__EAF_PAGE_MARKET: options.pageMarket} : {}),
+    document, localStorage, sessionStorage: localStorage, navigator, caches: options.caches, crypto: options.crypto ?? webcrypto,
+    location: { search: options.search || "", hash: options.hash || "", pathname: options.pathname || "/", href: "https://www.evspendpure.com/" },
     history: { replaceState() {} },
     addEventListener() {}, removeEventListener() {},
     requestAnimationFrame: () => 1, cancelAnimationFrame() {},
@@ -118,7 +119,7 @@ function createRuntime(options = {}) {
   windowObject.window = windowObject;
   const context = vm.createContext({
     window: windowObject, document, localStorage, sessionStorage: localStorage,
-    location: windowObject.location, history: windowObject.history, navigator,
+    location: windowObject.location, history: windowObject.history, navigator, caches: options.caches,
     URL: {createObjectURL(blob) { blobs.push(blob); return "blob:test"; }, revokeObjectURL() {}}, URLSearchParams, Blob, Intl, Date: RuntimeDate, Math, JSON, Number, String, Object,
     Array, Map, Set, Promise, console, Uint8Array,
     File: class File {}, FileReader: class FileReader {
@@ -172,11 +173,15 @@ const entry = (overrides = {}) => ({
 });
 const historyKey = "eautofakten_history";
 const existingJson = JSON.stringify([entry({date: Date.now() - 1000})]);
+// Bestehende Persistenztests laufen mit aktiviertem Merken ("eaf.rememberInputs").
+// remember: false prüft das Standardverhalten ohne Opt-in.
 function ready(options = {}) {
-  const rt = createRuntime({inputs: defaults, ...options, storage: {
+  const storage = {
     "eaf.appVersion": "20260428-1", "eaf.market": "de", "eaf.verlauf.period": "all",
-    [historyKey]: existingJson, ...options.storage
-  }});
+    [historyKey]: existingJson, "eaf.rememberInputs": "1", ...options.storage
+  };
+  if (options.remember === false && !(options.storage && "eaf.rememberInputs" in options.storage)) delete storage["eaf.rememberInputs"];
+  const rt = createRuntime({inputs: defaults, ...options, storage});
   rt.dispatchDom("DOMContentLoaded");
   return rt;
 }
@@ -185,6 +190,7 @@ function historyRuntime(options) {
   for (const id of ["histList", "histClearBtn", "legacyList", "histExportBtn", "histImportBtn", "histImportInput", "statCount",
     "statsEmpty", "statBlockEv", "statBlockVb", "statEvN", "statEvTotal", "statEvAvgCost", "statEvAvgPerEntry",
     "statEvLowest", "statVbN", "statVbTotal", "statVbAvgCost", "statVbAvgPerEntry", "statVbLowest", "statsCaveat"]) rt.element(id);
+  if (options && options.beforeHistory) options.beforeHistory(rt);
   const script = process.env.EVSPEND_TEST_MINIFIED === "1" ? "verlauf.min.js" : "verlauf.js";
   // No source rewriting: exercise the registered production file-input handler.
   vm.runInContext(fs.readFileSync(new URL(script, rootUrl), "utf8"), rt.context);

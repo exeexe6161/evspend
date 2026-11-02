@@ -25,13 +25,9 @@
       var locale = el.dataset.setLocale;
       var target = el.getAttribute('href');
 
-      // localStorage eaf.market (script.js — UI language + currency + slider defaults)
-      var market = LOCALE_TO_MARKET[locale];
-      if (market) {
-        try {
-          localStorage.setItem('eaf.market', market);
-        } catch (_) {}
-      }
+      // Language of a legal page is NOT a calculator market choice: no
+      // persistent eaf.market is written here (explicit choices happen in the
+      // calculator's market switch only).
       window.location.href = target;
     });
   });

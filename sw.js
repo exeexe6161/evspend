@@ -87,6 +87,25 @@ self.addEventListener('activate', (event) => {
   );
 });
 
+// Ausdrückliche Offline-Aktivierung: die Seite fragt, ob alle benötigten
+// Ressourcen tatsächlich im Cache liegen, und meldet erst dann Erfolg.
+self.addEventListener('message', (event) => {
+  const data = event.data;
+  if (!data || data.type !== 'EVS_OFFLINE_STATUS' || !event.ports || !event.ports[0]) return;
+  const port = event.ports[0];
+  event.waitUntil(offlineStatus().then((result) => port.postMessage(result),
+    () => port.postMessage({ type: 'EVS_OFFLINE_STATUS', ok: false, missing: ['cache-unreadable'] })));
+});
+
+async function offlineStatus() {
+  const cache = await caches.open(STATIC_CACHE);
+  const missing = [];
+  for (const url of REQUIRED_PRECACHE_URLS) {
+    if (!(await cache.match(url))) missing.push(url);
+  }
+  return { type: 'EVS_OFFLINE_STATUS', version: CACHE_VERSION, ok: missing.length === 0, missing };
+}
+
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
@@ -126,7 +145,24 @@ function cacheFirst(request) {
   });
 }
 
-function staleWhileRevalidate(request, event) {
+// Verlaufskennungen (id, entryKey, entryIndex) sind nutzerspezifisch. Sie gehören
+// weder in Cache-Schlüssel noch in Anfragen des Service Workers an den Hoster;
+// die ausgelieferte HTML-Seite ist für alle Kennungen identisch.
+const PRIVATE_NAV_PARAMS = ['id', 'entryKey', 'entryIndex'];
+function navigationCacheKey(request) {
+  let url;
+  try { url = new URL(request.url); } catch (_) { return request; }
+  let changed = false;
+  for (const name of PRIVATE_NAV_PARAMS) {
+    if (url.searchParams.has(name)) { url.searchParams.delete(name); changed = true; }
+  }
+  url.hash = '';
+  if (!changed) return request;
+  return new Request(url.href, { method: 'GET', headers: { Accept: 'text/html' }, credentials: 'same-origin' });
+}
+
+function staleWhileRevalidate(originalRequest, event) {
+  const request = navigationCacheKey(originalRequest);
   const cached = matchCurrentGeneration(request, undefined, true).catch(() => undefined);
   const network = cached.then(() => fetch(request)).then(async (response) => {
     await cacheRuntimeResponse(request, response).catch(() => {});

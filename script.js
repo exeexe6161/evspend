@@ -1,110 +1,5 @@
 const $ = id => document.getElementById(id);
 
-// ── EVSpendPure Splash lifecycle ─────────────────────────────────────────────────
-// First-paint C3 splash. Decorative only, never blocks the app:
-//   • shown once per browser session (sessionStorage flag), never on internal navigation
-//   • removed at once if `prefers-reduced-motion` is set
-//   • normal session view: ~1.0 s on screen (wordmark eases in), then opacity
-//     fade-out (~0.32 s)
-//   • native app: starts when the native launch screen is removed (≤ 3 s)
-//   • hard safety timeout: ~1.8 s after start — the overlay is force-removed regardless
-//     of whether the fade callbacks fired
-// Frame 0 matches the native launch image, so the hand-over shows no jump.
-// All DOM access is wrapped in try/catch so any failure here cannot prevent
-// the rest of the app from initialising.
-(function initEvspendSplash() {
-  try {
-    var el = document.getElementById("evspend-splash");
-    if (!el) return;
-
-    var SEEN_KEY = "evspendSplashSeen";
-    var raf = window.requestAnimationFrame || function (cb) { return setTimeout(cb, 16); };
-
-    var alreadySeen = false;
-    try { alreadySeen = sessionStorage.getItem(SEEN_KEY) === "1"; } catch (_) {}
-
-    var prefersReduced = false;
-    try {
-      prefersReduced = window.matchMedia &&
-        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    } catch (_) {}
-
-    function removeSplash() {
-      if (!el || el._removed) return;
-      el._removed = true;
-      el.classList.add("is-hidden");
-      el.setAttribute("aria-hidden", "true");
-      // After the CSS opacity transition (~320 ms) finishes, detach so the
-      // calculator can't be tap-blocked by an invisible layer.
-      setTimeout(function () {
-        if (el && el.parentNode) el.parentNode.removeChild(el);
-      }, 360);
-    }
-
-    if (alreadySeen) {
-      el.style.display = "none";
-      removeSplash();
-      return;
-    }
-
-    // Mark seen up-front so a quick reload during the splash still suppresses
-    // the next session view.
-    try { sessionStorage.setItem(SEEN_KEY, "1"); } catch (_) {}
-
-    if (prefersReduced) {
-      el.style.display = "none";
-      removeSplash();
-      return;
-    }
-
-    // In the native app the overlay starts only once the native launch screen is
-    // gone (event dispatched from initApp), so the hand-over shows the identical
-    // mark and the wordmark eases in visibly. In browsers it starts on the next frame.
-    var hideTimer = null, killTimer = null, started = false;
-    function start() {
-      if (started || el._removed) return;
-      started = true;
-      raf(function () { el.classList.add("run"); });
-      // Normal lifecycle: ~1.0 s on screen, then fade out.
-      hideTimer = setTimeout(removeSplash, 1000);
-      // Hard safety: even if hideTimer is throttled by background tabs, this
-      // wins after ~1.8 s so the calculator is never blocked.
-      killTimer = setTimeout(function () {
-        clearTimeout(hideTimer);
-        removeSplash();
-      }, 1800);
-    }
-    var isNative = false;
-    try {
-      isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
-    } catch (_) {}
-    if (isNative) {
-      window.addEventListener("evspend:native-splash-hidden", start, { once: true });
-      setTimeout(start, 3000); // never wait longer than this for the native event
-    } else {
-      start();
-    }
-    // Tap to dismiss — power users skip the wait. Never replays.
-    // Both listeners share the same idempotent dismiss; whichever fires
-    // first wins and the other is harmless because removeSplash() guards
-    // against double-runs via el._removed.
-    function dismiss() {
-      clearTimeout(hideTimer);
-      clearTimeout(killTimer);
-      removeSplash();
-    }
-    el.addEventListener("click", dismiss, { once: true });
-    el.addEventListener("touchstart", dismiss, { once: true, passive: true });
-  } catch (_) {
-    // Belt-and-braces: if anything throws, hide the overlay so the app stays
-    // usable. The CSS fallback animation will also drop it within 4 s.
-    try {
-      var fallback = document.getElementById("evspend-splash");
-      if (fallback) fallback.style.display = "none";
-    } catch (__) {}
-  }
-})();
-
 // ── Utilities ─────────────────────────────────────────────────────────────────
 function debounce(fn, ms) {
   let t;
@@ -137,23 +32,42 @@ const PURGE_TRIES_KEY = "eaf.legacyPurgeTries";
 // Storage failure is a session restriction, never evidence that saved data is empty.
 let _storageInitFailed = false;
 
-// ── PWA: Storage ────────────────────────────────────────────────────────────
-const _PWA_VISITS_KEY    = 'eaf.pwa.visits';
-const _PWA_DISMISSED_KEY = 'eaf.pwa.dismissed'; // permanent (X / installed)
-const _PWA_SNOOZE_KEY    = 'eaf.pwa.snooze';    // timestamp (Später → 24h)
-const _PWA_SNOOZE_MS     = 24 * 60 * 60 * 1000;
-
-const _pwaVisits = (() => {
+// ── Eingabespeicher: standardmäßig flüchtig, dauerhaft nur nach Opt-in ───────
+// Ohne ausdrückliche Aktivierung („Eingaben auf diesem Gerät merken“) bleiben
+// alle Rechnerwerte im Arbeitsspeicher. Bestehende Entwürfe werden weder
+// geladen noch überschrieben noch gelöscht, bis der Nutzer es ausdrücklich wählt.
+const REMEMBER_KEY = "eaf.rememberInputs";
+const DRAFT_KEYS = [LS_KEY, RIDESHARE_KEY, RIDESHARE_PERSONS_KEY, LT_ACTIVE_KEY,
+  LT_YEARS_KEY, LT_PREMIUM_KEY, LT_KM_MONAT_KEY, MODE_KEY, TYPE_KEY];
+const LEGACY_DRAFT_KEYS = ["eaf.inputs", "eaf.inputs.v1"];
+let _rememberInputs = false;   // Nutzer hat dauerhaftes Merken aktiviert
+let _draftPaused = false;      // Entwurf vorhanden/Konflikt: erst Nutzerentscheidung
+let _draftConflict = false;    // anderer Tab hat den Entwurf geändert
+let _draftWriteFailed = false; // letzter Schreibversuch ist fehlgeschlagen
+let _lastDraftRaw = null;      // Stand von LS_KEY, den dieser Tab zuletzt gelesen/geschrieben hat
+try { _rememberInputs = localStorage.getItem(REMEMBER_KEY) === "1"; }
+catch (_) { _storageInitFailed = true; _rememberInputs = false; }
+// Another tab may have switched remembering off: re-check the stored opt-in
+// before every persistent write so this tab stops writing as well.
+function _optInStillOn() {
+  if (!_rememberInputs) return false;
   try {
-    const storedVisits = parseInt(localStorage.getItem(_PWA_VISITS_KEY) || '0', 10);
-    const v = (Number.isFinite(storedVisits) && storedVisits >= 0 ? storedVisits : 0) + 1;
-    localStorage.setItem(_PWA_VISITS_KEY, String(v));
-    return v;
-  } catch (_) {
-    _storageInitFailed = true;
-    return 0;
-  }
-})();
+    if (localStorage.getItem(REMEMBER_KEY) === "1") return true;
+  } catch (_) { return true; /* read failure: the write below reports it */ }
+  _rememberInputs = false; _draftPaused = false; _draftConflict = false; _lastDraftRaw = null;
+  try { _renderRememberUI(); } catch (_) {}
+  return false;
+}
+function _stateSet(key, value) {
+  if (!_rememberInputs || _draftPaused || _storageInitFailed || !_optInStillOn()) return false;
+  try { localStorage.setItem(key, String(value)); return true; }
+  catch (_) { _draftWriteFailed = true; try { _renderRememberUI(); } catch (__) {} return false; }
+}
+function _stateRemove(key) {
+  if (!_rememberInputs || _draftPaused || _storageInitFailed || !_optInStillOn()) return false;
+  try { localStorage.removeItem(key); if (key === LS_KEY) _lastDraftRaw = null; return true; }
+  catch (_) { _draftWriteFailed = true; try { _renderRememberUI(); } catch (__) {} return false; }
+}
 
 // Read initial state together before any legacy cleanup can run.
 let _initialAppState = null;
@@ -166,18 +80,14 @@ try {
       .map(key => [key, localStorage.getItem(key)])
   );
 } catch (_) { _storageInitFailed = true; }
+// Ohne Opt-in wird der gespeicherte Stand nicht automatisch übernommen.
+const _storedSnapshot = _initialAppState;
+if (!_rememberInputs) _initialAppState = {};
 
-// ── Existing app-state cleanup (before state is applied) ─────────────────────
-// Two layers:
-//   1. Cleanup steps (always run on APP_VERSION change). Cheap localStorage
-//      hygiene. Unreadable or malformed current data is preserved.
-//   2. Legacy hard-purge (unregister old SW + drop caches + reload). Runs at
-//      most ONCE per browser, guarded by `eaf.legacyPurgeDone` in
-//      localStorage (Phase P Sprint 4 / F1.6: was sessionStorage, which
-//      could fail-loop in private modes). Additional reload-loop counter
-//      bails out after 3 unsuccessful attempts.
+// Validate existing app state before applying it. Offline installations and
+// their caches are maintained by the service worker, never by this migration.
 (function migrateAppState() {
-  if (_storageInitFailed) return;
+  if (_storageInitFailed || !_rememberInputs) return;
   let stored = null;
   try { stored = localStorage.getItem(APP_VERSION_KEY); }
   catch (_) { _storageInitFailed = true; return; }
@@ -210,61 +120,21 @@ try {
     if (rawHistory && !Array.isArray(JSON.parse(rawHistory))) throw new Error("Invalid stored history");
   } catch (_) { _storageInitFailed = true; return; }
 
-  // 1. Clean known-legacy keys (safe to drop — unused by current code)
-  ["eaf.inputs", "eaf.inputs.v1", "eaf.history.v0", "eaf.mode.v1", "eaf.ui", "eaf.prefs"]
+  // Preserve unknown legacy input formats; clean only unrelated legacy keys.
+  ["eaf.history.v0", "eaf.mode.v1", "eaf.ui", "eaf.prefs"]
     .forEach(k => { try { localStorage.removeItem(k); } catch(_) {} });
 
   // 2. Validate mode/type/theme — drop invalid values so defaults kick in
-  try { const m = localStorage.getItem(MODE_KEY); if (m && m !== "compare" && m !== "single") localStorage.removeItem(MODE_KEY); } catch(_) {}
-  try { const t = localStorage.getItem(TYPE_KEY); if (t && t !== "ev" && t !== "vb")          localStorage.removeItem(TYPE_KEY); } catch(_) {}
+  try { const m = localStorage.getItem(MODE_KEY); if (m && m !== "compare" && m !== "single") _stateRemove(MODE_KEY); } catch(_) {}
+  try { const t = localStorage.getItem(TYPE_KEY); if (t && t !== "ev" && t !== "vb")          _stateRemove(TYPE_KEY); } catch(_) {}
   try { const th = localStorage.getItem("theme"); if (th && th !== "light" && th !== "dark")  localStorage.removeItem("theme");   } catch(_) {}
 
   // 3. Mark migration done
   try { localStorage.setItem(APP_VERSION_KEY, APP_VERSION); }
   catch (_) { _storageInitFailed = true; return; }
 
-  // 4. Legacy purge (one-shot, lifetime of the browser). Skipped when:
-  //    - PURGE_DONE_KEY already set (already purged once before),
-  //    - or no legacy state to clean,
-  //    - or this is just an APP_VERSION bump for an already-tracked install
-  //      (stored !== null means a previous Phase P sprint already migrated
-  //      this browser; we record purge-done silently so future bumps skip).
-  //    Reload-loop guard via PURGE_TRIES_KEY — if we already tried ≥ 3
-  //    times without succeeding, give up and continue normally.
-  let purgeDone = null, purgeTries = 0;
-  try { purgeDone = localStorage.getItem(PURGE_DONE_KEY); } catch(_) {}
-  if (!purgeDone && stored !== null) {
-    try { localStorage.setItem(PURGE_DONE_KEY, "1"); } catch(_) {}
-    return;
-  }
-  if (purgeDone === "1" || !hasOldState) return;
-  try { purgeTries = parseInt(localStorage.getItem(PURGE_TRIES_KEY) || "0", 10) || 0; } catch(_) {}
-  if (purgeTries >= 3) {
-    try { localStorage.setItem(PURGE_DONE_KEY, "1"); } catch(_) {}
-    return;
-  }
-  try { localStorage.setItem(PURGE_TRIES_KEY, String(purgeTries + 1)); } catch(_) {}
+  // Preserve existing service workers and caches, including other apps on this origin.
 
-  const tasks = [];
-  if (navigator.serviceWorker && navigator.serviceWorker.getRegistrations) {
-    tasks.push(
-      navigator.serviceWorker.getRegistrations()
-        .then(regs => Promise.all(regs.map(r => r.unregister().catch(() => {}))))
-        .catch(() => {})
-    );
-  }
-  if (window.caches && caches.keys) {
-    tasks.push(
-      caches.keys()
-        .then(keys => Promise.all(keys.map(k => caches.delete(k).catch(() => {}))))
-        .catch(() => {})
-    );
-  }
-  Promise.all(tasks).finally(() => {
-    try { localStorage.setItem(PURGE_DONE_KEY, "1"); } catch(_) {}
-    try { localStorage.removeItem(PURGE_TRIES_KEY); } catch(_) {}
-    setTimeout(() => { try { location.reload(); } catch(_) {} }, 40);
-  });
 })();
 
 // App mode state
@@ -276,8 +146,8 @@ let longtermActive  = false;              // Langzeitanalyse an/aus — default:
 let longtermYears   = 10;                 // 0 bis 20 Jahre — default: 10
 let longtermPremium = 5000;               // Mehrpreis EV in € — default: 5000
 let kmMonat         = 1000;               // Monatliche Fahrleistung — default: 1000 km
+function _applyStateSnapshot(savedState) {
 try {
-  const savedState = _initialAppState;
   const m = savedState[MODE_KEY]; if (m === "compare" || m === "single") appMode = m;
   const t = savedState[TYPE_KEY]; if (t === "ev" || t === "vb") singleType = t;
   const rs = savedState[RIDESHARE_KEY]; if (rs === "1") rideshareActive = true;
@@ -294,6 +164,8 @@ try {
   const kmM = parseFloat(savedState[LT_KM_MONAT_KEY]);
   if (isFinite(kmM) && kmM >= 0) kmMonat = kmM;
 } catch (_) { _storageInitFailed = true; }
+}
+_applyStateSnapshot(_initialAppState);
 
 // One-time migration: legacy "eaf.history.v1" → new "eautofakten_history"
 let _historyMigrationPending = false;
@@ -373,7 +245,7 @@ function _clearHistoricalInputs() {
   if (!persons) return;
   ridesharePersons = Math.min(6, ridesharePersons);
   _applyHistoricalRange($("ridesharePersons"), _historyInputConfig("ridesharePersons"), ridesharePersons);
-  try { localStorage.setItem(RIDESHARE_PERSONS_KEY, String(ridesharePersons)); } catch (_) {}
+  try { _stateSet(RIDESHARE_PERSONS_KEY, String(ridesharePersons)); } catch (_) {}
   applyRideshare();
 }
 function _syncHistoricalInputs() {
@@ -399,9 +271,7 @@ function _loadHistoricalInputs(saved) {
   const code = window.EAF_I18N && window.EAF_I18N.getMarketCode();
   if (!meta || !meta.values || typeof meta.values !== "object" || Array.isArray(meta.values)) return;
   if (meta.marketCode !== code && !(["de", "eu"].includes(meta.marketCode) && ["de", "eu"].includes(code))) return;
-  if (_validHistoricalNote(meta.note) && $("noteInput")) {
-    _setHistoricalNote(meta.note);
-  }
+  // Notizen werden nicht mehr im Eingabeentwurf abgelegt; ihre Quelle ist der Verlauf.
   HISTORY_INPUT_IDS.forEach(id => {
     const record = meta.values[id];
     const savedValue = id === "ridesharePersons" ? localStorage.getItem(RIDESHARE_PERSONS_KEY) : saved[id];
@@ -462,10 +332,20 @@ function _historyCompareDistancesSupported(entry) {
   return (entry.kmEv == null || entry.kmEv === km) && (entry.kmVb == null || entry.kmVb === km);
 }
 function _historyEntryFromLocation() {
-  const params = new URLSearchParams(location.search);
+  // New links carry the selector in the URL fragment (never sent to the
+  // server or into cache keys). Legacy ?id=/entryKey/entryIndex links keep working.
+  const frag = String(location.hash || "").replace(/^#/, "");
+  const params = new URLSearchParams(frag.indexOf("id=") === 0 || frag.indexOf("&id=") >= 0 ? frag : location.search);
   const id = params.get("id");
   if (!id) return null;
   try {
+    // Move a legacy query selector into the fragment so it leaves the
+    // address bar / server logs from here on (reload still works).
+    if ((!frag && location.search && history.replaceState)) {
+      try {
+        history.replaceState(null, "", location.pathname + "#" + params.toString());
+      } catch (_) {}
+    }
     const hist = JSON.parse(localStorage.getItem(HIST_KEY) || "[]");
     const key = params.get("entryKey");
     const matches = Array.isArray(hist) ? hist.filter(e => {
@@ -562,8 +442,8 @@ function _restoreHistoryEntry(entry) {
     ridesharePersons = restoredPersons;
     rideshareActive = entry.ridesharing === true && restoredPersons > 1;
     if (!_storageInitFailed) try {
-      localStorage.setItem(RIDESHARE_KEY, rideshareActive ? "1" : "0");
-      localStorage.setItem(RIDESHARE_PERSONS_KEY, String(ridesharePersons));
+      _stateSet(RIDESHARE_KEY, rideshareActive ? "1" : "0");
+      _stateSet(RIDESHARE_PERSONS_KEY, String(ridesharePersons));
     } catch (_) {}
 
     if (single) {
@@ -571,16 +451,16 @@ function _restoreHistoryEntry(entry) {
       appMode   = "single";
       singleType = entry.type;
       if (!_storageInitFailed) try {
-        localStorage.setItem(MODE_KEY, appMode);
-        localStorage.setItem(TYPE_KEY, singleType);
+        _stateSet(MODE_KEY, appMode);
+        _stateSet(TYPE_KEY, singleType);
       } catch(_){}
     } else {
       // Legacy compare entry → fill both sides, switch to compare mode
       appMode = "compare";
       longtermActive = false;
       if (!_storageInitFailed) try {
-        localStorage.setItem(MODE_KEY, appMode);
-        localStorage.setItem(LT_ACTIVE_KEY, "0");
+        _stateSet(MODE_KEY, appMode);
+        _stateSet(LT_ACTIVE_KEY, "0");
       } catch(_){}
     }
     saveInputs();
@@ -639,24 +519,333 @@ if ($("noteInput")) $("noteInput").addEventListener("input", () => {
   });
 })();
 
-function saveInputs() {
-  if (_storageInitFailed) return;
+function _syncSessionState() {
+  _syncHistoricalInputs();
+  if (_historicalNote !== null) {
+    const note = $("noteInput") && $("noteInput").value;
+    if (!_validHistoricalNote(note)) _historicalNote = null;
+    else if (_historicalNote.value !== note) _historicalNote = {original: note, value: note};
+  }
+}
+function _collectDraft() {
+  const data = {};
+  INPUT_IDS.forEach(id => { const el = $(id); if (el) data[id] = el.value; });
+  // Nur Präzisionswerte; die Notiz bleibt ausschließlich im Verlauf bzw. im Arbeitsspeicher.
+  if (Object.keys(_historicalInputs).length) data._historyInputs = {
+    marketCode: window.EAF_I18N.getMarketCode(), values: _historicalInputs
+  };
+  data._marketCode = window.EAF_I18N.getMarketCode();
+  return data;
+}
+// Compare-and-set: ein anderer Tab hat den Entwurf zwischenzeitlich geändert →
+// nicht still überschreiben, sondern pausieren und den Nutzer entscheiden lassen.
+function _writeDraft() {
+  if (!_rememberInputs || _draftPaused || _storageInitFailed || !_optInStillOn()) return;
   try {
-    const data = {};
-    _syncHistoricalInputs();
-    if (_historicalNote !== null) {
-      const note = $("noteInput") && $("noteInput").value;
-      if (!_validHistoricalNote(note)) _historicalNote = null;
-      else if (_historicalNote.value !== note) _historicalNote = {original: note, value: note};
+    const current = localStorage.getItem(LS_KEY);
+    if (current !== _lastDraftRaw) {
+      _draftConflict = true; _draftPaused = true;
+      try { _renderRememberUI(); } catch (_) {}
+      return;
     }
-    INPUT_IDS.forEach(id => { const el = $(id); if (el) data[id] = el.value; });
-    if (Object.keys(_historicalInputs).length || _historicalNote !== null) data._historyInputs = {
-      marketCode: window.EAF_I18N.getMarketCode(), values: _historicalInputs
-    };
-    if (_historicalNote !== null) data._historyInputs.note = _historicalNote.original;
-    data._marketCode = window.EAF_I18N.getMarketCode();
-    localStorage.setItem(LS_KEY, JSON.stringify(data));
-  } catch(e) {}
+    const raw = JSON.stringify(_collectDraft());
+    localStorage.setItem(LS_KEY, raw);
+    _lastDraftRaw = raw;
+    if (_draftWriteFailed) { _draftWriteFailed = false; try { _renderRememberUI(); } catch (_) {} }
+  } catch (_) {
+    _draftWriteFailed = true;
+    try { _renderRememberUI(); } catch (__) {}
+  }
+}
+function _runDraftLocked(fn) {
+  try {
+    const locks = typeof navigator !== "undefined" && navigator.locks;
+    if (locks && typeof locks.request === "function") {
+      return Promise.resolve(locks.request("eaf-draft", {mode: "exclusive"}, () => fn())).catch(() => {
+        _draftWriteFailed = true; try { _renderRememberUI(); } catch (_) {}
+      });
+    }
+  } catch (_) {}
+  return Promise.resolve(fn());
+}
+function saveInputs() {
+  _syncSessionState();
+  if (!_rememberInputs || _draftPaused || _storageInitFailed) return;
+  // Einzelschritt-Schreiben mit Compare-and-Set (siehe _writeDraft); die Web Locks
+  // sichern die ausdrücklichen Aktionen Laden, Überschreiben und Löschen ab.
+  _writeDraft();
+}
+
+
+// ── Eingaben merken: Bedienung, Altbestand, Mehrtab-Konflikte ────────────────
+let _draftViewRaw = null;       // Stand des Entwurfs, den die Anzeige zuletzt kannte
+let _deleteArmed = null;        // "draft" | "legacy": zweiter Klick bestätigt
+let _deleteArmTimer = null;
+let _rememberMsg = "";
+function _hasStoredDraft() {
+  try { return DRAFT_KEYS.some(k => localStorage.getItem(k) !== null); } catch (_) { return false; }
+}
+function _hasLegacyDraft() {
+  try { return LEGACY_DRAFT_KEYS.some(k => localStorage.getItem(k) !== null); } catch (_) { return false; }
+}
+function _syncDraftView() { try { _draftViewRaw = localStorage.getItem(LS_KEY); } catch (_) {} }
+function _setRememberMsg(key) { _rememberMsg = key ? _t(key) : ""; _renderRememberUI(); }
+function _renderRememberUI() {
+  const box = $("rememberPanel");
+  if (!box) return;
+  const toggle = $("rememberToggle");
+  if (toggle) { toggle.checked = _rememberInputs; toggle.disabled = _storageInitFailed && !_rememberInputs; }
+  const draft = !_storageInitFailed && _hasStoredDraft();
+  const legacy = !_storageInitFailed && _hasLegacyDraft();
+  let status = _rememberInputs ? "rememberStatusOn" : "rememberStatusOff";
+  if (_draftWriteFailed) status = "rememberFailed";
+  if (_draftConflict) status = "rememberConflict";
+  else if (_rememberInputs && _draftPaused && draft) status = "rememberDraftFoundPaused";
+  const st = $("rememberStatus");
+  if (st) st.textContent = _rememberMsg || _t(status);
+  const set = (id, show, key) => {
+    const el = $(id); if (!el) return;
+    el.hidden = !show;
+    if (key && el.textContent !== undefined) el.textContent = _t(key);
+  };
+  const dbox = $("rememberDraftBox"); if (dbox) dbox.hidden = !(draft || _draftConflict);
+  set("rememberLoadBtn", draft || _draftConflict, "rememberLoad");
+  set("rememberReplaceBtn", _rememberInputs && _draftPaused, "rememberReplace");
+  set("rememberDeleteBtn", draft || _draftConflict, _deleteArmed === "draft" ? "rememberDeleteConfirm" : "rememberDelete");
+  const lbox = $("rememberLegacyBox"); if (lbox) lbox.hidden = !legacy;
+  set("rememberLegacyExportBtn", legacy, "rememberLegacyExport");
+  set("rememberLegacyDeleteBtn", legacy, _deleteArmed === "legacy" ? "rememberDeleteConfirm" : "rememberLegacyDelete");
+  const lt = $("rememberLegacyText"); if (lt) lt.textContent = _t("rememberLegacyFound");
+  const dt = $("rememberDraftText"); if (dt) dt.textContent = _t("rememberDraftFound");
+}
+function _persistAllState() {
+  _stateSet(MODE_KEY, appMode);
+  _stateSet(TYPE_KEY, singleType);
+  _stateSet(RIDESHARE_KEY, rideshareActive ? "1" : "0");
+  _stateSet(RIDESHARE_PERSONS_KEY, ridesharePersons);
+  _stateSet(LT_ACTIVE_KEY, longtermActive ? "1" : "0");
+  _stateSet(LT_YEARS_KEY, longtermYears);
+  _stateSet(LT_PREMIUM_KEY, longtermPremium);
+  _stateSet(LT_KM_MONAT_KEY, kmMonat);
+  _syncSessionState();
+  _writeDraft();
+}
+function _enableRemember() {
+  if (_storageInitFailed) { _draftWriteFailed = true; return _renderRememberUI(); }
+  try { localStorage.setItem(REMEMBER_KEY, "1"); }
+  catch (_) { _draftWriteFailed = true; _rememberInputs = false; return _renderRememberUI(); }
+  _rememberInputs = true; _draftWriteFailed = false; _draftConflict = false; _rememberMsg = "";
+  try { _lastDraftRaw = localStorage.getItem(LS_KEY); } catch (_) {}
+  // Vorhandene Entwürfe niemals still überschreiben: erst Nutzerentscheidung.
+  if (_hasStoredDraft()) _draftPaused = true;
+  else { _draftPaused = false; _persistAllState(); }
+  _syncDraftView(); _renderRememberUI();
+}
+function _disableRemember() {
+  try { localStorage.removeItem(REMEMBER_KEY); }
+  catch (_) { _draftWriteFailed = true; return _renderRememberUI(); }
+  _rememberInputs = false; _draftPaused = false; _draftConflict = false; _rememberMsg = "";
+  _syncDraftView(); _renderRememberUI();   // vorhandene Entwürfe bleiben unverändert und löschbar
+}
+function _refreshAfterDraftChange() {
+  try { applyMode(); applyRideshare(); applyLongterm(); refreshSliderValues(); updateRangeDisplay(); refreshSliderFills(); calc(); } catch (_) {}
+}
+function _rememberLoad() {
+  return _runDraftLocked(() => {
+    try {
+      if (typeof window.__eafApplyStoredDraft !== "function" || !window.__eafApplyStoredDraft()) throw new Error("not loadable");
+      if (_rememberInputs) { _draftPaused = false; _draftConflict = false; }
+      _refreshAfterDraftChange();
+      _syncDraftView();
+      _setRememberMsg("rememberLoaded");
+    } catch (_) { _setRememberMsg("rememberLoadFailed"); }
+  });
+}
+function _rememberReplace() {
+  return _runDraftLocked(() => {
+    try {
+      _lastDraftRaw = localStorage.getItem(LS_KEY);
+      _draftPaused = false; _draftConflict = false;
+      _persistAllState();
+      _syncDraftView();
+      _rememberMsg = ""; _renderRememberUI();
+    } catch (_) { _draftWriteFailed = true; _renderRememberUI(); }
+  });
+}
+function _disarmDelete() { _deleteArmed = null; clearTimeout(_deleteArmTimer); _deleteArmTimer = null; }
+function _rememberDelete(kind) {
+  if (_deleteArmed !== kind) {
+    _deleteArmed = kind; clearTimeout(_deleteArmTimer);
+    _deleteArmTimer = setTimeout(() => { _deleteArmed = null; _renderRememberUI(); }, 6000);
+    return _renderRememberUI();
+  }
+  _disarmDelete();
+  return _runDraftLocked(() => {
+    try {
+      // Hat ein anderer Tab den Entwurf seit der Anzeige geändert, nicht blind löschen.
+      if (kind === "draft" && localStorage.getItem(LS_KEY) !== _draftViewRaw) return _setRememberMsg("rememberChanged");
+      const keys = kind === "draft" ? DRAFT_KEYS : LEGACY_DRAFT_KEYS;
+      const backup = keys.map(k => [k, localStorage.getItem(k)]).filter(([, v]) => v !== null);
+      try {
+        backup.forEach(([k]) => localStorage.removeItem(k));
+        if (keys.some(k => localStorage.getItem(k) !== null)) throw new Error("still present");
+      } catch (e) {
+        // Entweder vollständig löschen oder nichts verändern.
+        backup.forEach(([k, v]) => { try { if (localStorage.getItem(k) === null) localStorage.setItem(k, v); } catch (_) {} });
+        throw e;
+      }
+      if (kind === "draft") { _lastDraftRaw = null; _draftConflict = false; if (_rememberInputs) _draftPaused = false; }
+      _syncDraftView();
+      _setRememberMsg("rememberDeleted");
+    } catch (_) { _setRememberMsg("rememberDeleteFailed"); }
+  });
+}
+function _rememberExportLegacy() {
+  try {
+    const out = {};
+    LEGACY_DRAFT_KEYS.forEach(k => { const v = localStorage.getItem(k); if (v !== null) out[k] = v; });
+    const blob = new Blob([JSON.stringify(out, null, 2)], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url; a.download = "evspendpure-altbestand.json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (_) { _setRememberMsg("rememberDeleteFailed"); }
+}
+function _initRememberUI() {
+  const bind = (id, fn) => { const el = $(id); if (el) el.addEventListener("click", fn); };
+  const toggle = $("rememberToggle");
+  if (toggle) toggle.addEventListener("change", () => (toggle.checked ? _enableRemember() : _disableRemember()));
+  _syncDraftView();
+  bind("rememberLoadBtn", () => { _disarmDelete(); _rememberLoad(); });
+  bind("rememberReplaceBtn", () => { _disarmDelete(); _rememberReplace(); });
+  bind("rememberDeleteBtn", () => _rememberDelete("draft"));
+  bind("rememberLegacyDeleteBtn", () => _rememberDelete("legacy"));
+  bind("rememberLegacyExportBtn", _rememberExportLegacy);
+  _renderRememberUI();
+}
+
+
+// ── Offline verfügbar machen: nur auf ausdrücklichen Wunsch ─────────────────
+// Es gibt keine automatische Registrierung und kein stilles Vorladen. Erfolg
+// wird erst gemeldet, wenn der Service Worker bestätigt, dass alle benötigten
+// Ressourcen im Cache liegen. Beim Entfernen werden ausschließlich die eigenen
+// Registrierungen (/sw.js) und Caches mit EVSpendPure-Präfix berührt.
+const SW_URL = "/sw.js";
+const EVS_CACHE_PREFIXES = ["evspend-static-", "evspend-runtime-"];
+let _offlineState = "off";      // off | working | ready | failed | unsupported
+let _offlineBusy = false;
+let _offlineArmed = false;
+let _offlineArmTimer = null;
+let _offlineMsg = "";
+let _offlineSeq = 0;           // jüngere Nutzeraktion hat Vorrang vor der Startprüfung
+function _offlineSupported() {
+  try { return !!(navigator.serviceWorker && window.caches && window.isSecureContext !== false); } catch (_) { return false; }
+}
+async function _ownRegistrations() {
+  const regs = await navigator.serviceWorker.getRegistrations();
+  return regs.filter(r => {
+    const w = r.active || r.waiting || r.installing;
+    try { return !!w && String(w.scriptURL).replace(/^[a-z][a-z0-9+.-]*:\/\/[^/]+/i, "").split(/[?#]/)[0] === SW_URL; } catch (_) { return false; }
+  });
+}
+function _waitWorker(reg, ms) {
+  return new Promise(resolve => {
+    const w = reg.installing || reg.waiting || reg.active;
+    if (!w) return resolve("redundant");
+    if (w.state === "activated") return resolve("activated");
+    if (w.state === "redundant") return resolve("redundant");
+    let done = false, timer = null;
+    const finish = v => { if (done) return; done = true; clearTimeout(timer); resolve(v); };
+    timer = setTimeout(() => finish("timeout"), ms);
+    w.addEventListener("statechange", () => {
+      if (w.state === "activated") finish("activated");
+      else if (w.state === "redundant") finish("redundant");
+    });
+  });
+}
+function _offlineCheck(reg) {
+  return new Promise(resolve => {
+    const worker = reg.active;
+    if (!worker || typeof MessageChannel === "undefined") return resolve(null);
+    const timer = setTimeout(() => resolve(null), 5000);
+    try {
+      const channel = new MessageChannel();
+      channel.port1.onmessage = event => { clearTimeout(timer); resolve(event.data || null); };
+      worker.postMessage({type: "EVS_OFFLINE_STATUS"}, [channel.port2]);
+    } catch (_) { clearTimeout(timer); resolve(null); }
+  });
+}
+function _renderOfflineUI() {
+  const status = $("offlineStatus");
+  const map = {off: "offlineStatusOff", working: "offlineStatusWorking", ready: "offlineStatusReady",
+    failed: "offlineStatusFailed", unsupported: "offlineStatusUnsupported"};
+  if (status) status.textContent = _offlineMsg || _t(map[_offlineState]);
+  const enable = $("offlineBtn"), remove = $("offlineRemoveBtn");
+  if (enable) { enable.hidden = _offlineState === "unsupported" || _offlineState === "ready"; enable.disabled = _offlineBusy; }
+  if (remove) {
+    remove.hidden = !(_offlineState === "ready" || _offlineState === "failed" && _offlineMsg === "removeAvailable");
+    remove.disabled = _offlineBusy;
+    remove.textContent = _t(_offlineArmed ? "rememberDeleteConfirm" : "offlineRemove");
+  }
+}
+async function _offlineRefresh() {
+  if (!_offlineSupported()) { _offlineState = "unsupported"; return _renderOfflineUI(); }
+  const seq = ++_offlineSeq;
+  let next = "off";
+  try {
+    const regs = await _ownRegistrations();
+    if (regs.length) {
+      // Vorhandene Installation schützen: nur anzeigen und löschbar machen.
+      const st = await _offlineCheck(regs[0]);
+      next = st && st.ok === false ? "failed" : "ready";
+    }
+  } catch (_) { next = "off"; }
+  if (seq !== _offlineSeq) return;
+  _offlineState = next;
+  _renderOfflineUI();
+}
+async function _offlineEnable() {
+  if (_offlineBusy) return;
+  if (!_offlineSupported()) { _offlineState = "unsupported"; return _renderOfflineUI(); }
+  _offlineSeq++;
+  _offlineBusy = true; _offlineMsg = ""; _offlineState = "working"; _renderOfflineUI();
+  try {
+    const reg = await navigator.serviceWorker.register(SW_URL, {scope: "/"});
+    if (await _waitWorker(reg, 60000) !== "activated") throw new Error("not activated");
+    const st = await _offlineCheck(reg);
+    if (!st || st.ok !== true) throw new Error("resources not confirmed");
+    _offlineState = "ready";
+  } catch (_) { _offlineState = "failed"; }
+  _offlineBusy = false;
+  _renderOfflineUI();
+}
+async function _offlineRemove() {
+  if (_offlineBusy) return;
+  if (!_offlineArmed) {
+    _offlineArmed = true; clearTimeout(_offlineArmTimer);
+    _offlineArmTimer = setTimeout(() => { _offlineArmed = false; _renderOfflineUI(); }, 6000);
+    return _renderOfflineUI();
+  }
+  _offlineArmed = false; clearTimeout(_offlineArmTimer);
+  _offlineSeq++;
+  _offlineBusy = true; _renderOfflineUI();
+  try {
+    const regs = await _ownRegistrations();
+    for (const r of regs) await r.unregister();
+    const keys = await caches.keys();
+    await Promise.all(keys.filter(k => EVS_CACHE_PREFIXES.some(p => k.startsWith(p))).map(k => caches.delete(k)));
+    _offlineState = "off"; _offlineMsg = _t("offlineRemoved");
+  } catch (_) { _offlineMsg = _t("offlineRemoveFailed"); _offlineState = "ready"; }
+  _offlineBusy = false;
+  _renderOfflineUI();
+}
+function _initOfflineUI() {
+  const bind = (id, fn) => { const el = $(id); if (el) el.addEventListener("click", fn); };
+  bind("offlineBtn", _offlineEnable);
+  bind("offlineRemoveBtn", _offlineRemove);
+  _renderOfflineUI();
+  return _offlineRefresh();
 }
 
 // ── Quick share / save (primary UI actions) ──────────────────────────────────
@@ -804,10 +993,12 @@ async function saveQuick() {
 
 // ── Save cooldown (1 min) ───────────────────────────────────────────────────
 const SAVE_COOLDOWN = 60 * 1000;
+// Phase H: cooldown timestamp lives in memory only (no persistent write);
+// a legacy "lastSaveTime" key from older versions is removed on reset only.
+let _lastSaveAt = 0;
 function canSave() {
-  const last = localStorage.getItem("lastSaveTime");
-  if (!last) return true;
-  return Date.now() - Number(last) > SAVE_COOLDOWN;
+  if (!_lastSaveAt) return true;
+  return Date.now() - _lastSaveAt > SAVE_COOLDOWN;
 }
 let _saveEntryPending = false;
 async function saveEntrySafe() {
@@ -822,7 +1013,7 @@ async function saveEntrySafe() {
   _saveEntryPending = true;
   try {
     if (await saveQuick()) {
-      try { localStorage.setItem("lastSaveTime", String(Date.now())); } catch (_) {}
+      _lastSaveAt = Date.now();
     }
   } finally { _saveEntryPending = false; }
 }
@@ -894,7 +1085,7 @@ function updateSaveButton() {
 function setMode(m) {
   if (m !== "compare" && m !== "single") return;
   appMode = m;
-  try { localStorage.setItem(MODE_KEY, m); } catch(_) {}
+  try { _stateSet(MODE_KEY, m); } catch(_) {}
   applyMode();
   // Phase Z6.5.a: clamp km values to current max
   ["kmEv","kmVb","kmShared"].forEach(function(id){
@@ -913,7 +1104,7 @@ function setMode(m) {
 function setType(t) {
   if (t !== "ev" && t !== "vb") return;
   singleType = t;
-  try { localStorage.setItem(TYPE_KEY, t); } catch(_) {}
+  try { _stateSet(TYPE_KEY, t); } catch(_) {}
   applyMode();
   // Phase Z6.5.a: km cap on type switch
   ["kmEv","kmVb"].forEach(function(id){
@@ -1273,12 +1464,12 @@ function setRideshareActive(v) {
   rideshareActive = !!v;
   if (!rideshareActive) {
     ridesharePersons = 1;
-    try { localStorage.setItem(RIDESHARE_PERSONS_KEY, "1"); } catch (_) {}
+    try { _stateSet(RIDESHARE_PERSONS_KEY, "1"); } catch (_) {}
     const pp1 = $("singlePerPerson"), pp2 = $("comparePerPerson");
     if (pp1) { pp1.textContent = ""; pp1.hidden = true; }
     if (pp2) { pp2.textContent = ""; pp2.hidden = true; }
   }
-  try { localStorage.setItem(RIDESHARE_KEY, rideshareActive ? "1" : "0"); } catch (_) {}
+  try { _stateSet(RIDESHARE_KEY, rideshareActive ? "1" : "0"); } catch (_) {}
   applyRideshare();
   saveInputs();
   calc();
@@ -1290,7 +1481,7 @@ function setRidesharePersons(v) {
   v = Math.max(1, Math.min(max, Math.round(v)));
   ridesharePersons = v;
   if (slider) slider.value = String(v);
-  try { localStorage.setItem(RIDESHARE_PERSONS_KEY, String(v)); } catch (_) {}
+  try { _stateSet(RIDESHARE_PERSONS_KEY, String(v)); } catch (_) {}
   saveInputs();
   const valEl = $("ridesharePersonsV");
   if (valEl) valEl.textContent = v.toString();
@@ -1345,7 +1536,7 @@ function applyLongterm() {
 }
 function setLongtermActive(v) {
   longtermActive = !!v;
-  try { localStorage.setItem(LT_ACTIVE_KEY, longtermActive ? "1" : "0"); } catch (_) {}
+  try { _stateSet(LT_ACTIVE_KEY, longtermActive ? "1" : "0"); } catch (_) {}
   // Beide Eingabesätze bleiben erhalten. Der aktive Modus entscheidet allein,
   // welche Strecke in die Rechnung einfließt; ein Moduswechsel darf keine
   // bereits eingegebenen Werte des anderen Modus überschreiben.
@@ -1365,7 +1556,7 @@ function setKmMonat(v) {
   // distance, including stored values between visual steps.
   v = Math.max(minV, Math.min(maxV, v));
   kmMonat = v;  // Raw-Wert (Markt-Einheit: km oder mi)
-  try { localStorage.setItem(LT_KM_MONAT_KEY, String(v)); } catch (_) {}
+  try { _stateSet(LT_KM_MONAT_KEY, String(v)); } catch (_) {}
   const valEl  = $("kmMonatV");
   const jahrEl = $("ltKmJahr");
   const warnEl = $("ltKmWarn");
@@ -1382,7 +1573,7 @@ function setLongtermYears(v) {
   if (!isFinite(v)) return;
   v = Math.max(0, Math.min(20, Math.round(v)));
   longtermYears = v;
-  try { localStorage.setItem(LT_YEARS_KEY, String(v)); } catch (_) {}
+  try { _stateSet(LT_YEARS_KEY, String(v)); } catch (_) {}
   const valEl = $("longtermYearsV");
   if (valEl) valEl.textContent = `${v} ${v === 1 ? _t("yearOne") : _t("yearOther")}`;
   calc();
@@ -1397,7 +1588,7 @@ function setLongtermPremium(v) {
   // The browser handles interaction steps; preserve accepted stored precision.
   v = Math.max(minV, Math.min(maxV, v));
   longtermPremium = v;
-  try { localStorage.setItem(LT_PREMIUM_KEY, String(v)); } catch (_) {}
+  try { _stateSet(LT_PREMIUM_KEY, String(v)); } catch (_) {}
   const valEl = $("longtermPremiumV");
   if (valEl) valEl.textContent = _fmtMoney(v, 0);
   calc();
@@ -1470,14 +1661,15 @@ function reset() {
   if (longtermToggle) longtermToggle.checked = false;
 
   try {
-    localStorage.setItem(MODE_KEY, appMode);
-    localStorage.setItem(TYPE_KEY, singleType);
-    localStorage.removeItem(RIDESHARE_KEY);
-    localStorage.setItem(RIDESHARE_PERSONS_KEY, "1");
-    localStorage.removeItem(LT_ACTIVE_KEY);
-    localStorage.setItem(LT_YEARS_KEY, "10");
-    localStorage.setItem(LT_PREMIUM_KEY, String(longtermPremium));
-    localStorage.setItem(LT_KM_MONAT_KEY, String(kmMonat));
+    _stateSet(MODE_KEY, appMode);
+    _stateSet(TYPE_KEY, singleType);
+    _stateRemove(RIDESHARE_KEY);
+    _stateSet(RIDESHARE_PERSONS_KEY, "1");
+    _stateRemove(LT_ACTIVE_KEY);
+    _stateSet(LT_YEARS_KEY, "10");
+    _stateSet(LT_PREMIUM_KEY, String(longtermPremium));
+    _stateSet(LT_KM_MONAT_KEY, String(kmMonat));
+    _lastSaveAt = 0;
     localStorage.removeItem("lastSaveTime");
   } catch (_) {}
 
@@ -1487,7 +1679,7 @@ function reset() {
   updateRangeDisplay();
   refreshSliderFills();
   applyLongterm();
-  try { localStorage.removeItem(LS_KEY); } catch(e) {}
+  try { _stateRemove(LS_KEY); } catch(e) {}
   saveInputs();
   if ($("compareBody"))  $("compareBody").hidden  = true;
   if ($("compareEmpty")) $("compareEmpty").hidden = false;
@@ -2749,48 +2941,31 @@ function initApp() {
   } catch (_) {}
 }
 
-// ── PWA: Device detection ───────────────────────────────────────────────────
-const PWA = (() => {
-  const ua = navigator.userAgent;
-  const isStandalone =
-    window.matchMedia('(display-mode: standalone)').matches ||
-    window.navigator.standalone === true;
-  const isIOS     = /iphone|ipod/i.test(ua);
-  const isIPad    = /ipad/i.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const isCriOS   = /crios/i.test(ua);
-  const isFxiOS   = /fxios/i.test(ua);
-  const isSafari  = /safari/i.test(ua) && !/chrome|android|crios|fxios/i.test(ua);
+// ── PWA: Geräteerkennung nur bei ausdrücklich aufgerufener Installationshilfe ──
+let _pwaInfo = null;
+function _pwa() {
+  if (_pwaInfo) return _pwaInfo;
+  let ua = "", platformName = "", touch = 0, standalone = false;
+  try { ua = navigator.userAgent || ""; platformName = navigator.platform || ""; touch = navigator.maxTouchPoints || 0; } catch (_) {}
+  try { standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone === true; } catch (_) {}
+  const isIOS = /iphone|ipod/i.test(ua);
+  const isIPad = /ipad/i.test(ua) || (platformName === "MacIntel" && touch > 1);
+  const isCriOS = /crios/i.test(ua);
+  const isFxiOS = /fxios/i.test(ua);
+  const isSafari = /safari/i.test(ua) && !/chrome|android|crios|fxios/i.test(ua);
   const isAndroid = /android/i.test(ua);
-  const isChrome  = /chrome/i.test(ua) && !/edg|opr\//i.test(ua);
-  const isMobile  = isIOS || isIPad || isAndroid || /mobile/i.test(ua);
+  const isChrome = /chrome/i.test(ua) && !/edg|opr\//i.test(ua);
+  const isMobile = isIOS || isIPad || isAndroid || /mobile/i.test(ua);
   const isIOSSafari = (isIOS || isIPad) && isSafari && !isCriOS && !isFxiOS;
-  const platform =
-    isStandalone          ? 'standalone' :
-    isIOSSafari           ? 'ios'        :
-    isAndroid             ? 'android'    :
-    !isMobile             ? 'desktop'    : 'other';
-  return { isStandalone, isIOSSafari, isAndroid, isChrome, isMobile, platform };
-})();
+  const platform = standalone ? "standalone" : isIOSSafari ? "ios" : isAndroid ? "android" : !isMobile ? "desktop" : "other";
+  return (_pwaInfo = { isStandalone: standalone, isIOSSafari, isAndroid, isChrome, isMobile, platform });
+}
 
-// ── PWA: State ──────────────────────────────────────────────────────────────
+// ── PWA: State (nur Arbeitsspeicher) ────────────────────────────────────────
 let _deferredPrompt = null;
-let _pwaBarShown    = false;
 let _pwaPopupShown  = false;
 let _pwaLastFocus   = null;
 let _pwaWired       = false;
-let _pwaAutoFired   = false;
-
-function _pwaCanShow() {
-  if (_storageInitFailed || PWA.isStandalone || PWA.platform === 'other') return false;
-  try {
-    if (localStorage.getItem(_PWA_DISMISSED_KEY) === '1') return false;
-    const snoozeUntil = parseInt(localStorage.getItem(_PWA_SNOOZE_KEY) || '0', 10);
-    if (Date.now() < snoozeUntil) return false;
-    return _pwaVisits >= 2;
-  } catch (_) {
-    return false;
-  }
-}
 
 // ── PWA: Device-specific steps ──────────────────────────────────────────────
 // Phase J Sprint 1 (F5.2): step copy is i18n-driven via _t(). Each translation
@@ -2820,46 +2995,6 @@ function _pwaBuildSteps(platform) {
   return frag;
 }
 
-// ── PWA: Storage actions ────────────────────────────────────────────────────
-function _pwaSnooze() {
-  try { localStorage.setItem(_PWA_SNOOZE_KEY, String(Date.now() + _PWA_SNOOZE_MS)); } catch(e) {}
-}
-function _pwaPersistDismiss() {
-  try { localStorage.setItem(_PWA_DISMISSED_KEY, '1'); } catch(e) {}
-}
-
-// ── PWA: Bar (stage 1) ──────────────────────────────────────────────────────
-function pwaShowBar() {
-  if (_pwaBarShown || _pwaPopupShown) return;
-  const bar = document.getElementById('pwaBar');
-  if (!bar) return;
-  bar.classList.add('visible');
-  bar.removeAttribute('inert');
-  _pwaBarShown = true;
-  // Body state lets CSS dodge the floating Calc-CTA out from underneath
-  // the install bar (both occupy the bottom strip, bar has higher z-index).
-  document.body.setAttribute('data-pwa-bar', 'visible');
-}
-
-function pwaHideBar() {
-  const bar = document.getElementById('pwaBar');
-  if (!bar) return;
-  bar.classList.remove('visible');
-  bar.setAttribute('inert', '');
-  _pwaBarShown = false;
-  document.body.removeAttribute('data-pwa-bar');
-}
-
-function pwaBarLater() { _pwaSnooze(); pwaHideBar(); }
-function pwaBarClose() { _pwaPersistDismiss(); pwaHideBar(); }
-
-// Bar → Popup. IMPORTANT: kept sync so the user-gesture chain stays valid
-// when "Alles klar" later calls _deferredPrompt.prompt() in the popup.
-function pwaBarInstall() {
-  pwaHideBar();
-  pwaShowPopup();
-}
-
 // ── PWA: Popup (stage 2) ────────────────────────────────────────────────────
 function pwaShowPopup() {
   if (_pwaPopupShown) return;
@@ -2868,7 +3003,7 @@ function pwaShowPopup() {
   if (!el || !stepsEl) return;
 
   _pwaLastFocus = document.activeElement;
-  stepsEl.replaceChildren(_pwaBuildSteps(PWA.platform));
+  stepsEl.replaceChildren(_pwaBuildSteps(_pwa().platform));
 
   el.classList.add('visible');
   el.removeAttribute('inert');
@@ -2886,34 +3021,26 @@ function pwaHidePopup() {
   if (_pwaLastFocus && _pwaLastFocus.focus) _pwaLastFocus.focus();
 }
 
-function pwaPopupLater() { _pwaSnooze(); pwaHidePopup(); }
-function pwaPopupClose() { _pwaPersistDismiss(); pwaHidePopup(); }
+function pwaPopupLater() { pwaHidePopup(); }
+function pwaPopupClose() { pwaHidePopup(); }
+// Installationshilfe: nur auf ausdrücklichen Klick; nichts wird gespeichert.
+function pwaOpenHelp() {
+  if (_pwa().isStandalone) { eafToast(_t("pwaAlreadyInstalled")); return; }
+  pwaShowPopup();
+}
 
-// "Alles klar" — triggers native install prompt if available,
-// otherwise just closes (steps are already visible for manual install)
+// "Alles klar" — löst den nativen Installationsdialog aus, falls verfügbar;
+// sonst bleibt es bei den angezeigten Schritten.
 function pwaPopupConfirm() {
   if (_deferredPrompt) {
     const p = _deferredPrompt;
     _deferredPrompt = null;
     try {
       p.prompt();
-      p.userChoice.then(choice => {
-        if (choice && choice.outcome === 'accepted') {
-          _pwaPersistDismiss();
-          pwaHidePopup();
-        } else {
-          _pwaSnooze();
-          pwaHidePopup();
-        }
-      }).catch(() => { _pwaSnooze(); pwaHidePopup(); });
-    } catch(e) {
-      _pwaSnooze();
-      pwaHidePopup();
-    }
+      p.userChoice.then(() => pwaHidePopup()).catch(() => pwaHidePopup());
+    } catch (e) { pwaHidePopup(); }
     return;
   }
-  // No native prompt (iOS / Firefox etc.): soft-dismiss; steps were shown
-  _pwaSnooze();
   pwaHidePopup();
 }
 
@@ -2926,11 +3053,7 @@ function _pwaWire() {
     const el = document.getElementById(id);
     if (el) el.addEventListener('click', fn);
   };
-  // Bar
-  bind('pwaBarInstall', pwaBarInstall);
-  bind('pwaBarLater',   pwaBarLater);
-  bind('pwaBarClose',   pwaBarClose);
-  // Popup
+  bind('installHelpBtn',   pwaOpenHelp);
   bind('pwaPopupAdd',      pwaPopupConfirm);
   bind('pwaPopupLater',    pwaPopupLater);
   bind('pwaPopupClose',    pwaPopupClose);
@@ -2939,7 +3062,6 @@ function _pwaWire() {
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       if (_pwaPopupShown) pwaPopupLater();
-      else if (_pwaBarShown) pwaBarLater();
       return;
     }
     if (e.key !== 'Tab' || !_pwaPopupShown) return;
@@ -2970,18 +3092,8 @@ window.addEventListener('beforeinstallprompt', e => {
 
 window.addEventListener('appinstalled', () => {
   _deferredPrompt = null;
-  _pwaPersistDismiss();
   pwaHidePopup();
-  pwaHideBar();
 });
-
-// ── PWA: Auto-trigger bar (once per load, 7s delay) ─────────────────────────
-setTimeout(() => {
-  if (_pwaAutoFired) return;
-  _pwaAutoFired = true;
-  if (!_pwaCanShow()) return;
-  pwaShowBar();
-}, 7000);
 
 // ── DOM event wiring (replaces legacy inline on* handlers) ──────────────────
 (function wireDom() {
@@ -3111,7 +3223,7 @@ setTimeout(() => {
       heroSubtitle1: "Strom und Kraftstoffkosten berechnen",
       heroSubtitle2: "",
       trustNoSignup: "Ohne Anmeldung",
-      trustLocal: "Eingaben lokal gespeichert",
+      trustLocal: "Eingaben bleiben lokal",
       brandTagline: "Vergleich basierend auf deinen Eingaben",
       modeSingle: "Einzelberechnung",
       modeCompare: "Vergleich",
@@ -3167,7 +3279,7 @@ setTimeout(() => {
       ariaKmEv: "E-Auto Kilometer",
       ariaKmVb: "Verbrenner Kilometer",
       footerVerlauf: "Verlauf",
-      footerNote: "Unverbindliche Beispielrechnung. Eingaben und Ergebnisse vor Entscheidungen prüfen. Keine vollständige Gesamtkostenberechnung. Eingaben lokal gespeichert.",
+      footerNote: "Unverbindliche Beispielrechnung. Eingaben und Ergebnisse vor Entscheidungen prüfen. Keine vollständige Gesamtkostenberechnung. Eingaben bleiben lokal.",
       privacyNotice: "Rechner-Eingaben bleiben lokal im Browser. Beim Laden der Website können technische Verbindungsdaten durch den Hosting-Anbieter verarbeitet werden.",
       marketDe: "DE · €",
       marketEu: "EU · €",
@@ -3217,6 +3329,38 @@ setTimeout(() => {
       toastCalcFirst: "Bitte zuerst berechnen",
       toastImageReady: "Bild bereit zum Teilen",
       toastClipboard: "In Zwischenablage kopiert",
+      rememberLabel: "Eingaben auf diesem Gerät merken",
+      rememberHelp: "Standardmäßig bleiben deine Eingaben nur im Arbeitsspeicher dieser Sitzung und sind nach dem Schließen weg. Wenn du das Merken aktivierst, speichert dein Browser sie lokal auf diesem Gerät, nicht auf einem Server. Der bewusst gespeicherte Verlauf ist davon unabhängig.",
+      rememberStatusOn: "Eingaben werden auf diesem Gerät gespeichert.",
+      rememberStatusOff: "Eingaben werden nicht dauerhaft gespeichert.",
+      rememberFailed: "Speichern auf diesem Gerät ist fehlgeschlagen. Deine Eingaben bleiben nur in dieser Sitzung erhalten.",
+      rememberConflict: "Die gespeicherten Eingaben wurden in einem anderen Tab geändert. Dieser Tab speichert vorerst nicht. Bitte wähle, was gelten soll.",
+      rememberDraftFound: "Auf diesem Gerät sind gespeicherte Eingaben vorhanden.",
+      rememberDraftFoundPaused: "Auf diesem Gerät sind bereits gespeicherte Eingaben vorhanden. Sie werden nicht überschrieben, bis du entscheidest.",
+      rememberLoad: "Gespeicherte Eingaben laden",
+      rememberReplace: "Mit aktuellen Werten überschreiben",
+      rememberDelete: "Gespeicherte Eingaben löschen",
+      rememberDeleteConfirm: "Wirklich löschen? Zum Bestätigen erneut klicken.",
+      rememberDeleted: "Gespeicherte Eingaben wurden gelöscht.",
+      rememberDeleteFailed: "Löschen nicht möglich. Es wurde nichts verändert.",
+      rememberLoaded: "Gespeicherte Eingaben geladen.",
+      rememberLoadFailed: "Gespeicherte Eingaben konnten nicht geladen werden. Es wurde nichts verändert.",
+      rememberChanged: "Die gespeicherten Eingaben haben sich in einem anderen Tab geändert. Bitte prüfe die Anzeige und versuche es erneut.",
+      rememberLegacyFound: "Ein älteres Speicherformat ist vorhanden, das nicht geladen werden kann. Es bleibt unverändert, bis du es exportierst oder löschst.",
+      rememberLegacyExport: "Altbestand exportieren",
+      rememberLegacyDelete: "Altbestand löschen",
+      installHelpBtn: "App installieren (Anleitung)",
+      pwaAlreadyInstalled: "Du nutzt EVSpendPure bereits als App.",
+      offlineBtn: "Offline verfügbar machen",
+      offlineHelp: "Nur auf deinen Wunsch lädt dein Browser die App-Dateien auf dieses Gerät, damit der Rechner auch ohne Internet startet. Gespeicherte Verläufe und Notizen bleiben davon unberührt.",
+      offlineStatusOff: "Offline-Nutzung ist nicht eingerichtet.",
+      offlineStatusWorking: "Offline-Dateien werden vorbereitet …",
+      offlineStatusReady: "Offline verfügbar: Alle benötigten Dateien sind auf diesem Gerät gespeichert.",
+      offlineStatusFailed: "Offline-Nutzung konnte nicht bestätigt werden. Bitte prüfe die Verbindung und versuche es erneut.",
+      offlineStatusUnsupported: "Dein Browser unterstützt Offline-Nutzung hier nicht.",
+      offlineRemove: "Offline-Dateien entfernen",
+      offlineRemoved: "Offline-Dateien von EVSpendPure wurden entfernt. Verlauf und Notizen sind unverändert.",
+      offlineRemoveFailed: "Entfernen nicht möglich. Es wurde nichts verändert.",
       toastShareFailed: "Teilen nicht möglich",
       toastImageError: "Fehler beim Erstellen des Bildes",
       confirmReset: "Möchtest du wirklich alles zurücksetzen?",
@@ -3362,7 +3506,7 @@ setTimeout(() => {
       heroSubtitle1: "Electric & Fuel Cost Calculator",
       heroSubtitle2: "",
       trustNoSignup: "No sign-up",
-      trustLocal: "Inputs saved locally",
+      trustLocal: "Inputs stay on your device",
       brandTagline: "Comparison based on your inputs",
       modeSingle: "Single calculation",
       modeCompare: "Comparison",
@@ -3418,7 +3562,7 @@ setTimeout(() => {
       ariaKmEv: "Electric vehicle distance",
       ariaKmVb: "Combustion distance",
       footerVerlauf: "History",
-      footerNote: "Non-binding example calculation. Check inputs and results before decisions. Not a complete total-cost calculation. Inputs are stored locally.",
+      footerNote: "Non-binding example calculation. Check inputs and results before decisions. Not a complete total-cost calculation. Inputs stay on your device.",
       privacyNotice: "Calculator inputs stay in your browser. When the website is loaded, technical connection data may be processed by the hosting provider.",
       marketDe: "DE · €",
       marketEu: "EU · €",
@@ -3468,6 +3612,38 @@ setTimeout(() => {
       toastCalcFirst: "Please calculate first",
       toastImageReady: "Image ready to share",
       toastClipboard: "Copied to clipboard",
+      rememberLabel: "Remember my inputs on this device",
+      rememberHelp: "By default your inputs stay in this session's memory only and are gone when you close the page. If you turn this on, your browser stores them locally on this device, not on a server. Your deliberately saved history is separate.",
+      rememberStatusOn: "Inputs are saved on this device.",
+      rememberStatusOff: "Inputs are not stored permanently.",
+      rememberFailed: "Saving on this device failed. Your inputs are kept for this session only.",
+      rememberConflict: "The saved inputs were changed in another tab. This tab will not save for now. Please choose which version should apply.",
+      rememberDraftFound: "Saved inputs exist on this device.",
+      rememberDraftFoundPaused: "Saved inputs already exist on this device. They will not be overwritten until you decide.",
+      rememberLoad: "Load saved inputs",
+      rememberReplace: "Overwrite with current values",
+      rememberDelete: "Delete saved inputs",
+      rememberDeleteConfirm: "Delete for real? Click again to confirm.",
+      rememberDeleted: "Saved inputs were deleted.",
+      rememberDeleteFailed: "Deleting is not possible. Nothing was changed.",
+      rememberLoaded: "Saved inputs loaded.",
+      rememberLoadFailed: "Saved inputs could not be loaded. Nothing was changed.",
+      rememberChanged: "The saved inputs changed in another tab. Please check the display and try again.",
+      rememberLegacyFound: "An older storage format exists that cannot be loaded. It stays unchanged until you export or delete it.",
+      rememberLegacyExport: "Export old data",
+      rememberLegacyDelete: "Delete old data",
+      installHelpBtn: "Install app (instructions)",
+      pwaAlreadyInstalled: "You are already using EVSpendPure as an app.",
+      offlineBtn: "Make available offline",
+      offlineHelp: "Only if you ask, your browser downloads the app files to this device so the calculator also starts without internet. Saved history and notes are not affected.",
+      offlineStatusOff: "Offline use is not set up.",
+      offlineStatusWorking: "Preparing offline files …",
+      offlineStatusReady: "Available offline: all required files are stored on this device.",
+      offlineStatusFailed: "Offline use could not be confirmed. Please check your connection and try again.",
+      offlineStatusUnsupported: "Your browser does not support offline use here.",
+      offlineRemove: "Remove offline files",
+      offlineRemoved: "EVSpendPure offline files were removed. History and notes are unchanged.",
+      offlineRemoveFailed: "Removing is not possible. Nothing was changed.",
       toastShareFailed: "Sharing failed",
       toastImageError: "Error creating image",
       confirmReset: "Do you really want to reset everything?",
@@ -3615,7 +3791,7 @@ setTimeout(() => {
       heroSubtitle1: "Elektrik ve yakıt maliyeti hesaplayıcı",
       heroSubtitle2: "",
       trustNoSignup: "Kayıt gerekmez",
-      trustLocal: "Girdiler yerel olarak saklanır",
+      trustLocal: "Girdiler cihazında kalır",
       brandTagline: "Girdilerine dayalı karşılaştırma",
       modeSingle: "Tekli hesaplama",
       modeCompare: "Karşılaştırma",
@@ -3671,7 +3847,7 @@ setTimeout(() => {
       ariaKmEv: "Elektrikli araç mesafesi",
       ariaKmVb: "İçten yanmalı araç mesafesi",
       footerVerlauf: "Geçmiş",
-      footerNote: "Bağlayıcı olmayan örnek hesaplama. Karar vermeden önce girdileri ve sonuçları kontrol et. Tam toplam maliyet hesabı değildir. Girdiler yerel olarak saklanır.",
+      footerNote: "Bağlayıcı olmayan örnek hesaplama. Karar vermeden önce girdileri ve sonuçları kontrol et. Tam toplam maliyet hesabı değildir. Girdiler cihazında kalır.",
       privacyNotice: "Hesaplayıcı girdileri tarayıcıda kalır. Web sitesi yüklenirken teknik bağlantı verileri barındırma sağlayıcısı tarafından işlenebilir.",
       marketDe: "DE · €",
       marketEu: "EU · €",
@@ -3721,6 +3897,38 @@ setTimeout(() => {
       toastCalcFirst: "Önce hesaplama yap.",
       toastImageReady: "Resim paylaşıma hazır",
       toastClipboard: "Panoya kopyalandı",
+      rememberLabel: "Girdilerimi bu cihazda hatırla",
+      rememberHelp: "Varsayılan olarak girdilerin yalnızca bu oturumun belleğinde kalır ve sayfayı kapattığında silinir. Bunu açarsan tarayıcın girdileri bir sunucuya değil, bu cihaza yerel olarak kaydeder. Bilerek kaydettiğin geçmiş bundan bağımsızdır.",
+      rememberStatusOn: "Girdiler bu cihazda kaydediliyor.",
+      rememberStatusOff: "Girdiler kalıcı olarak kaydedilmiyor.",
+      rememberFailed: "Bu cihaza kaydetme başarısız oldu. Girdilerin yalnızca bu oturumda korunur.",
+      rememberConflict: "Kayıtlı girdiler başka bir sekmede değiştirildi. Bu sekme şimdilik kaydetmeyecek. Lütfen hangisinin geçerli olacağını seç.",
+      rememberDraftFound: "Bu cihazda kayıtlı girdiler var.",
+      rememberDraftFoundPaused: "Bu cihazda zaten kayıtlı girdiler var. Sen karar verene kadar üzerine yazılmayacak.",
+      rememberLoad: "Kayıtlı girdileri yükle",
+      rememberReplace: "Güncel değerlerle üzerine yaz",
+      rememberDelete: "Kayıtlı girdileri sil",
+      rememberDeleteConfirm: "Gerçekten silinsin mi? Onaylamak için tekrar tıkla.",
+      rememberDeleted: "Kayıtlı girdiler silindi.",
+      rememberDeleteFailed: "Silme mümkün değil. Hiçbir şey değiştirilmedi.",
+      rememberLoaded: "Kayıtlı girdiler yüklendi.",
+      rememberLoadFailed: "Kayıtlı girdiler yüklenemedi. Hiçbir şey değiştirilmedi.",
+      rememberChanged: "Kayıtlı girdiler başka bir sekmede değişti. Lütfen görünümü kontrol edip yeniden dene.",
+      rememberLegacyFound: "Yüklenemeyen eski bir kayıt biçimi var. Dışa aktarana veya silene kadar değişmeden kalır.",
+      rememberLegacyExport: "Eski veriyi dışa aktar",
+      rememberLegacyDelete: "Eski veriyi sil",
+      installHelpBtn: "Uygulamayı yükle (yönergeler)",
+      pwaAlreadyInstalled: "EVSpendPure'u zaten uygulama olarak kullanıyorsun.",
+      offlineBtn: "Çevrimdışı kullanıma hazırla",
+      offlineHelp: "Yalnızca sen isteyince tarayıcın uygulama dosyalarını bu cihaza indirir, böylece hesaplayıcı internet olmadan da açılır. Kayıtlı geçmiş ve notlar etkilenmez.",
+      offlineStatusOff: "Çevrimdışı kullanım kurulu değil.",
+      offlineStatusWorking: "Çevrimdışı dosyalar hazırlanıyor …",
+      offlineStatusReady: "Çevrimdışı kullanılabilir: gerekli tüm dosyalar bu cihazda kayıtlı.",
+      offlineStatusFailed: "Çevrimdışı kullanım doğrulanamadı. Lütfen bağlantıyı kontrol edip yeniden dene.",
+      offlineStatusUnsupported: "Tarayıcın burada çevrimdışı kullanımı desteklemiyor.",
+      offlineRemove: "Çevrimdışı dosyaları kaldır",
+      offlineRemoved: "EVSpendPure çevrimdışı dosyaları kaldırıldı. Geçmiş ve notlar değişmedi.",
+      offlineRemoveFailed: "Kaldırma mümkün değil. Hiçbir şey değiştirilmedi.",
       toastShareFailed: "Paylaşım başarısız",
       toastImageError: "Resim oluşturulamadı",
       confirmReset: "Tüm değerleri sıfırlamak istediğine emin misin?",
@@ -4099,7 +4307,10 @@ setTimeout(() => {
   function loadI18nState() {
     try {
       var explicit = new URLSearchParams(location.search).get("market");
-      var m = ["de", "us"].includes(explicit) ? explicit : localStorage.getItem(MARKET_KEY);
+      // Priority: explicit ?market= link > market of the opened /tr/ or /en-eu/
+      // page (session only, never written) > stored user choice.
+      var pageMk = window.__EAF_PAGE_MARKET && MARKET_CONFIG[window.__EAF_PAGE_MARKET] ? window.__EAF_PAGE_MARKET : null;
+      var m = ["de", "us"].includes(explicit) ? explicit : (pageMk || localStorage.getItem(MARKET_KEY));
       if (m && MARKET_CONFIG[m]) {
         currentMarket = m;
         currentLanguage = MARKET_CONFIG[m].language;
@@ -4121,7 +4332,8 @@ setTimeout(() => {
       // Phase 8: Erster Besuch ohne jeden State → aus Browser-Locale ableiten.
       // Nur als Initialwert; sobald der Nutzer eine Auswahl trifft, persistiert
       // setMarket() die explizite Wahl und überschreibt die Auto-Erkennung.
-      var autoMk = _detectMarketFromBrowser();
+      var autoMk = (window.__EAF_PAGE_MARKET && MARKET_CONFIG[window.__EAF_PAGE_MARKET])
+        ? window.__EAF_PAGE_MARKET : _detectMarketFromBrowser();
       if (autoMk && MARKET_CONFIG[autoMk]) {
         currentMarket = autoMk;
         currentLanguage = MARKET_CONFIG[autoMk].language;
@@ -4189,6 +4401,8 @@ setTimeout(() => {
       var val = _resolveKey(dict, fallback, key);
       if (typeof val === "string") el.setAttribute("placeholder", sub(val));
     });
+    try { _renderRememberUI(); } catch (_) {}
+    try { _renderOfflineUI(); } catch (_) {}
     const legalPages = {footerImpressum:"impressum", footerDatenschutz:"datenschutz", footerTerms:"terms", footerHinweise:"hinweise", footerBarrierefreiheit:"barrierefreiheit"};
     Object.entries(legalPages).forEach(([key, page]) => {
       const suffix = currentLanguage === "de" ? "" : "." + currentLanguage;
@@ -4399,6 +4613,36 @@ setTimeout(() => {
   }
 
   // Init: run immediately (script is at end of body, DOM is ready)
+  // Wendet den gespeicherten Entwurf auf die laufende Sitzung an. Beim Start
+  // (nur mit aktiviertem Merken) und bei ausdrücklichem „Laden“ des Nutzers.
+  function _applyStoredDraftImpl(atStartup) {
+    const mk = MARKET_CONFIG[currentMarket];
+    const raw = localStorage.getItem(LS_KEY);
+    const saved = JSON.parse(raw || "{}");
+    if (!saved || typeof saved !== "object" || Array.isArray(saved)) throw new Error("Invalid stored inputs");
+    const inputMarket = MARKET_CONFIG[saved._marketCode];
+    const incompatible = inputMarket && !_marketsCompatible(inputMarket, mk);
+    Object.entries(mk.defaults).forEach(([id, cfg]) => {
+      const el = $(id);
+      if (el && (incompatible || saved[id] == null)) el.value = String(cfg.value);
+    });
+    if (!incompatible) loadInputs();
+    if (!atStartup) {
+      const snap = Object.fromEntries([MODE_KEY, TYPE_KEY, RIDESHARE_KEY, RIDESHARE_PERSONS_KEY, LT_ACTIVE_KEY,
+        LT_YEARS_KEY, LT_PREMIUM_KEY, LT_KM_MONAT_KEY].map(k => [k, incompatible ? null : localStorage.getItem(k)]));
+      _applyStateSnapshot(snap);
+    }
+    const storedKm = incompatible ? null : localStorage.getItem(LT_KM_MONAT_KEY);
+    const storedPremium = incompatible ? null : localStorage.getItem(LT_PREMIUM_KEY);
+    kmMonat = storedKm !== null && Number.isFinite(Number(storedKm))
+      ? Math.max(mk.defaults.kmMonat.min, Math.min(mk.defaults.kmMonat.max, Number(storedKm))) : mk.defaults.kmMonat.value;
+    longtermPremium = storedPremium !== null && Number.isFinite(Number(storedPremium))
+      ? Math.max(0, Math.min(mk.defaults.longtermPremium.max, Number(storedPremium))) : mk.defaults.longtermPremium.value;
+    _lastDraftRaw = raw;
+    return !incompatible;
+  }
+  window.__eafApplyStoredDraft = function () { return _applyStoredDraftImpl(false); };
+
   function init() {
     if (_historyMigrationPending) return _historyMigration.then(init);
     loadI18nState();
@@ -4412,35 +4656,19 @@ setTimeout(() => {
       currentMarket = historyMarket;
       currentLanguage = restoredMarket.language;
       currentCurrency = restoredMarket.currency;
-      if (!_storageInitFailed) try {
-        localStorage.setItem(MARKET_KEY, currentMarket);
-        localStorage.setItem(LANG_KEY, currentLanguage);
-        localStorage.setItem(CURR_KEY, currentCurrency);
-      } catch (_) {}
+      // Session only: opening a link must not change the stored market preference.
     }
     // Phase 6: Markt-Ranges VOR loadInputs anwenden, damit persistierte
     // User-Werte gegen die KORREKTE Markt-Range geclampt werden (Smart-Fix
     // für US-/EU-User: "Stored locally" bleibt erhalten).
     try { applyMarketRanges(MARKET_CONFIG[currentMarket]); } catch (_) {}
+    // Standardmäßig starten die Rechner mit Marktdefaults (flüchtig). Gespeicherte
+    // Entwürfe werden nur mit aktiviertem Merken automatisch übernommen.
     try {
-      if (_storageInitFailed) throw new Error("Storage unavailable");
       const mk = MARKET_CONFIG[currentMarket];
-      const saved = JSON.parse(localStorage.getItem(LS_KEY) || "{}");
-      if (!saved || typeof saved !== "object" || Array.isArray(saved)) throw new Error("Invalid stored inputs");
-      const inputMarket = MARKET_CONFIG[saved._marketCode];
-      const incompatible = inputMarket && !_marketsCompatible(inputMarket, mk);
-      Object.entries(mk.defaults).forEach(([id, cfg]) => {
-        const el = $(id);
-        if (el && (incompatible || !saved || saved[id] == null)) el.value = String(cfg.value);
-      });
-      if (!incompatible) loadInputs();
-      const storedKm = incompatible ? null : localStorage.getItem(LT_KM_MONAT_KEY);
-      const storedPremium = incompatible ? null : localStorage.getItem(LT_PREMIUM_KEY);
-      kmMonat = storedKm !== null && Number.isFinite(Number(storedKm))
-        ? Math.max(mk.defaults.kmMonat.min, Math.min(mk.defaults.kmMonat.max, Number(storedKm))) : mk.defaults.kmMonat.value;
-      longtermPremium = storedPremium !== null && Number.isFinite(Number(storedPremium))
-        ? Math.max(0, Math.min(mk.defaults.longtermPremium.max, Number(storedPremium))) : mk.defaults.longtermPremium.value;
-      if (!_storageInitFailed) localStorage.setItem(MARKET_KEY, currentMarket);
+      if (_rememberInputs && !_storageInitFailed) _applyStoredDraftImpl(true);
+      else Object.entries(mk.defaults).forEach(([id, cfg]) => { const el = $(id); if (el) el.value = String(cfg.value); });
+      if (!_rememberInputs) { kmMonat = mk.defaults.kmMonat.value; longtermPremium = mk.defaults.longtermPremium.value; }
     } catch (_) { _storageInitFailed = true; }
 
     var historyRestoreFailed = _historySelectionFailed;
@@ -4448,6 +4676,8 @@ setTimeout(() => {
     catch (_) { historyRestoreFailed = true; }
     try { document.documentElement.setAttribute("lang", currentLanguage); } catch (_) {}
     applyTranslations();
+    try { _initRememberUI(); } catch (_) {}
+    try { _initOfflineUI(); } catch (_) {}
     if (historyRestoreFailed) eafToast(_t("toastRestoreFailed"));
     // Reflect initial state in the single market pill.
     var mkLbl = document.getElementById("marketSwitchLabel");
@@ -4478,13 +4708,5 @@ window.addEventListener("beforeprint", () => {
 window.addEventListener("afterprint", () => {
   document.body.classList.remove("printing");
 });
-
-// ── Service Worker registration (Phase P Sprint 3) ──────────────────────────
-// Registers /sw.js for offline caching + faster revisits. Defers to `load` so
-// the SW install never competes with the first paint. Failures are silent —
-// the app works fully without a SW; the SW is only an enhancement layer.
-if ("serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    navigator.serviceWorker.register("/sw.js").catch(() => {});
-  });
-}
+// Der Service Worker wird nicht mehr automatisch registriert: Offlinebetrieb
+// startet nur über „Offline verfügbar machen“ (siehe _offlineEnable).

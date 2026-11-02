@@ -11,10 +11,14 @@ const inputs = {
   verbrauchVerbrennerV:"", benzinpreisV:"", qSaveBtn:"", saveHint:"",
   ridesharePersons:1, ridesharePersonsV:"", rideshareToggle:"", longtermToggle:""
 };
-function runtime({entries = [], search = "", market = "de", storage = {}} = {}) {
+function runtime(opts = {}) {
+  const {entries = [], search = "", market = "de", storage = {}} = opts;
+  // Opening a history link restores its market for the session only; a reopened
+  // app starts from the user's stored preference (given explicitly via `market`).
   const rt = createRuntime({inputs, search, storage:{
-    "eaf.appVersion":"20260428-1", "eaf.market":market,
-    [historyKey]:JSON.stringify(entries), ...storage
+    "eaf.appVersion":"20260428-1", "eaf.market":market, "eaf.rememberInputs":"1",
+    [historyKey]:JSON.stringify(entries), ...storage,
+    ...(opts.market !== undefined ? {"eaf.market":market} : {})
   }});
   rt.context.Event = class Event {constructor(type) {this.type = type;}};
   rt.context.CustomEvent = class CustomEvent {constructor(type, opts = {}) {this.type=type; this.detail=opts.detail;}};
@@ -57,7 +61,8 @@ for (const market of ["de","eu","us","tr"]) {
       assert.equal(await reboot.run("saveQuick()"),true);
       const resaved = JSON.parse(reboot.storage.get(historyKey))[0];
       for (const key of ["km","consumption","price","costPer100","monthlyCost","yearlyCost"]) assert.equal(resaved[key],entry[key],`${market}/${type}/${distance}/${key}`);
-      assert.equal(resaved.note, entry.note);
+      // Die Notiz ist keine zweite Kopie im Eingabeentwurf und kehrt nach Neustart nicht zurück.
+      assert.equal(resaved.note ?? "", "");
     }
   });
   test(`historical restore ${market}: off-grid distance, consumption and price preserve values and labels`, async () => {
@@ -182,30 +187,35 @@ test("historical rideshare editing, disabling, reset and incompatible market res
   assert.equal(normal.run("ridesharePersons"),6);
 });
 
-test("historical note: Unicode, safe whitespace, empty and 200-character notes survive reload and resave exactly", async () => {
+test("historical note: Unicode, safe whitespace, empty and 200-character notes bleiben in der Sitzung, nicht im Eingabeentwurf, und werden exakt in den Verlauf gespeichert", async () => {
   for (const note of ["Restore Ä İ İstanbul 😃", "  Ä İ\tİstanbul\n😃  ", "", "Ä".repeat(200)]) {
     const entry={...scenario("de","ev",1250),note};
     const rt=runtime({entries:[entry],search:`?id=${entry.id}`});
     assert.equal(rt.elements.get("noteInput").value,note);
+    const draft=JSON.parse(rt.storage.get(inputKey));
+    assert.equal(draft._historyInputs?.note, undefined);
+    if (note) assert.equal(rt.storage.get(inputKey).includes(JSON.stringify(note).slice(1,-1)), false);
     const reboot=runtime({storage:Object.fromEntries(rt.storage)});
-    assert.equal(reboot.elements.get("noteInput").value,note);
-    assert.equal(await reboot.run("saveQuick()"),true);
-    assert.equal(JSON.parse(reboot.storage.get(historyKey))[0].note,note);
     assert.equal(reboot.elements.get("noteInput").value,"");
-    const afterSave=runtime({storage:Object.fromEntries(reboot.storage)});
+    assert.equal(await rt.run("saveQuick()"),true);
+    assert.equal(JSON.parse(rt.storage.get(historyKey))[0].note,note);
+    assert.equal(rt.elements.get("noteInput").value,"");
+    const afterSave=runtime({storage:Object.fromEntries(rt.storage)});
     assert.equal(afterSave.elements.get("noteInput").value,"");
   }
 });
 
-test("historical note: safe edits persist, reset clears and invalid metadata never hydrates", () => {
+test("historical note: Bearbeitungen werden nicht persistiert, Zurücksetzen leert, Altmetadaten hydratisieren nie", () => {
   const entry={...scenario("de","ev",1250),note:"Original note"};
   const rt=runtime({entries:[entry],search:`?id=${entry.id}`});
   const field=rt.elements.get("noteInput");
   field.value="Edited Ä İ 😃";field.dispatchEvent({type:"input"});
-  assert.equal(runtime({storage:Object.fromEntries(rt.storage)}).elements.get("noteInput").value,field.value);
+  assert.equal(JSON.parse(rt.storage.get(inputKey))._historyInputs?.note, undefined);
+  assert.equal(rt.storage.get(inputKey).includes("Edited"), false);
+  assert.equal(runtime({storage:Object.fromEntries(rt.storage)}).elements.get("noteInput").value,"");
   rt.run("reset()");
   assert.equal(runtime({storage:Object.fromEntries(rt.storage)}).elements.get("noteInput").value,"");
-  for (const note of ["Ä".repeat(201),"unsafe\x00note",42]) {
+  for (const note of ["Ä".repeat(201),"unsafe\x00note",42,"valid legacy copy"]) {
     const broken=runtime({storage:{[inputKey]:JSON.stringify({_historyInputs:{marketCode:"de",values:{},note}})}});
     assert.equal(broken.elements.get("noteInput").value,"");
   }
@@ -239,7 +249,8 @@ test("historical compare: unrelated longterm and rideshare state never replace t
     assert.equal(reopened.eAutoTotal,data.eAutoTotal);
     assert.equal(reopened.verbrennerTotal,data.verbrennerTotal);
     assert.equal(reopened.persons,data.persons);
-    assert.equal(reboot.elements.get("noteInput").value,entry.note);
+    assert.equal(rt.elements.get("noteInput").value,entry.note);
+    assert.equal(reboot.elements.get("noteInput").value,"");
     assert.equal(rt.storage.get(historyKey),JSON.stringify([entry]));
   }
 });
@@ -280,10 +291,12 @@ test("historical note: input value sanitization and unrelated parameter edits pr
   assert.equal(field.value,entry.note.replace(/[\r\n]/g,""));
   rt.elements.get("kmEv").value="1100";
   rt.elements.get("kmEv").dispatchEvent({type:"input"});
-  assert.equal(JSON.parse(rt.storage.get(inputKey))._historyInputs.note,entry.note);
+  assert.equal(JSON.parse(rt.storage.get(inputKey))._historyInputs?.note,undefined);
+  assert.equal(rt.run("_historicalNote.original"),entry.note);
   assert.equal(await rt.run("saveQuick()"),true);
   assert.equal(JSON.parse(rt.storage.get(historyKey))[0].note,entry.note);
   rt.run("_restoreHistoryEntry(restoredEntry)");
   field.value="Edited note";field.dispatchEvent({type:"input"});
-  assert.equal(JSON.parse(rt.storage.get(inputKey))._historyInputs.note,"Edited note");
+  assert.equal(JSON.parse(rt.storage.get(inputKey))._historyInputs?.note,undefined);
+  assert.equal(rt.run("_historicalNote.original"),"Edited note");
 });

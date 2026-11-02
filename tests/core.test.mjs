@@ -7,7 +7,8 @@ import { createLockManager } from "./history-locks.mjs";
 
 function createRuntime(options = {}) {
   const elements = new Map();
-  const storage = new Map(Object.entries(options.storage || {}));
+  // Persistenztests laufen mit aktiviertem Merken; remember: false = Standardverhalten.
+  const storage = new Map(Object.entries({...(options.remember === false ? {} : {"eaf.rememberInputs": "1"}), ...(options.storage || {})}));
   const domEvents = new Map();
   const localStorage = {
     getItem: key => storage.has(key) ? storage.get(key) : null,
@@ -615,8 +616,10 @@ test("EVS-002/003 gespeicherte DE und US Szenarien öffnen nach Neustart mit eig
       assert.equal(rt.elements.get("noteInput").value, `${c.market}-${c.type}`);
       assert.equal(rt.elements.get("documentElement").getAttribute("lang"), c.market === "de" ? "de" : "en");
       assert.equal(rt.elements.get("marketSwitchLabel").textContent, `${c.market.toUpperCase()} · ${c.currency === "USD" ? "$" : "€"}`);
-      assert.equal(rt.localStorage.getItem("eaf.market"), c.market);
-      assert.equal(rt.localStorage.getItem("eaf.currency"), c.currency);
+      // Opening a saved scenario restores its market for the session only;
+      // the stored preference stays exactly as it was.
+      assert.equal(rt.localStorage.getItem("eaf.market"), startingMarket);
+      assert.equal(rt.localStorage.getItem("eaf.currency"), startingCurrency);
       assert.equal(rt.localStorage.getItem("eautofakten_history"), historyJson);
     }
   }

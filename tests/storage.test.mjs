@@ -166,20 +166,20 @@ test("EVS-005 normaler Start lädt Zustand und Einheiten vollständig", () => {
 
 test("EVS-005 Lesefehler, Schreibfehler und werfender Storage Zugriff lassen den Rechner starten", async () => {
   for (const options of [
-    {fault: {getItem: true}}, {fault: {setItem: true, name: "QuotaExceededError"}}, {storageGetterThrows: true}
+    {fault: {getItem: true}}, {storageGetterThrows: true}
   ]) {
     const rt = ready(options);
     assert.equal(rt.elements.get("documentElement").getAttribute("lang"), "de");
     assert.equal(rt.run("typeof window.EAF_I18N.t"), "function");
     assert.equal(rt.elements.get("body").getAttribute("data-app-mode"), "compare");
     assert.equal(rt.elements.get("rangeDisplay").hidden, false);
-    assert.match(rt.elements.get("rangeDisplay").textContent, /333 km/);
+    assert.match(rt.elements.get("rangeDisplay").textContent, /353 km/);
     assert.match(rt.elements.get("eaf-toast").textContent, /Gerätespeicher.*neu laden/);
     assert.equal(rt.elements.get("qSaveBtn").disabled, true);
     assert.equal(rt.elements.get("saveHint").hidden, false);
     assert.match(rt.elements.get("saveHint").textContent, /Gerätespeicher/);
     assert.equal(rt.elements.get("saveHint").getAttribute("role"), "status");
-    assert.ok(Math.abs(rt.run("_getCompareData().eAutoTotal") - 54) < 1e-12);
+    assert.ok(Math.abs(rt.run("_getCompareData().eAutoTotal") - 62.9) < 1e-12);
     assert.equal(rt.storage.get(historyKey), existingJson);
     assert.equal(rt.calls.filter(([m]) => m === "removeItem").length, 0);
     assert.equal(await rt.run("saveQuick()"), false);
@@ -190,8 +190,19 @@ test("EVS-005 Lesefehler, Schreibfehler und werfender Storage Zugriff lassen den
   }
 });
 
+test("EVS-005 reiner Schreibfehler wird erst beim Schreiben sichtbar und lässt den Rechner starten", async () => {
+  const rt = ready({fault: {setItem: true, name: "QuotaExceededError"}});
+  assert.equal(rt.elements.get("documentElement").getAttribute("lang"), "de");
+  assert.ok(Math.abs(rt.run("_getCompareData().eAutoTotal") - 62.9) < 1e-12);
+  assert.equal(rt.storage.get(historyKey), existingJson);
+  rt.run("appMode='single'");
+  assert.equal(await rt.run("saveQuick()"), false);
+  assert.equal(rt.elements.get("eaf-toast").textContent, "Speichern nicht möglich");
+  assert.equal(rt.storage.get(historyKey), existingJson);
+});
+
 test("EVS-005 punktuelle Initialisierungslesefehler löschen oder überschreiben keine vorhandenen Werte", () => {
-  for (const key of ["eaf.pwa.visits", "eaf.appVersion", "eaf.inputs.v2", "eautofakten_history", "eaf.longtermKmMonat", "eaf.market", "theme", "eaf.legacyPurgeDone", "eaf.history.v1"]) {
+  for (const key of ["eaf.appVersion", "eaf.inputs.v2", "eautofakten_history", "eaf.longtermKmMonat", "eaf.market", "theme", "eaf.legacyPurgeDone", "eaf.history.v1"]) {
     const storedInputs = JSON.stringify({evVerbrauch: 17.5, strompreis: .37, kmEv: 500});
     const rt = ready({fault: {getItem: true, key}, storage: {"eaf.appVersion": "older", "eaf.inputs.v2": storedInputs}});
     assert.equal(rt.storage.get(historyKey), existingJson, key);
@@ -208,12 +219,13 @@ test("EVS-005 beschädigte Eingaben und ungültiger Besuchszähler führen zu de
     const rt = ready({storage: {"eaf.appVersion": "older", "eaf.inputs.v2": raw}});
     assert.equal(rt.storage.get("eaf.inputs.v2"), raw);
     assert.equal(rt.storage.get(historyKey), existingJson);
-    assert.ok(Math.abs(rt.run("_getCompareData().eAutoTotal") - 54) < 1e-12);
+    assert.ok(Math.abs(rt.run("_getCompareData().eAutoTotal") - 62.9) < 1e-12);
     assert.match(rt.elements.get("eaf-toast").textContent, /Gerätespeicher/);
   }
+  // Der automatische Besuchszähler existiert nicht mehr: ein Altwert bleibt unberührt.
   const rt = ready({storage: {"eaf.pwa.visits": "broken"}});
-  assert.equal(rt.storage.get("eaf.pwa.visits"), "1");
-  assert.equal(rt.run("_pwaCanShow()"), false);
+  assert.equal(rt.storage.get("eaf.pwa.visits"), "broken");
+  assert.equal(rt.run("typeof _pwaCanShow"), "undefined");
 });
 
 test("EVS-005 Neustart nach Speicherfehler lädt unveränderte gespeicherte Daten", () => {
@@ -235,4 +247,31 @@ test("EVS-005 sichtbarer Speicherfehler ist in DE, EN und TR lokalisiert", () =>
     assert.match(rt.elements.get("eaf-toast").textContent, message);
     assert.doesNotMatch(rt.elements.get("eaf-toast").textContent, /synthetic|SecurityError/);
   }
+});
+
+
+test("Legacy migration preserves all workers, caches and saved history", async () => {
+  const calls = [];
+  const serviceWorker = {
+    getRegistrations: async () => {
+      calls.push("getRegistrations");
+      return [{unregister: async () => { calls.push("unregister"); return true; }}];
+    }
+  };
+  const caches = {
+    keys: async () => { calls.push("keys"); return ["evspend-static-v1", "another-app"]; },
+    delete: async name => { calls.push(name); return true; }
+  };
+  const rt = ready({
+    serviceWorker, caches,
+    storageMap: new Map([["eaf.mode", "single"], [historyKey, existingJson]])
+  });
+  await rt.settle();
+  // Ohne Opt-in schreibt der Start nichts, auch keine Versionsmarke.
+  assert.equal(rt.storage.has("eaf.appVersion"), false);
+  // Nur lesender Zugriff auf Registrierungen; nichts wird abgemeldet oder gelöscht.
+  assert.deepEqual(calls.filter(call => call !== "getRegistrations"), []);
+  assert.equal(rt.storage.get(historyKey), existingJson);
+  assert.equal(rt.storage.get("eaf.mode"), "single");
+  assert.equal(rt.timers.some(timer => timer.delay === 40), false);
 });

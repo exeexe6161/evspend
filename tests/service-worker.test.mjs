@@ -210,6 +210,13 @@ function createWorker(options = {}) {
     install: () => lifecycle("install"),
     activate: () => lifecycle("activate"),
     request,
+    async message(data) {
+      let reply, waiters = [];
+      const port = { postMessage(value) { reply = value; } };
+      listeners.get("message")({ data, ports: [port], waitUntil(value) { waiters.push(Promise.resolve(value)); } });
+      await Promise.all(waiters);
+      return reply;
+    },
     setNetwork(next) { network = next; }
   };
 }
@@ -599,20 +606,32 @@ test("EVS-052 aktuelle Navigation gewinnt unabhängig von der Cacheanlagereihenf
   }
 });
 
-test("EVS-052 regionale Shells direkte HTML Einstiege und Querys revalidieren ihre eigene URL", async () => {
+// Verlaufskennungen dürfen weder Cache-Schlüssel noch Netzanfrage des Service Workers sein.
+function withoutPrivateParams(route) {
+  const url = new URL(route, "https://x.invalid");
+  for (const name of ["id", "entryKey", "entryIndex"]) url.searchParams.delete(name);
+  return url.pathname + url.search;
+}
+test("EVS-052 regionale Shells direkte HTML Einstiege und Querys revalidieren ihre eigene URL ohne Verlaufskennungen", async () => {
   const routes = ["/", "/verlauf", "/en-eu/", "/tr/", "/en-eu/verlauf", "/tr/verlauf",
     "/verlauf.html", "/en-eu/verlauf.html", "/tr/verlauf.html", "/index.html", "/en-eu/index.html", "/tr/index.html",
     "/en-eu/?id=12345&entryKey=abc&entryIndex=2", "/tr/verlauf?id=12345", "/?v=1"];
   const caches = new MemoryCacheStorage();
-  await seed(caches, "evspend-static-vRoutes", routes.map(route => [route, `OLD:${route}`]));
+  await seed(caches, "evspend-static-vRoutes", [...new Set(routes.map(withoutPrivateParams))].map(route => [route, `OLD:${route}`]));
   const rt = createWorker({ source: versionedSource("vRoutes"), caches,
     network: async request => new Response(`NEW:${new URL(request.url).pathname}${new URL(request.url).search}`, { headers: { "Content-Type": "text/html" } }) });
+  const seenKeys = new Set();
   for (const route of routes) {
-    assert.equal(await body((await rt.request(ORIGIN + route, NAVIGATION)).response), `OLD:${route}`);
-    assert.equal(await body((await rt.request(ORIGIN + route, NAVIGATION)).response), `NEW:${route}`);
+    const key = withoutPrivateParams(route);
+    // Mehrere Einstiege mit verschiedenen Kennungen teilen sich genau einen Schlüssel.
+    if (!seenKeys.has(key)) assert.equal(await body((await rt.request(ORIGIN + route, NAVIGATION)).response), `OLD:${key}`);
+    seenKeys.add(key);
+    assert.equal(await body((await rt.request(ORIGIN + route, NAVIGATION)).response), `NEW:${key}`);
   }
+  assert.equal(rt.fetchCalls.some(url => /[?&](?:id|entryKey|entryIndex)=/.test(url)), false);
+  for (const cache of caches.caches.values()) for (const key of cache.entries.keys()) assert.doesNotMatch(String(key), /[?&](?:id|entryKey|entryIndex)=/);
   rt.setNetwork(async () => { throw new Error("offline"); });
-  for (const route of routes) assert.equal(await body((await rt.request(ORIGIN + route, NAVIGATION)).response), `NEW:${route}`);
+  for (const route of routes) assert.equal(await body((await rt.request(ORIGIN + route, NAVIGATION)).response), `NEW:${withoutPrivateParams(route)}`);
 });
 
 test("EVS-052 Netzwerkfehler behält aktuelles Runtime HTML und ignoriert fremde Generationen", async () => {
@@ -681,9 +700,10 @@ test("EVS-052 Offline Alias und Queryfallback bevorzugt das aktualisierte passen
     ["/en-eu/index.html", "/en-eu/"], ["/tr/index.html", "/tr/"],
     ["/en-eu/verlauf?id=12345", "/en-eu/verlauf"], ["/tr/verlauf?id=12345", "/tr/verlauf"]
   ]) assert.equal(await body((await rt.request(ORIGIN + route, NAVIGATION)).response), `NEW:${target}`);
+  // Nutzerspezifische Schlüssel aus Altbeständen werden nicht mehr zur Auslieferung benutzt.
   await seed(caches, "evspend-runtime-vFallback", [["/?id=one", "ONE"], ["/?id=two", "TWO"]]);
-  assert.equal(await body((await rt.request(`${ORIGIN}/?id=one`, NAVIGATION)).response), "ONE");
-  assert.equal(await body((await rt.request(`${ORIGIN}/?id=two`, NAVIGATION)).response), "TWO");
+  assert.equal(await body((await rt.request(`${ORIGIN}/?id=one`, NAVIGATION)).response), "NEW:/");
+  assert.equal(await body((await rt.request(`${ORIGIN}/?id=two`, NAVIGATION)).response), "NEW:/");
 });
 
 test("EVS-052 Cachelesefehler lässt den anderen aktuellen Cache weiterhin als Reserve zu", async () => {
@@ -826,4 +846,36 @@ test("EVS-053 uncached offline license path never substitutes calculator HTML", 
   assert.equal(result.response.status, 503);
   assert.equal(result.response.headers.get('Cache-Control'), 'no-store');
   assert.doesNotMatch(await body(result.response), /SYNTHETIC CALCULATOR/);
+});
+
+test("Offline-Statusabfrage meldet Erfolg nur bei vollständig zwischengespeicherten Pflichtressourcen", async () => {
+  const rt = createWorker({ source: versionedSource("vStatus") });
+  assert.equal((await rt.message({ type: "EVS_OFFLINE_STATUS" })).ok, false);
+  await rt.install();
+  const ready = await rt.message({ type: "EVS_OFFLINE_STATUS" });
+  assert.equal(ready.ok, true);
+  assert.equal(ready.missing.length, 0);
+  const cache = await rt.caches.open("evspend-static-vStatus");
+  cache.entries.delete([...cache.entries.keys()].find(key => String(key).includes("script.min.js")));
+  const partial = await rt.message({ type: "EVS_OFFLINE_STATUS" });
+  assert.equal(partial.ok, false);
+  assert.ok(partial.missing.some(url => url.includes("script.min.js")));
+  assert.equal(await rt.message({ type: "unknown" }), undefined);
+});
+
+test("Service Worker hält keine Verlaufskennungen im Netz- oder Cachepfad und löscht nur eigene Generationen", async () => {
+  const caches = new MemoryCacheStorage();
+  await seed(caches, "other-app-cache", [["/", "FOREIGN"]]);
+  await seed(caches, "evspend-static-vOld", [["/", "OLD"]]);
+  await seed(caches, "evspend-runtime-vOld", [["/", "OLD"]]);
+  const rt = createWorker({ source: versionedSource("vNew"), caches });
+  await rt.install();
+  await rt.activate();
+  const names = await caches.keys();
+  assert.ok(names.includes("other-app-cache"));
+  assert.equal(names.includes("evspend-static-vOld"), false);
+  assert.equal(names.includes("evspend-runtime-vOld"), false);
+  await rt.request(`${ORIGIN}/verlauf?id=eaf_${"a".repeat(32)}&entryKey=k&entryIndex=1&market=us`, NAVIGATION);
+  assert.equal(rt.fetchCalls.some(url => /[?&](?:id|entryKey|entryIndex)=/.test(url)), false);
+  assert.ok(rt.fetchCalls.some(url => url.includes("market=us")));
 });

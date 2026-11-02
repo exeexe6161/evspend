@@ -1070,8 +1070,8 @@
   }
 
   function _historyEntryUrl(e) {
-    if (typeof e.id === "string" && /^eaf_[0-9a-f]{32}$/.test(e.id)) return "./?id=" + encodeURIComponent(e.id);
-    return "./?id=" + encodeURIComponent(e.date ?? e.id)
+    if (typeof e.id === "string" && /^eaf_[0-9a-f]{32}$/.test(e.id)) return "./#id=" + encodeURIComponent(e.id);
+    return "./#id=" + encodeURIComponent(e.date ?? e.id)
       + "&entryKey=" + _historyLegacyKey(e) + "&entryIndex=" + state.all.indexOf(e);
   }
   function _todayIsoDate() {
@@ -2345,13 +2345,7 @@
     try {
       const raw = localStorage.getItem("eaf.inputs.v2");
       if (raw && !compatible && !confirm(_tv("marketResetWarn"))) return false;
-      if (raw) {
-        const saved = JSON.parse(raw);
-        if (saved && typeof saved === "object" && !Array.isArray(saved) && !saved._marketCode) {
-          saved._marketCode = oldMarket;
-          localStorage.setItem("eaf.inputs.v2", JSON.stringify(saved));
-        }
-      }
+      if (raw) JSON.parse(raw);
     } catch (_) { return false; }
     try { localStorage.setItem(MARKET_KEY, code); } catch (_) {}
     try { localStorage.setItem(LANG_KEY, cfg.language); } catch (_) {}
