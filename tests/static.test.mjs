@@ -92,13 +92,13 @@ test("L1 Privacytexte grenzen lokale Speicherung, Teilen, URL und Datenlöschung
       /gezielte Leeren dieses Caches entfernt/, /Löschen sämtlicher Websitedaten kann zusätzlich den LocalStorage/
     ],
     en: [
-      /not automatically transmitted to the operator/, /browser's (?:local storage|storage)/,
+      /not automatically transmitted to the operator/, /(?:browser's (?:local ?storage|storage)|stored in LocalStorage)/i,
       /share a calculation or export the history/, /recipient or storage location you choose/,
       /history backup also includes saved notes/,
       /Clearing (?:this|that) cache alone removes/, /Clearing all website data may also delete localStorage/i
     ],
     tr: [
-      /işleticiye otomatik olarak aktarılmaz/, /tarayıcının yerel depolamasında/,
+      /işleticiye otomatik olarak aktarılmaz/, /tarayıcı(?:sı)?nın yerel depolamasında/,
       /hesaplamayı paylaştığınızda veya geçmişi dışa aktardığınızda/, /seçtiğiniz bir alıcıya veya saklama konumuna/,
       /Geçmiş yedeği kaydedilmiş notları da içerir/,
       /Yalnızca bu önbelleği temizlemek/, /Tüm web sitesi verilerini silmek.*LocalStorage'ı da silebilir/
