@@ -239,7 +239,7 @@ test("EVS-051 erster vollständiger Aufbau aktiviert genau eine Generation", asy
   const names = await rt.caches.keys();
   assert.equal(names.filter(name => name.startsWith("evspend-static-")).length, 1);
   const cache = await rt.caches.open(names.find(name => name.startsWith("evspend-static-")));
-  assert.ok(await cache.match("/script.min.js?v=20261111-f11"));
+  assert.ok(await cache.match("/script.min.js?v=20261111-splash"));
 });
 
 test("H1 versionierter Verlauf Coordinator bleibt aus dem Pflicht Precache offline verfügbar", async () => {
@@ -258,7 +258,7 @@ test("H1 versionierter Verlauf Coordinator bleibt aus dem Pflicht Precache offli
 
 test("EVS-051 ein Pflichtfehler verwirft die neue Generation und erhält A", async () => {
   const caches = new MemoryCacheStorage();
-  await seed(caches, "evspend-static-vA", [["/", "A"], ["/script.min.js?v=20261111-f11", "A_JS", "text/javascript"]]);
+  await seed(caches, "evspend-static-vA", [["/", "A"], ["/script.min.js?v=20261111-splash", "A_JS", "text/javascript"]]);
   const rt = createWorker({
     caches,
     network: async request => {
@@ -342,7 +342,7 @@ test("EVS-051 optionale Bildfehler blockieren die vollständige Kernversion nich
 
 test("EVS-051 erneuter Versuch nach Fehler installiert B und entfernt A erst bei activate", async () => {
   const caches = new MemoryCacheStorage();
-  await seed(caches, "evspend-static-vA", [["/", "A"], ["/script.min.js?v=20261111-f11", "A_JS", "text/javascript"]]);
+  await seed(caches, "evspend-static-vA", [["/", "A"], ["/script.min.js?v=20261111-splash", "A_JS", "text/javascript"]]);
   const failed = createWorker({
     source: versionedSource("vB"),
     caches,
@@ -364,14 +364,14 @@ test("EVS-051 erneuter Versuch nach Fehler installiert B und entfernt A erst bei
 
 test("EVS-051 aktiver Worker liest nur seine eigene Cachegeneration", async () => {
   const caches = new MemoryCacheStorage();
-  await seed(caches, "evspend-static-vB", [["/script.min.js?v=20261111-f11", "PARTIAL_B", "text/javascript"]]);
-  await seed(caches, "evspend-static-vA", [["/script.min.js?v=20261111-f11", "COMPLETE_A", "text/javascript"]]);
+  await seed(caches, "evspend-static-vB", [["/script.min.js?v=20261111-splash", "PARTIAL_B", "text/javascript"]]);
+  await seed(caches, "evspend-static-vA", [["/script.min.js?v=20261111-splash", "COMPLETE_A", "text/javascript"]]);
   const rt = createWorker({
     source: versionedSource("vA"),
     caches,
     network: async () => { throw new Error("offline"); }
   });
-  const result = await rt.request(`${ORIGIN}/script.min.js?v=20261111-f11`);
+  const result = await rt.request(`${ORIGIN}/script.min.js?v=20261111-splash`);
   assert.equal(await body(result.response), "COMPLETE_A");
   assert.equal(caches.globalMatchCalls, 0);
 });
@@ -525,7 +525,7 @@ test("EVS-059 fehlgeschlagenes B lässt Rechtstext und Rechner aus A offline ver
   const caches = new MemoryCacheStorage();
   await seed(caches, "evspend-static-vA", [
     ["/", "A_HOME"], ["/datenschutz", "A_PRIVACY"],
-    ["/script.min.js?v=20261111-f11", "A_JS", "text/javascript"]
+    ["/script.min.js?v=20261111-splash", "A_JS", "text/javascript"]
   ]);
   const failedB = createWorker({
     source: versionedSource("vB"),
@@ -538,7 +538,7 @@ test("EVS-059 fehlgeschlagenes B lässt Rechtstext und Rechner aus A offline ver
   await assert.rejects(failedB.install());
   const activeA = createWorker({ source: versionedSource("vA"), caches, network: async () => { throw new Error("offline"); } });
   const privacy = await activeA.request(`${ORIGIN}/datenschutz`, { mode: "navigate", headers: { Accept: "text/html" } });
-  const script = await activeA.request(`${ORIGIN}/script.min.js?v=20261111-f11`);
+  const script = await activeA.request(`${ORIGIN}/script.min.js?v=20261111-splash`);
   assert.equal(await body(privacy.response), "A_PRIVACY");
   assert.equal(await body(script.response), "A_JS");
 });
@@ -675,7 +675,7 @@ test("EVS-052 nicht gecachte Navigation hält HTTP Fehler getrennt von Offline 5
 });
 
 test("EVS-052 statische Assets behalten die Static vor Runtime Cachepriorität", async () => {
-  const routes = ["/script.min.js?v=20261111-f11", "/styles-app.min.css?v=20261101-evs",
+  const routes = ["/script.min.js?v=20261111-splash", "/styles-app.min.css?v=20261111-splash",
     "/extra.js", "/extra.css", "/favicon.ico", "/fonts/InterVariable.woff2", "/site.webmanifest"];
   const caches = new MemoryCacheStorage();
   for (const name of ["evspend-static-vAsset", "evspend-runtime-vAsset"]) {
@@ -733,7 +733,7 @@ test("EVS-052 fehlgeschlagenes Update erhält A einschließlich seines aktualisi
   assert.ok((await caches.keys()).includes("evspend-static-vA"));
   a.setNetwork(async () => { throw new Error("offline"); });
   assert.equal(await body((await a.request(`${ORIGIN}/`, NAVIGATION)).response), "CURRENT_A");
-  assert.equal(await body((await a.request(`${ORIGIN}/script.min.js?v=20261111-f11`)).response), "NETWORK:/script.min.js");
+  assert.equal(await body((await a.request(`${ORIGIN}/script.min.js?v=20261111-splash`)).response), "NETWORK:/script.min.js");
 });
 
 test("EVS-052 erfolgreiche neue Generation benutzt B und revalidiert nur innerhalb B", async () => {
@@ -817,8 +817,8 @@ test("Precache Liste ist eindeutig und verweist auf vorhandene Produktionsdateie
     assert.ok(fs.existsSync(path.join(ROOT, sourceFile(route))), route);
   }
   for (const asset of [
-    "/history-store.js?v=20260927-h1", "/script.min.js?v=20261111-f11", "/verlauf.min.js?v=20261012-evspendpure",
-    "/styles-app.min.css?v=20261101-evs", "/theme-init.js?v=20261012-evspendpure",
+    "/history-store.js?v=20260927-h1", "/script.min.js?v=20261111-splash", "/verlauf.min.js?v=20261012-evspendpure",
+    "/styles-app.min.css?v=20261111-splash", "/theme-init.js?v=20261012-evspendpure",
     "/vendor/chart-4.4.6.umd.js", "/fonts/InterVariable.woff2"
   ]) assert.ok(required.includes(asset), asset);
   for (const asset of [

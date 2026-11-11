@@ -1,5 +1,112 @@
 const $ = id => document.getElementById(id);
 
+// ── EVSpendPure Splash lifecycle ─────────────────────────────────────────────────
+// First-paint C3 splash. Decorative only, never blocks the app:
+//   • shown on every fresh start; never on internal navigation (same-origin referrer) or reload.
+//     No browser storage is read or written for this (no sessionStorage flag).
+//   • removed at once if `prefers-reduced-motion` is set
+//   • normal session view: ~1.0 s on screen (wordmark eases in), then opacity
+//     fade-out (~0.32 s)
+//   • native app: starts when the native launch screen is removed (≤ 3 s)
+//   • hard safety timeout: ~1.8 s after start — the overlay is force-removed regardless
+//     of whether the fade callbacks fired
+// Frame 0 matches the native launch image, so the hand-over shows no jump.
+// All DOM access is wrapped in try/catch so any failure here cannot prevent
+// the rest of the app from initialising.
+(function initEvspendSplash() {
+  try {
+    var el = document.getElementById("evspend-splash");
+    if (!el) return;
+
+    var raf = window.requestAnimationFrame || function (cb) { return setTimeout(cb, 16); };
+
+    var alreadySeen = false;
+    try {
+      var navEntry = window.performance && performance.getEntriesByType &&
+        performance.getEntriesByType("navigation")[0];
+      var ref = document.referrer ? new URL(document.referrer) : null;
+      var internal = !!ref && ref.protocol === location.protocol && ref.host === location.host;
+      alreadySeen = internal || !!(navEntry && navEntry.type === "reload");
+    } catch (_) {}
+
+    var prefersReduced = false;
+    try {
+      prefersReduced = window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    } catch (_) {}
+
+    function removeSplash() {
+      if (!el || el._removed) return;
+      el._removed = true;
+      el.classList.add("is-hidden");
+      el.setAttribute("aria-hidden", "true");
+      // After the CSS opacity transition (~320 ms) finishes, detach so the
+      // calculator can't be tap-blocked by an invisible layer.
+      setTimeout(function () {
+        if (el && el.parentNode) el.parentNode.removeChild(el);
+      }, 360);
+    }
+
+    if (alreadySeen) {
+      el.style.display = "none";
+      removeSplash();
+      return;
+    }
+
+    if (prefersReduced) {
+      el.style.display = "none";
+      removeSplash();
+      return;
+    }
+
+    // In the native app the overlay starts only once the native launch screen is
+    // gone (event dispatched from initApp), so the hand-over shows the identical
+    // mark and the wordmark eases in visibly. In browsers it starts on the next frame.
+    var hideTimer = null, killTimer = null, started = false;
+    function start() {
+      if (started || el._removed) return;
+      started = true;
+      raf(function () { el.classList.add("run"); });
+      // Normal lifecycle: ~1.0 s on screen, then fade out.
+      hideTimer = setTimeout(removeSplash, 1000);
+      // Hard safety: even if hideTimer is throttled by background tabs, this
+      // wins after ~1.8 s so the calculator is never blocked.
+      killTimer = setTimeout(function () {
+        clearTimeout(hideTimer);
+        removeSplash();
+      }, 1800);
+    }
+    var isNative = false;
+    try {
+      isNative = !!(window.Capacitor && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform());
+    } catch (_) {}
+    if (isNative) {
+      window.addEventListener("evspend:native-splash-hidden", start, { once: true });
+      setTimeout(start, 3000); // never wait longer than this for the native event
+    } else {
+      start();
+    }
+    // Tap to dismiss — power users skip the wait. Never replays.
+    // Both listeners share the same idempotent dismiss; whichever fires
+    // first wins and the other is harmless because removeSplash() guards
+    // against double-runs via el._removed.
+    function dismiss() {
+      clearTimeout(hideTimer);
+      clearTimeout(killTimer);
+      removeSplash();
+    }
+    el.addEventListener("click", dismiss, { once: true });
+    el.addEventListener("touchstart", dismiss, { once: true, passive: true });
+  } catch (_) {
+    // Belt-and-braces: if anything throws, hide the overlay so the app stays
+    // usable. The CSS fallback animation will also drop it within 4 s.
+    try {
+      var fallback = document.getElementById("evspend-splash");
+      if (fallback) fallback.style.display = "none";
+    } catch (__) {}
+  }
+})();
+
 // ── Utilities ─────────────────────────────────────────────────────────────────
 function debounce(fn, ms) {
   let t;
