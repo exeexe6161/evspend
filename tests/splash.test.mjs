@@ -138,3 +138,13 @@ test('SPL-12 Ein Fehler im Splash-Code blockiert die App nicht', () => {
   const ctx = { document: { getElementById: () => { throw new Error('boom'); } }, window: {} };
   assert.doesNotThrow(() => vm.runInNewContext(lifecycle, ctx));
 });
+
+test('SPL-13 Fokus-Scrollen laesst Platz fuer den schwebenden Ergebnisbutton (scroll-padding-bottom)', () => {
+  for (const f of ['styles-app.css', 'styles-app.min.css']) {
+    assert.match(read(f), /html\{scroll-padding-bottom:calc\(84px\s*\+\s*var\(--safe-bot\)\)\}|html\{\s*scroll-padding-bottom:\s*calc\(84px \+ var\(--safe-bot\)\);?\s*\}/, f);
+  }
+  const css = read('styles-app.css');
+  const h = Number(css.match(/html\{scroll-padding-bottom:calc\((\d+)px/)[1]);
+  const wrap = css.match(/\.sticky-cta-wrapper\{[^}]*bottom:calc\((\d+)px/)[1];
+  assert.ok(h >= Number(wrap) + 60, 'reserve covers button height 60px plus its offset');
+});

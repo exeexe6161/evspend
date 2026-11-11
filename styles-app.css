@@ -1608,6 +1608,11 @@ img{user-select:none;-webkit-user-drag:none;-moz-user-drag:none;}
    #chartSection ist seit Phase E das Compare-Scroll-Ziel (Chart oben). */
 #singleResult,#compareResult,#chartSection{scroll-margin-bottom:100px;scroll-margin-top:24px;}
 
+/* Focus/tab/VoiceOver scrolling aligns a field to the viewport's bottom edge, which is exactly where the
+   floating result button sits (up to two thirds of the field was covered on 320-390 px wide phones).
+   Reserve its height (60px + 14px offset + safe area) so scrolled-to fields stay fully visible. */
+html{scroll-padding-bottom:calc(84px + var(--safe-bot));}
+
 /* ══ Hero — Signature: flat, no glow (light). Dark keeps its glow. ══ */
 .hero{
   position:relative;
