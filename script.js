@@ -996,17 +996,30 @@ const SAVE_COOLDOWN = 60 * 1000;
 // Phase H: cooldown timestamp lives in memory only (no persistent write);
 // a legacy "lastSaveTime" key from older versions is removed on reset only.
 let _lastSaveAt = 0;
-function canSave() {
+let _lastSaveSig = "";
+// Inhaltssignatur der aktuellen Einzelberechnung; null bei ungueltiger Eingabe.
+// So blockiert die Sperre nur das versehentliche doppelte Speichern desselben
+// Eintrags, nicht eine inhaltlich andere, legitime Berechnung innerhalb der Minute.
+function _currentSaveSignature() {
+  const d = _getSingleData();
+  if (!d) return null;
+  const noteEl = $("noteInput");
+  const note = (noteEl ? noteEl.value : "").trim();
+  return JSON.stringify([singleType, d.km, d.consumption, d.price, d.persons, d.ridesharing, note]);
+}
+function canSave(sig) {
+  if (sig == null) return true;                 // ungueltige Eingabe: saveQuick meldet den Fehler selbst
   if (!_lastSaveAt) return true;
-  return Date.now() - _lastSaveAt > SAVE_COOLDOWN;
+  if (Date.now() - _lastSaveAt > SAVE_COOLDOWN) return true;
+  return sig !== _lastSaveSig;                   // innerhalb der Sperre nur echte Duplikate blockieren
 }
 let _saveEntryPending = false;
 async function saveEntrySafe() {
   if (_saveEntryPending) return;
-  let allowed;
-  try { allowed = canSave(); }
+  let sig;
+  try { sig = _currentSaveSignature(); }
   catch (_) { eafToast(_t("toastSaveFailed")); return; }
-  if (!allowed) {
+  if (!canSave(sig)) {
     eafToast(_t("saveCooldown"));
     return;
   }
@@ -1014,6 +1027,7 @@ async function saveEntrySafe() {
   try {
     if (await saveQuick()) {
       _lastSaveAt = Date.now();
+      _lastSaveSig = sig;
     }
   } finally { _saveEntryPending = false; }
 }
@@ -1670,6 +1684,7 @@ function reset() {
     _stateSet(LT_PREMIUM_KEY, String(longtermPremium));
     _stateSet(LT_KM_MONAT_KEY, String(kmMonat));
     _lastSaveAt = 0;
+    _lastSaveSig = "";
     localStorage.removeItem("lastSaveTime");
   } catch (_) {}
 
