@@ -70,6 +70,7 @@ export const PUBLIC_FILES = Object.freeze([
   'vendor/chart-4.4.6.umd.js',
   'vendor/chartjs-4.4.6.LICENSE.txt',
   'vendor/feather-portions.LICENSE.txt',
+  'vendor/instrument-serif-OFL.LICENSE.txt',
   'vendor/kurkle-color-0.3.2.LICENSE.txt',
   'vendor/license-inventory.json',
   'vendor/lucide-0.511.0.LICENSE.txt',

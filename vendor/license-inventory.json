@@ -45,6 +45,15 @@
       "source": "local fonts/LICENSE.txt; embedded font name tables",
       "licenseFile": "fonts/LICENSE.txt",
       "licenseSha256": "262481e844521b326f5ecd053e59b98c8b2da78c8ee1bdbb6e8174305e54935a"
+    },
+    {
+      "name": "Instrument Serif Italic (outlines only)",
+      "version": "exact font file and version not recorded (historical evidence gap)",
+      "license": "OFL-1.1",
+      "material": "no font file is shipped; vector outlines of the lettering \"pure\" inside the logo SVG paths (inline splash SVG and brand/EVSpendPure-*.svg), taken from the WeatherPure wordmark master",
+      "source": "https://github.com/Instrument/instrument-serif; original license text copied byte for byte from the WeatherPure repository file licenses/instrument-serif-OFL.txt",
+      "licenseFile": "vendor/instrument-serif-OFL.LICENSE.txt",
+      "licenseSha256": "129ed7618959716959f2941fdd5b49e0ad6e6c1d78726761786a00253d865521"
     }
   ],
   "release": {

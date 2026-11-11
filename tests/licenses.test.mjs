@@ -19,7 +19,7 @@ function fixture(t) {
 test('EVS-053 every notice has real release material and unchanged local original text', () => {
   checkLicenses();
   const manifest = JSON.parse(fs.readFileSync(path.join(ROOT, 'vendor/license-inventory.json')));
-  assert.deepEqual(manifest.components.map(c => c.name), ['Chart.js', '@kurkle/color', 'Lucide', 'Feather portions', 'Inter Variable']);
+  assert.deepEqual(manifest.components.map(c => c.name), ['Chart.js', '@kurkle/color', 'Lucide', 'Feather portions', 'Inter Variable', 'Instrument Serif Italic (outlines only)']);
   const doc = fs.readFileSync(path.join(ROOT, 'LICENSES.md'), 'utf8');
   const generated = doc.slice(doc.indexOf(START), doc.indexOf(END) + END.length);
   for (const c of manifest.components) assert.ok(generated.includes(fs.readFileSync(path.join(ROOT, c.licenseFile), 'utf8')));
