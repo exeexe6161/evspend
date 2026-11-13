@@ -3,7 +3,7 @@
  *
  * - reuses buildStaticOutput() (same 70 public files as the Vercel build)
  * - generates _headers from vercel.json so header rules have ONE source of truth
- * - CF_NOINDEX=1 adds "X-Robots-Tag: noindex, nofollow, noarchive" to every response (test deployments)
+ * - CF_NOINDEX=1 blocks indexing globally; otherwise only Pages hosts receive noindex
  * Output: .cloudflare-static/   (hidden on purpose: build-licenses.mjs walk() skips dot-directories)
  * Geo redirect lives in functions/ (Pages Functions), headers/redirects of Functions are NOT touched by _headers.
  */
@@ -34,6 +34,11 @@ export function buildHeadersFile(vercelJson, { noindex = false } = {}) {
     if (global && noindex) headers.push('  X-Robots-Tag: noindex, nofollow, noarchive');
     for (const pattern of toPatterns(rule.source)) out.push('', pattern, ...headers);
   }
+  if (!noindex) {
+    for (const host of [':project.pages.dev', ':version.:project.pages.dev']) {
+      out.push('', `https://${host}/*`, '  X-Robots-Tag: noindex, nofollow, noarchive');
+    }
+  }
   return out.join('\n') + '\n';
 }
 
@@ -45,7 +50,7 @@ export function buildCloudflareOutput(root = ROOT, env = process.env) {
   fs.cpSync(staged.output, target, { recursive: true });
   const vercelJson = JSON.parse(fs.readFileSync(path.join(root, 'vercel.json'), 'utf8'));
   const headers = buildHeadersFile(vercelJson, { noindex: env.CF_NOINDEX === '1' });
-  const rules = headers.split('\n').filter(line => line.startsWith('/')).length;
+  const rules = headers.split('\n').filter(line => line.startsWith('/') || line.startsWith('https://')).length;
   if (rules > MAX_HEADER_RULES) throw new Error(`_headers has ${rules} rules, Cloudflare Pages allows ${MAX_HEADER_RULES}`);
   fs.writeFileSync(path.join(target, '_headers'), headers);
   return { output: target, files: staged.files.length, rules, noindex: env.CF_NOINDEX === '1' };
