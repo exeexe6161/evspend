@@ -3356,6 +3356,38 @@ body[data-longterm="on"] .sl-row--km{
   font-variant-numeric:tabular-nums;
   letter-spacing:-.2px;
 }
+.trip-distance{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:4px;
+  min-width:0;
+}
+.trip-distance [hidden]{display:none;}
+.trip-distance-value,.trip-distance-done{
+  position:relative;
+  border:0;
+  padding:0;
+  background:transparent;
+  font-family:inherit;
+  text-align:right;
+  cursor:pointer;
+}
+.trip-distance-value{text-decoration:underline dotted;text-underline-offset:3px;}
+.trip-distance-value::after{content:"";position:absolute;inset:-4px 0;}
+.trip-distance-edit{
+  width:8ch;
+  max-width:100%;
+  padding:0 4px;
+  border:1px solid currentColor;
+  border-radius:4px;
+  background:transparent;
+  font-family:inherit;
+  font-size:16px;
+  text-align:right;
+}
+.trip-distance-done{min-width:24px;min-height:24px;text-align:center;}
+.trip-distance :focus-visible{outline:2px solid currentColor;outline-offset:2px;}
 /* Phase L.4 — Range-Box neutral & sichtbar (Tool-Style):
    var(--s2) als elevated Surface, var(--sep) Border, kein Gradient. */
 .range-box{

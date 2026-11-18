@@ -72,9 +72,9 @@ for (const market of ["de","eu","us","tr"]) {
       assertOriginal(rt,entry);
       rt.run("refreshSliderValues()");
       const distanceId = type === "ev" ? "kmEv" : "kmVb";
-      assert.equal(rt.elements.get(distanceId).step,"any");
+      assert.equal(rt.elements.get(distanceId).step,"1");
       assert.match(rt.elements.get(distanceId+"V").textContent,/25/);
-      assert.equal(rt.elements.get(distanceId).getAttribute("aria-valuetext"),rt.elements.get(distanceId+"V").textContent);
+      assert.equal(rt.elements.get(distanceId).getAttribute("aria-valuetext"), market === "us" ? "300 mi" : "500 km");
       assert.equal(await rt.run("saveQuick()"),true);
       const saved = JSON.parse(rt.storage.get(historyKey))[0];
       for (const key of ["km","consumption","price","monthlyCost"]) assert.equal(saved[key],entry[key]);
@@ -88,10 +88,9 @@ test("historical restore: normal inputs remain bounded and historical editing re
   const original = scenario("de","ev",1250,true);
   const rt = runtime({entries:[original],search:`?id=${original.id}`});
   const slider = rt.elements.get("kmEv");
-  assert.equal(slider.max,"1250");
-  slider.value="1100"; slider.dispatchEvent({type:"input"});
+  assert.equal(slider.max,"500");
   const reboot = runtime({storage:Object.fromEntries(rt.storage)});
-  assert.equal(reboot.run("_getSingleData().km"),1100);
+  assert.equal(reboot.run("_getSingleData().km"),1250);
   slider.value="499"; slider.dispatchEvent({type:"input"});
   assert.equal(slider.max,"500");
   assert.equal(slider.step,"1");
@@ -108,7 +107,7 @@ test("historical restore: compatible market preserves binding, incompatible mark
   const rt = runtime({entries:[entry],search:`?id=${entry.id}`});
   rt.run("window.EAF_I18N.setMarket('eu')");
   assertOriginal(rt,entry);
-  assert.equal(rt.elements.get("kmEv").max,"1250");
+  assert.equal(rt.elements.get("kmEv").max,"500");
   rt.run("window.EAF_I18N.setMarket('us')");
   assert.equal(rt.elements.get("kmEv").max,"300");
   assert.equal(rt.elements.get("kmEv").step,"1");
@@ -289,7 +288,7 @@ test("historical note: input value sanitization and unrelated parameter edits pr
   rt.context.restoredEntry=entry;
   assert.equal(rt.run("_restoreHistoryEntry(restoredEntry)"),true);
   assert.equal(field.value,entry.note.replace(/[\r\n]/g,""));
-  rt.elements.get("kmEv").value="1100";
+  rt.elements.get("kmEv").value="499";
   rt.elements.get("kmEv").dispatchEvent({type:"input"});
   assert.equal(JSON.parse(rt.storage.get(inputKey))._historyInputs?.note,undefined);
   assert.equal(rt.run("_historicalNote.original"),entry.note);

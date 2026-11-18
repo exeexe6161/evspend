@@ -120,6 +120,8 @@ function debounce(fn, ms) {
 // kmMonat ist NICHT Teil von INPUT_IDS — wird ausschließlich über LT_KM_MONAT_KEY
 // verwaltet (Single Source of Truth). Verhindert doppelte Listener / calc().
 const INPUT_IDS = ["evVerbrauch","strompreis","benzinpreis","verbrauchVerbrenner","kmEv","kmVb","kmShared","batteryKwh"];
+const TRIP_DISTANCE_IDS = ["kmEv", "kmVb", "kmShared"];
+const isTripDistance = id => TRIP_DISTANCE_IDS.includes(id);
 const LS_KEY       = "eaf.inputs.v2";
 const RIDESHARE_KEY       = "eaf.rideshareActive";
 const RIDESHARE_PERSONS_KEY = "eaf.ridesharePersons";
@@ -340,9 +342,25 @@ function _applyHistoricalRange(el, cfg, value) {
 function _setHistoricalInput(id, value, internal) {
   const el = $(id);
   if (!el) return;
+  if (isTripDistance(id)) {
+    el.value = String(_tripSliderValue(id, value));
+    _historicalInputs[id] = {value: String(value), internal};
+    return;
+  }
   _applyHistoricalRange(el, _historyInputConfig(id), value);
   _historicalInputs[id] = {value: el.value, internal};
   if (id === "ridesharePersons") ridesharePersons = internal;
+}
+// Restored trips and typed values can exceed the range or fall between ticks.
+// The thumb represents the nearest tick. Only the exact distance is persisted.
+function _tripSliderValue(id, value) {
+  const {min, max} = _historyInputConfig(id);
+  return Math.min(max, Math.max(min, Math.round(value)));
+}
+function _matchesHistoricalInput(id, el, record) {
+  return isTripDistance(id)
+    ? Number(el.value) === _tripSliderValue(id, Number(record.value))
+    : el.value === record.value;
 }
 function _clearHistoricalInputs() {
   const persons = _historicalInputs.ridesharePersons;
@@ -359,7 +377,8 @@ function _syncHistoricalInputs() {
   Object.entries(_historicalInputs).forEach(([id, record]) => {
     const el = $(id), cfg = _historyInputConfig(id);
     if (!el || !cfg) { delete _historicalInputs[id]; return; }
-    if (el.value === record.value) return;
+    if (_matchesHistoricalInput(id, el, record)) return;
+    if (isTripDistance(id)) { delete _historicalInputs[id]; return; }
     const value = Number(el.value);
     if (!Number.isFinite(value) || value < 0) { delete _historicalInputs[id]; return; }
     if (value >= cfg.min && value <= cfg.max && _historyInputOnGrid(value, cfg)) {
@@ -386,7 +405,7 @@ function _loadHistoricalInputs(saved) {
     if (!record.value || record.value.trim() !== record.value) return;
     const value = Number(record.value), internal = record.internal;
     if (!Number.isFinite(value) || !Number.isFinite(internal) || value < 0 || internal < 0) return;
-    if (id !== "kmShared" && (value === 0 || internal === 0)) return;
+    if (!isTripDistance(id) && (value === 0 || internal === 0)) return;
     if (id === "ridesharePersons" && (!Number.isInteger(internal) || internal < 1 || internal > 99)) return;
     const converted = _rawToInternal(id, value);
     if (!Number.isFinite(converted) || Math.abs(converted - internal) > 1e-12 * Math.max(1, Math.abs(internal))) return;
@@ -411,9 +430,10 @@ function loadInputs() {
     });
     // Back-compat: old single "km" field → fill kmEv / kmVb / kmShared
     if (saved.km != null && saved.km !== "" && saved.kmEv == null && saved.kmVb == null) {
-      if ($("kmEv")) $("kmEv").value = Math.min(500, parseFloat(saved.km) || 50);
-      if ($("kmVb")) $("kmVb").value = Math.min(500, parseFloat(saved.km) || 50);
-      if ($("kmShared")) $("kmShared").value = Math.min(Number($("kmShared").max), parseFloat(saved.km) || 1000);
+      const distance = parseFloat(saved.km);
+      if (Number.isFinite(distance)) TRIP_DISTANCE_IDS.forEach(id => {
+        if ($(id)) $(id).value = String(_tripSliderValue(id, distance));
+      });
     }
   } catch (_) { _storageInitFailed = true; }
 }
@@ -536,7 +556,7 @@ function _restoreHistoryEntry(entry) {
     }
     values.ridesharePersons = restoredPersons;
     const plan = Object.entries(values).map(([id, internal]) => {
-      if (!Number.isFinite(internal) || internal < 0 || (id !== "kmShared" && internal === 0)) throw new Error("Invalid historical input");
+      if (!Number.isFinite(internal) || internal < 0 || (!isTripDistance(id) && internal === 0)) throw new Error("Invalid historical input");
       const value = id === "kmEv" || id === "kmVb" || id === "kmShared" ? _kmToDist(internal)
         : id === "evVerbrauch" ? _evConsumptionToMarket(internal)
         : id === "verbrauchVerbrenner" ? _iceConsumptionToMarket(internal)
@@ -588,7 +608,11 @@ function _restoreHistoryEntry(entry) {
 
 INPUT_IDS.forEach(id => {
   const el = $(id); if (!el) return;
-  el.addEventListener("input", () => { saveInputs(); calc(); });
+  el.addEventListener("input", () => {
+    if (isTripDistance(id)) delete _historicalInputs[id];
+    saveInputs();
+    calc();
+  });
 });
 if ($("noteInput")) $("noteInput").addEventListener("input", () => {
   if (_historicalNote !== null) saveInputs();
@@ -636,7 +660,10 @@ function _syncSessionState() {
 }
 function _collectDraft() {
   const data = {};
-  INPUT_IDS.forEach(id => { const el = $(id); if (el) data[id] = el.value; });
+  INPUT_IDS.forEach(id => {
+    const el = $(id);
+    if (el) data[id] = isTripDistance(id) && _historicalInputs[id] ? _historicalInputs[id].value : el.value;
+  });
   // Nur Präzisionswerte; die Notiz bleibt ausschließlich im Verlauf bzw. im Arbeitsspeicher.
   if (Object.keys(_historicalInputs).length) data._historyInputs = {
     marketCode: window.EAF_I18N.getMarketCode(), values: _historicalInputs
@@ -1205,15 +1232,10 @@ function updateSaveButton() {
 
 function setMode(m) {
   if (m !== "compare" && m !== "single") return;
+  _cancelTripEdits();
   appMode = m;
   try { _stateSet(MODE_KEY, m); } catch(_) {}
   applyMode();
-  // Phase Z6.5.a: clamp km values to current max
-  ["kmEv","kmVb","kmShared"].forEach(function(id){
-    var el = document.getElementById(id); if (!el) return;
-    var mx = parseFloat(el.max);
-    if (isFinite(mx) && parseFloat(el.value) > mx) el.value = String(mx);
-  });
   // Phase Z6.5.b: full slider visual resync — display text + fill bar for
   // every registered slider must match DOM .value after a mode change,
   // since hidden sliders never receive input events that would refresh them.
@@ -1224,15 +1246,10 @@ function setMode(m) {
 }
 function setType(t) {
   if (t !== "ev" && t !== "vb") return;
+  _cancelTripEdits();
   singleType = t;
   try { _stateSet(TYPE_KEY, t); } catch(_) {}
   applyMode();
-  // Phase Z6.5.a: km cap on type switch
-  ["kmEv","kmVb"].forEach(function(id){
-    var el = document.getElementById(id); if (!el) return;
-    var mx = parseFloat(el.max);
-    if (isFinite(mx) && parseFloat(el.value) > mx) el.value = String(mx);
-  });
   // Phase Z6.5.b: full slider visual resync (same reasoning as setMode)
   try { refreshSliderValues(); } catch(_) {}
   try { refreshSliderFills();  } catch(_) {}
@@ -1250,7 +1267,7 @@ function n(id) {
   const v = parseFloat(el.value);
   if (!isFinite(v)) return NaN;
   const restored = _historicalInputs[id];
-  if (restored && restored.value === el.value) return restored.internal;
+  if (restored && _matchesHistoricalInput(id, el, restored)) return restored.internal;
   return _rawToInternal(id, v);
 }
 // Raw-Wert ohne Konversion (für Anzeige-/Speicher-Zwecke, wenn der User-Wert
@@ -1746,6 +1763,7 @@ function confirmReset() {
 }
 
 function reset() {
+  _cancelTripEdits();
   _clearHistoricalInputs();
   const market = (window.EAF_I18N && typeof window.EAF_I18N.getMarket === "function")
     ? window.EAF_I18N.getMarket()
@@ -2223,7 +2241,7 @@ const _getSingleData = () => {
   const km          = isEv ? n("kmEv")        : n("kmVb");
   const consumption = isEv ? n("evVerbrauch") : n("verbrauchVerbrenner");
   const price       = isEv ? n("strompreis")  : n("benzinpreis");
-  if (![km, consumption, price].every(x => isFinite(x) && x > 0)) return null;
+  if (!Number.isFinite(km) || km < 0 || ![consumption, price].every(x => isFinite(x) && x > 0)) return null;
   // Keep raw precision for downstream totals, sharing and v2 storage.
   const costPer100  = consumption * price;
   const monthlyCost = costPer100 * km / 100;   // = trip cost (see header)
@@ -2941,9 +2959,153 @@ const SLIDER_LABEL_KEY = {
   longtermYears:       "longtermPeriod",
   longtermPremium:     "longtermPremiumLabel",
 };
+function _tripDistanceText(id) {
+  const el = $(id);
+  const restored = _historicalInputs[id];
+  const value = restored && _matchesHistoricalInput(id, el, restored) ? Number(restored.value) : Number(el.value);
+  if (Number.isInteger(value)) return SLIDER_FMT[id](value);
+  return value.toLocaleString(_currentLocale(), {maximumSignificantDigits: 15}) + " " + _distanceUnit();
+}
+function _closeTripEdit(id, accept, focusButton = false) {
+  const field = $(id + "Edit"), button = $(id + "V");
+  if (!field || field.hidden) return;
+  const changed = field.value !== field.defaultValue;
+  const input = field.value.trim();
+  const digits = input.replace(/[^0-9]/g, "");
+  const value = digits ? Number(digits) : NaN;
+  field.hidden = true;
+  $(id + "Done").hidden = true;
+  button.hidden = false;
+  if (focusButton) button.focus();
+  if (!accept || !changed) return;
+  const max = _historyInputConfig("kmShared").max;
+  if (!Number.isSafeInteger(value) || value > max ||
+      (input !== digits && input !== value.toLocaleString(_currentLocale()))) {
+    eafToast(_t("tripDistanceInvalid", {max: SLIDER_FMT[id](max)}));
+    return;
+  }
+  const slider = $(id);
+  if (value > Number(slider.max)) {
+    _setHistoricalInput(id, value, _rawToInternal(id, value));
+  } else {
+    delete _historicalInputs[id];
+    slider.value = String(value);
+  }
+  saveInputs();
+  calc();
+  _updateSliderVal(id);
+  _updateSliderFill(slider);
+  _announceSlider(id);
+}
+function _cancelTripEdits() {
+  TRIP_DISTANCE_IDS.forEach(id => _closeTripEdit(id, false));
+}
+function _bindTripTouchSnap(id, slider) {
+  // A range step is a value increment. Its thumb can travel several steps
+  // per CSS pixel, particularly on the comparison range.
+  let drag;
+  slider.addEventListener("touchstart", event => {
+    const finger = event.touches.length === 1 && event.changedTouches[0];
+    drag = finger ? {
+      finger, market: window.EAF_I18N.getMarketCode(), changed: false, moved: false
+    } : null;
+  }, {passive: true});
+  slider.addEventListener("touchmove", event => {
+    if (drag && event.touches.length === 1 &&
+        event.changedTouches[0]?.identifier === drag.finger.identifier) drag.moved = true;
+  }, {passive: true});
+  slider.addEventListener("input", () => { if (drag) drag.changed = true; });
+  slider.addEventListener("touchcancel", () => { drag = null; });
+  slider.addEventListener("keydown", () => { drag = null; });
+  slider.addEventListener("touchend", event => {
+    const finished = drag;
+    drag = null;
+    if (!finished?.changed || event.touches.length || finished.market !== window.EAF_I18N.getMarketCode()) return;
+    const end = event.changedTouches[0], start = finished.finger;
+    if (!end || end.identifier !== start.identifier) return;
+    const shared = id === "kmShared";
+    const dx = Math.abs(end.clientX - start.clientX);
+    // WebKit can emit a real range change on a drag of only a few pixels.
+    // An observed move distinguishes it from a tap without a distance cutoff.
+    if ((shared ? dx < 8 : !finished.moved) || dx <= Math.abs(end.clientY - start.clientY)) return;
+
+    const current = Number(slider.value);
+    // Match the thumb's travel in styles-app.css. Limit the window even on
+    // unusually narrow tracks so a precise release outside it stays intact.
+    const travel = slider.getBoundingClientRect().width - 18;
+    if (travel <= 0 || !Number.isFinite(current)) return;
+    const miles = finished.market === "us";
+    const tolerancePixels = shared ? 2 : 8;
+    const tolerance = Math.min(shared ? 60 : miles ? 9 : 14,
+      tolerancePixels * (Number(slider.max) - Number(slider.min)) / travel);
+    const targets = shared ? [100, 500, 1000]
+      : miles ? [30, 60, 120, 150, 180, 240, 300] : [50, 100, 200, 250, 300, 400, 500];
+    const target = targets.find(value => Math.abs(current - value) <= tolerance);
+    if (target === undefined || target === current) return;
+    slider.value = String(target);
+    slider.dispatchEvent(new Event("input", {bubbles: true}));
+    _announceSlider(id);
+  }, {passive: true});
+}
+
+function _bindTripEditor(id) {
+  const slider = $(id), button = $(id + "V"), field = $(id + "Edit"), done = $(id + "Done");
+  if (!slider || !button || !field || !done) return;
+  button.addEventListener("click", () => {
+    const restored = _historicalInputs[id];
+    field.defaultValue = restored && _matchesHistoricalInput(id, slider, restored) ? restored.value : slider.value;
+    field.value = field.defaultValue;
+    button.hidden = true;
+    field.hidden = false;
+    done.hidden = false;
+    field.focus();
+    field.select();
+  });
+  field.addEventListener("blur", event => {
+    if (event.relatedTarget !== done) _closeTripEdit(id, true);
+  });
+  done.addEventListener("blur", event => {
+    if (event.relatedTarget !== field) _closeTripEdit(id, true);
+  });
+  done.addEventListener("pointerdown", event => event.preventDefault());
+  done.addEventListener("click", () => _closeTripEdit(id, true, true));
+  [field, done].forEach(control => control.addEventListener("keydown", event => {
+    if (event.key === "Escape" || (control === field && event.key === "Enter")) {
+      event.preventDefault();
+      _closeTripEdit(id, event.key === "Enter", true);
+    }
+  }));
+  // A pointer or keyboard action at the range boundary may emit no input event.
+  const adoptSliderValue = () => {
+    if (!_historicalInputs[id]) return;
+    slider.dispatchEvent(new Event("input", {bubbles: true}));
+    _announceSlider(id);
+  };
+  slider.addEventListener("pointerup", adoptSliderValue);
+  _bindTripTouchSnap(id, slider);
+  slider.addEventListener("keyup", event => {
+    if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Home", "End", "PageUp", "PageDown"].includes(event.key)) adoptSliderValue();
+  });
+}
 function _updateSliderVal(id) {
   const el = $(id); const valEl = $(id + "V"); const fmtFn = SLIDER_FMT[id];
   if (!el || !valEl || !fmtFn) return;
+  if (isTripDistance(id)) {
+    const txt = _tripDistanceText(id);
+    const restored = _historicalInputs[id];
+    const outside = restored && _matchesHistoricalInput(id, el, restored) && Number(restored.value) > Number(el.max);
+    const visible = outside ? _t("tripDistanceAboveSlider", {value: txt, max: fmtFn(Number(el.max))}) : txt;
+    const field = $(id + "Edit"), done = $(id + "Done");
+    valEl.textContent = visible;
+    el.setAttribute("aria-valuetext", fmtFn(Number(el.value)));
+    if (field && done) {
+      const label = _t(el.getAttribute("data-i18n-aria") || "labelKilometer");
+      valEl.setAttribute("aria-label", _t("tripDistanceEditValue", {label, value: visible}));
+      field.setAttribute("aria-label", _t("tripDistanceEditLabel", {label, unit: _distanceUnit()}));
+      done.setAttribute("aria-label", _t("tripDistanceDone"));
+    }
+    return;
+  }
   const v = id === "kmMonat" ? kmMonat : parseFloat(el.value);
   if (isFinite(v)) {
     let txt = fmtFn(v);
@@ -2969,7 +3131,7 @@ function _announceSlider(id) {
   if (!announcer) return;
   const labelKey = SLIDER_LABEL_KEY[id];
   const label = labelKey ? _t(labelKey) : id;
-  announcer.textContent = _t("srSliderSetTo", { label: label, value: valEl.textContent });
+  announcer.textContent = _t("srSliderSetTo", { label: isTripDistance(id) ? _t("sectionMileage") : label, value: valEl.textContent });
 }
 function _updateSliderFill(el) {
   if (!el || el.type !== "range") return;
@@ -3016,6 +3178,7 @@ Object.keys(SLIDER_FMT).forEach(id => {
   _updateSliderVal(id);
   _updateSliderFill(el);
 });
+TRIP_DISTANCE_IDS.forEach(_bindTripEditor);
 
 // Re-sync slider visuals after browser/layout state changes that can leave
 // the CSS --p fill out of step with the thumb (bfcache restore, mobile
@@ -3397,9 +3560,14 @@ window.addEventListener('appinstalled', () => {
       srSliderSetTo: "{label} auf {value} gesetzt",
       srResultUpdated: "Neues Ergebnis: {value}",
       // Phase P Sprint 2 (F4.8) — Slider-aria-Labels mit Fahrzeug-Kontext
-      ariaKmShared: "Kilometer für beide Fahrzeuge",
-      ariaKmEv: "E-Auto Kilometer",
-      ariaKmVb: "Verbrenner Kilometer",
+      ariaKmShared: "Strecke für beide Fahrzeuge",
+      ariaKmEv: "Strecke E-Auto",
+      ariaKmVb: "Strecke Verbrenner",
+      tripDistanceEditValue: "{label} bearbeiten: {value}",
+      tripDistanceEditLabel: "{label} in {unit}",
+      tripDistanceDone: "Strecke übernehmen",
+      tripDistanceAboveSlider: "{value} · Regler bis {max}",
+      tripDistanceInvalid: "Gib eine ganze Zahl zwischen 0 und {max} ein.",
       footerVerlauf: "Verlauf",
       footerNote: "Unverbindliche Beispielrechnung. Eingaben und Ergebnisse vor Entscheidungen prüfen. Keine vollständige Gesamtkostenberechnung. Eingaben bleiben lokal.",
       privacyNotice: "Rechner-Eingaben bleiben lokal im Browser. Beim Laden der Website können technische Verbindungsdaten durch den Hosting-Anbieter verarbeitet werden.",
@@ -3683,6 +3851,11 @@ window.addEventListener('appinstalled', () => {
       ariaKmShared: "Distance for both vehicles",
       ariaKmEv: "Electric vehicle distance",
       ariaKmVb: "Combustion distance",
+      tripDistanceEditValue: "Edit {label}: {value}",
+      tripDistanceEditLabel: "{label} in {unit}",
+      tripDistanceDone: "Apply distance",
+      tripDistanceAboveSlider: "{value} · slider up to {max}",
+      tripDistanceInvalid: "Enter a whole number from 0 to {max}.",
       footerVerlauf: "History",
       footerNote: "Non-binding example calculation. Check inputs and results before decisions. Not a complete total-cost calculation. Inputs stay on your device.",
       privacyNotice: "Calculator inputs stay in your browser. When the website is loaded, technical connection data may be processed by the hosting provider.",
@@ -3968,6 +4141,11 @@ window.addEventListener('appinstalled', () => {
       ariaKmShared: "Her iki araç için mesafe",
       ariaKmEv: "Elektrikli araç mesafesi",
       ariaKmVb: "İçten yanmalı araç mesafesi",
+      tripDistanceEditValue: "{label} düzenle: {value}",
+      tripDistanceEditLabel: "{label} ({unit})",
+      tripDistanceDone: "Mesafeyi uygula",
+      tripDistanceAboveSlider: "{value} · sürgü en çok {max}",
+      tripDistanceInvalid: "0 ile {max} arasında tam sayı gir.",
       footerVerlauf: "Geçmiş",
       footerNote: "Bağlayıcı olmayan örnek hesaplama. Karar vermeden önce girdileri ve sonuçları kontrol et. Tam toplam maliyet hesabı değildir. Girdiler cihazında kalır.",
       privacyNotice: "Hesaplayıcı girdileri tarayıcıda kalır. Web sitesi yüklenirken teknik bağlantı verileri barındırma sağlayıcısı tarafından işlenebilir.",
@@ -4205,8 +4383,8 @@ window.addEventListener('appinstalled', () => {
         // Phase P Sprint 4 (F6.1): km* sliders harmonised at 0-10000 step 1
         // for consistent UX between single (kmEv/kmVb) and compare (kmShared)
         // mode — a "trip distance" means the same thing in both.
-        kmEv:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a single-mode tight range
-        kmVb:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a single-mode tight range
+        kmEv:                { value: 50,     min: 0,     max: 500,     step: 1 },     // km — Phase Z6.5.a single-mode tight range
+        kmVb:                { value: 50,     min: 0,     max: 500,     step: 1 },     // km — Phase Z6.5.a single-mode tight range
         kmShared:            { value: 1000,   min: 0,     max: 10000,   step: 1 },     // km
         kmMonat:             { value: 1000,   min: 100,   max: 5000,    step: 50 },    // km
         batteryKwh:          { value: 60,     min: 20,    max: 150,     step: 1 },     // kWh
@@ -4222,8 +4400,8 @@ window.addEventListener('appinstalled', () => {
         benzinpreis:         { value: 1.70,   min: 1.00,  max: 3.00,    step: 0.01 },  // €/L
         verbrauchVerbrenner: { value: 6.5,    min: 3,     max: 20,      step: 0.1 },   // L/100 km
         evVerbrauch:         { value: 17,     min: 8,     max: 35,      step: 0.5 },   // kWh/100 km (wie DE)
-        kmEv:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a
-        kmVb:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a
+        kmEv:                { value: 50,     min: 0,     max: 500,     step: 1 },     // km — Phase Z6.5.a
+        kmVb:                { value: 50,     min: 0,     max: 500,     step: 1 },     // km — Phase Z6.5.a
         kmShared:            { value: 1000,   min: 0,     max: 10000,   step: 1 },     // km — F6.1
         kmMonat:             { value: 1000,   min: 100,   max: 5000,    step: 50 },    // km
         batteryKwh:          { value: 60,     min: 20,    max: 150,     step: 1 },     // kWh
@@ -4239,8 +4417,8 @@ window.addEventListener('appinstalled', () => {
         benzinpreis:         { value: 3.20,   min: 2.00,  max: 6.00,    step: 0.05 },  // $/gallon
         verbrauchVerbrenner: { value: 26,     min: 10,    max: 80,      step: 1 },     // mpg
         evVerbrauch:         { value: 30,     min: 15,    max: 50,      step: 0.5 },   // kWh/100 mi
-        kmEv:                { value: 30,     min: 1,     max: 300,     step: 1 },     // mi — Phase Z6.5.a (≈ 50/500 km)
-        kmVb:                { value: 30,     min: 1,     max: 300,     step: 1 },     // mi — Phase Z6.5.a
+        kmEv:                { value: 30,     min: 0,     max: 300,     step: 1 },     // mi — Phase Z6.5.a (≈ 50/500 km)
+        kmVb:                { value: 30,     min: 0,     max: 300,     step: 1 },     // mi — Phase Z6.5.a
         kmShared:            { value: 600,    min: 0,     max: 6000,    step: 1 },     // mi — F6.1
         kmMonat:             { value: 1000,   min: 50,    max: 3100,    step: 50 },    // mi
         batteryKwh:          { value: 75,     min: 20,    max: 150,     step: 1 },     // kWh
@@ -4256,8 +4434,8 @@ window.addEventListener('appinstalled', () => {
         benzinpreis:         { value: 63.00,  min: 20.00, max: 80.00,   step: 0.50 },  // ₺/L
         verbrauchVerbrenner: { value: 7.0,    min: 3,     max: 20,      step: 0.1 },   // L/100 km
         evVerbrauch:         { value: 17,     min: 8,     max: 35,      step: 0.5 },   // kWh/100 km
-        kmEv:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a
-        kmVb:                { value: 50,     min: 1,     max: 500,     step: 1 },     // km — Phase Z6.5.a
+        kmEv:                { value: 50,     min: 0,     max: 500,     step: 1 },     // km — Phase Z6.5.a
+        kmVb:                { value: 50,     min: 0,     max: 500,     step: 1 },     // km — Phase Z6.5.a
         kmShared:            { value: 1000,   min: 0,     max: 10000,   step: 1 },     // km — F6.1
         kmMonat:             { value: 1000,   min: 100,   max: 5000,    step: 50 },    // km
         batteryKwh:          { value: 60,     min: 20,    max: 150,     step: 1 },     // kWh
@@ -4301,7 +4479,7 @@ window.addEventListener('appinstalled', () => {
       var el = document.getElementById(id);
       if (!el || !cfg) return;
       const restored = _historicalInputs[id];
-      if (restored && restored.value === el.value) {
+      if (restored && !isTripDistance(id) && restored.value === el.value) {
         _applyHistoricalRange(el, cfg, Number(restored.value));
         return;
       }
@@ -4338,7 +4516,8 @@ window.addEventListener('appinstalled', () => {
     for (var i = 0; i < ids.length; i++) {
       var cfg = fromMk.defaults[ids[i]], el = document.getElementById(ids[i]);
       if (!el || !cfg || cfg.value == null) continue;
-      var cur = parseFloat(el.value), def = parseFloat(cfg.value);
+      const restored = _historicalInputs[ids[i]];
+      var cur = parseFloat(isTripDistance(ids[i]) && restored ? restored.value : el.value), def = parseFloat(cfg.value);
       if (isFinite(cur) && isFinite(def) && Math.abs(cur - def) > 1e-9) return true;
     }
     return false;
@@ -4353,7 +4532,7 @@ window.addEventListener('appinstalled', () => {
     ].forEach(function (id) {
       var el = document.getElementById(id);
       if (!el) return;
-      if (_historicalInputs[id] && _historicalInputs[id].value === el.value) return;
+      if (_historicalInputs[id] && _matchesHistoricalInput(id, el, _historicalInputs[id])) return;
       var num = parseFloat(el.value);
       if (!isFinite(num)) return;
       var min = parseFloat(el.min), max = parseFloat(el.max);
@@ -4592,6 +4771,7 @@ window.addEventListener('appinstalled', () => {
         !confirm(_t("marketResetWarn", { market: code.toUpperCase() }))) {
       return false; // user cancelled → stay in current market, values untouched
     }
+    if (!compatible) _cancelTripEdits();
     currentMarket = code;
     try { localStorage.setItem(MARKET_KEY, code); } catch (_) {}
     // Phase P Sprint 1 (F6.2): currency MUST be set before language, because

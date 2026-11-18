@@ -48,7 +48,7 @@
 <title>EVSpendPure · Elektrik ve yakıt maliyeti hesaplayıcı</title>
 <script src="/theme-init.js?v=20261012-evspendpure"></script>
 <script src="/tr/init-tr.js?v=20260601-audit-3b2"></script>
-<link rel="stylesheet" href="/styles-app.min.css?v=20261111-ui1">
+<link rel="stylesheet" href="/styles-app.min.css?v=km-4ceb389ad54f">
 <link rel="stylesheet" href="/tr/styles-tr.css?v=20260601-audit-3b2">
 <link rel="stylesheet" href="/styles-duo.min.css?v=d1-03f0a3d87bea" data-web-only="duo">
 <!-- UI icon provenance:
@@ -141,7 +141,11 @@
     <div class="sl-row">
       <div class="sl-head">
         <label for="kmShared" class="sl-lbl" data-i18n="labelKilometer">Kilometre</label>
-        <span class="sl-val" id="kmSharedV">1,000 km</span>
+        <div class="trip-distance">
+          <button class="sl-val trip-distance-value" id="kmSharedV" type="button">1,000 km</button>
+          <input class="sl-val trip-distance-edit" id="kmSharedEdit" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" spellcheck="false" hidden>
+          <button class="sl-val trip-distance-done" id="kmSharedDone" type="button" hidden>✓</button>
+        </div>
       </div>
       <input id="kmShared" class="sl sl--shared" type="range" min="0" max="10000" step="1" value="1000" data-i18n-aria="ariaKmShared" aria-label="Her iki araç için mesafe">
     </div>
@@ -153,9 +157,13 @@
     <div class="sl-row sl-row--km">
       <div class="sl-head">
         <label for="kmEv" class="sl-lbl" data-i18n="labelKilometer">Kilometre</label>
-        <span class="sl-val" id="kmEvV">50 km</span>
+        <div class="trip-distance">
+          <button class="sl-val trip-distance-value" id="kmEvV" type="button">50 km</button>
+          <input class="sl-val trip-distance-edit" id="kmEvEdit" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" spellcheck="false" hidden>
+          <button class="sl-val trip-distance-done" id="kmEvDone" type="button" hidden>✓</button>
+        </div>
       </div>
-      <input id="kmEv" class="sl sl--ev" type="range" min="1" max="500" step="1" value="50" data-i18n-aria="ariaKmEv" aria-label="Elektrikli araç mesafesi">
+      <input id="kmEv" class="sl sl--ev" type="range" min="0" max="500" step="1" value="50" data-i18n-aria="ariaKmEv" aria-label="Elektrikli araç mesafesi">
     </div>
     <div class="sl-row">
       <div class="sl-head">
@@ -191,9 +199,13 @@
     <div class="sl-row sl-row--km">
       <div class="sl-head">
         <label for="kmVb" class="sl-lbl" data-i18n="labelKilometer">Kilometre</label>
-        <span class="sl-val" id="kmVbV">50 km</span>
+        <div class="trip-distance">
+          <button class="sl-val trip-distance-value" id="kmVbV" type="button">50 km</button>
+          <input class="sl-val trip-distance-edit" id="kmVbEdit" type="text" inputmode="numeric" enterkeyhint="done" autocomplete="off" spellcheck="false" hidden>
+          <button class="sl-val trip-distance-done" id="kmVbDone" type="button" hidden>✓</button>
+        </div>
       </div>
-      <input id="kmVb" class="sl sl--vb" type="range" min="1" max="500" step="1" value="50" data-i18n-aria="ariaKmVb" aria-label="İçten yanmalı araç mesafesi">
+      <input id="kmVb" class="sl sl--vb" type="range" min="0" max="500" step="1" value="50" data-i18n-aria="ariaKmVb" aria-label="İçten yanmalı araç mesafesi">
     </div>
     <div class="sl-row">
       <div class="sl-head">
@@ -505,6 +517,6 @@
 </div>
 
 <script src="/history-store.js?v=20260927-h1"></script>
-<script src="/script.min.js?v=20261111-ui1"></script>
+<script src="/script.min.js?v=km-2ce3b1b14b1f"></script>
 </body>
 </html>

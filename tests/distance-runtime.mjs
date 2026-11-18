@@ -11,13 +11,21 @@ function distanceRuntime(market = "us", storage = {}) {
       kmMonat: 1000, longtermPremium: 5000, longtermYears: 10,
       ridesharePersons: 1, marketSwitchLabel: "", qSaveBtn: "", saveHint: "",
       rangeDisplay: "", longtermYearsV: "", longtermPremiumV: "",
-      kmMonatV: "", ltKmJahr: "", ltKmWarn: "", singleHeroVal: ""
+      kmMonatV: "", ltKmJahr: "", ltKmWarn: "", singleHeroVal: "",
+      sliderAnnouncer: "", noteInput: "",
+      kmEvV: "", kmEvEdit: "", kmEvDone: "",
+      kmVbV: "", kmVbEdit: "", kmVbDone: "",
+      kmSharedV: "", kmSharedEdit: "", kmSharedDone: ""
     }
   });
   // The older generic test adapter uses empty Event stubs. Preserve type so
   // real market-change and input dispatches reach their registered handlers.
   rt.context.Event = class Event { constructor(type) { this.type = type; } };
   rt.context.CustomEvent = class CustomEvent { constructor(type, options = {}) { this.type = type; this.detail = options.detail; } };
+  for (const id of ["kmEv", "kmVb", "kmShared"]) {
+    rt.elements.get(id + "Edit").hidden = true;
+    rt.elements.get(id + "Done").hidden = true;
+  }
   rt.dispatchDom("DOMContentLoaded");
   return rt;
 }
