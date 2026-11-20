@@ -50,6 +50,7 @@
 <script src="/tr/init-tr.js?v=20260601-audit-3b2"></script>
 <link rel="stylesheet" href="/styles-app.min.css?v=km-4ceb389ad54f">
 <link rel="stylesheet" href="/tr/styles-tr.css?v=20260601-audit-3b2">
+<link rel="stylesheet" href="/app-discovery.css?v=ff259c797c71" data-web-only="app-discovery">
 <link rel="stylesheet" href="/styles-duo.min.css?v=d1-03f0a3d87bea" data-web-only="duo">
 <!-- UI icon provenance:
      Some UI symbols structurally match verified Lucide or Feather sources.
@@ -514,6 +515,19 @@
       <button class="pwa-btn pwa-btn--ghost" id="pwaPopupLater" type="button" data-i18n="pwaLater">Sonra</button>
     </div>
   </div>
+
+  <template id="app-discovery-template">
+    <section class="app-discovery" aria-labelledby="app-discovery-title">
+      <img alt="" decoding="async">
+      <div class="app-discovery-copy">
+        <h2 id="app-discovery-title"></h2>
+        <p></p>
+      </div>
+      <a rel="noreferrer"></a>
+      <button type="button">×</button>
+    </section>
+  </template>
+  <script src="/app-discovery.js?v=00494e0134f2" defer></script>
 </div>
 
 <script src="/history-store.js?v=20260927-h1"></script>

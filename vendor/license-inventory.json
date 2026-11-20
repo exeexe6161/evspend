@@ -63,6 +63,8 @@
       "404.js",
       "android-chrome-192x192.png",
       "android-chrome-512x512.png",
+      "app-discovery.css",
+      "app-discovery.js",
       "apple-touch-icon.png",
       "banner.png",
       "en-eu/init-eu.js",
@@ -88,6 +90,8 @@
     "material": {
       "android-chrome-192x192.png": "926394b700e197668d3a45ce11982078e10589657e5d2e571333ce605a1d98e1",
       "android-chrome-512x512.png": "5e40db3062f79141c68746c0f1dfd6639f447007bd4dee92be32613fddfda30a",
+      "app-discovery-icon.png": "5b03f9c91f73382316e19b4edb837fb51745690b78bd1d9225515514f9146aa0",
+      "app-discovery-qr.png": "375d4e3e600b70ee2d0a3306a2bfe0757b8c8e6988f380edb47d1987c326b060",
       "apple-touch-icon.png": "c04be31a2fc7c7cb1b2320d5c270b7614f299de08f27121634304ce5bf3bcfb0",
       "banner.png": "36571284e95650191973b5b653aa0545cb8f2a4fb6e032cabccdacbb8ab80b33",
       "banner.webp": "1ee30ad531c183fcf7b8e542ad7f16f0f985e93d66b82a70c03e2efa452ecfa3",
