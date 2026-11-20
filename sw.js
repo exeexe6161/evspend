@@ -55,6 +55,10 @@ const REQUIRED_PRECACHE_URLS = [
 ];
 
 const OPTIONAL_PRECACHE_URLS = [
+  '/app-discovery.css?v=1906bdeec6d2',
+  '/app-discovery.js?v=163835afc3a3',
+  '/app-discovery-icon.png',
+  '/app-discovery-qr.png',
   '/styles-pages.min.css?v=20260501-legal3',
   '/lang-switch.js?v=20260501-legal3',
   '/fonts/InterVariable-Italic.woff2',

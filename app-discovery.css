@@ -1,0 +1,103 @@
+.app-discovery {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  grid-template-areas: "art copy close" ". link link";
+  align-items: start;
+  gap: var(--sp-2);
+  max-inline-size: 32rem;
+  margin-inline: max(var(--gutter), calc((100% - 32rem) / 2));
+  padding: var(--sp-3);
+  border: 1px solid var(--sep);
+  border-radius: var(--r-card);
+  background: var(--s1);
+  color: var(--l1);
+  text-align: start;
+}
+
+.app-discovery[data-layout="desktop"] {
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-areas: "copy art" "link art";
+  align-items: center;
+  column-gap: var(--sp-4);
+  padding: var(--sp-4);
+}
+
+.app-discovery-copy {
+  grid-area: copy;
+  overflow-wrap: anywhere;
+}
+
+.app-discovery h2 {
+  font-size: 1rem;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.app-discovery p {
+  margin-block-start: var(--sp-1);
+  color: var(--l3);
+  font-size: .875rem;
+  line-height: 1.5;
+}
+
+.app-discovery img {
+  grid-area: art;
+  display: block;
+  inline-size: var(--h-btn-md);
+  block-size: auto;
+  border-radius: var(--r-sm);
+}
+
+.app-discovery[data-layout="desktop"] img {
+  inline-size: clamp(82px, 24vw, 129px);
+  border-radius: 0;
+}
+
+.app-discovery a,
+.app-discovery button {
+  display: inline-flex;
+  align-items: center;
+  min-block-size: var(--h-btn-md);
+  min-inline-size: var(--h-btn-md);
+  border-radius: var(--r-btn);
+  color: var(--l1);
+  scroll-margin-block: 72px 120px;
+}
+
+.app-discovery a {
+  grid-area: link;
+  justify-self: start;
+  padding-inline: var(--sp-3);
+  background: var(--s2);
+  font-size: .875rem;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+  text-underline-offset: .18em;
+}
+
+.app-discovery button {
+  grid-area: close;
+  justify-content: center;
+  padding-inline: var(--sp-1);
+  border: 0;
+  background: transparent;
+  font: inherit;
+  font-size: 1.375rem;
+  cursor: pointer;
+}
+
+.app-discovery a:hover,
+.app-discovery button:hover {
+  background: var(--s3);
+}
+
+.app-discovery :is(a, button):focus-visible {
+  outline: 2px solid var(--l1);
+  outline-offset: 2px;
+}
+
+@media print {
+  .app-discovery {
+    display: none;
+  }
+}
