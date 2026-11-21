@@ -9,12 +9,20 @@
   text-align: start;
 }
 
-.app-discovery-row {
+.app-discovery-row,
+.app-discovery[data-legacy-template] {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr) auto auto;
   grid-template-areas: "icon copy store close";
   align-items: center;
   gap: var(--sp-2) var(--sp-1);
+}
+
+@media (max-width: 560px) {
+  .app-discovery[data-legacy-template] {
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-areas: "icon copy copy" ". store close";
+  }
 }
 
 .app-discovery[data-layout="desktop"] .app-discovery-row {
