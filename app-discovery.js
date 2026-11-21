@@ -3,87 +3,86 @@
   const browserMode = matchMedia("(display-mode: browser)");
   if (standalone || !browserMode.matches || window.top !== window) return;
 
-  // Adding the native tag is the manual activation step after checking the store.
-  const appId = "6832245694";
-  const downloadEnabled = document.querySelector('meta[name="apple-itunes-app"]')?.content === "app-id=" + appId;
   const iphone = /\(iPhone;/.test(userAgent);
-  const thirdPartyIOS = /\b(?:CriOS|FxiOS|EdgiOS)\/\d/.test(userAgent);
-  const safariIOS = /\bVersion\/[\d.]+\b.*\bSafari\/[\d.]+$/.test(userAgent);
-  const desktop = /\b(?:Macintosh|Windows NT)\b/.test(userAgent) &&
+  const iosBrowserTokens = userAgent.match(/\b(?:CriOS|FxiOS|EdgiOS)\/\d/g) || [];
+  const desktop = iosBrowserTokens.length === 0 && /\b(?:Macintosh|Windows NT)\b/.test(userAgent) &&
     !/\b(?:Mobile|Android|iPhone|iPad|iPod)\b/.test(userAgent) &&
-    (!userAgent.includes("Macintosh") || maxTouchPoints < 2);
-  if (!(iphone && (thirdPartyIOS || (!downloadEnabled && safariIOS))) && !desktop) return;
+    (!userAgent.includes("Macintosh") || (maxTouchPoints === 0 && !matchMedia("(any-pointer: coarse)").matches));
+  if (!(iphone && iosBrowserTokens.length === 1) && !desktop) return;
 
   const copy = {
     de: {
-      title: "EVSpendPure fürs iPhone",
-      soon: "Bald im App Store",
-      mobile: "Kostenlose App fürs iPhone.",
-      desktop: "Vergleiche Stromkosten und Kraftstoffkosten mit der kostenlosen App fürs iPhone.",
-      link: "Zum App Store",
-      qr: "QR-Code zur App im App Store",
+      subtitle: "Strom- und Kraftstoffkosten vergleichen",
+      link: "EVSpendPure im App Store ansehen",
+      desktopLink: "Im App Store ansehen",
+      qr: "QR-Code",
+      qrHint: "Mit dem iPhone scannen",
+      scan: "QR-Code zur EVSpendPure-Seite im App Store",
       close: "App-Hinweis schließen"
     },
     en: {
-      title: "EVSpendPure for iPhone",
-      soon: "Coming soon to the App Store",
-      mobile: "Free app for iPhone.",
-      desktop: "Compare electricity and fuel costs with the free app for iPhone.",
-      link: "View on the App Store",
-      qr: "QR code for the app on the App Store",
-      close: "Dismiss app promotion"
+      subtitle: "Compare electricity and fuel costs",
+      link: "View EVSpendPure on the App Store",
+      desktopLink: "View on the App Store",
+      qr: "QR code",
+      qrHint: "Scan with your iPhone",
+      scan: "QR code for EVSpendPure on the App Store",
+      close: "Dismiss app banner"
     },
     tr: {
-      title: "iPhone için EVSpendPure",
-      soon: "Yakında App Store’da",
-      mobile: "iPhone için ücretsiz uygulama.",
-      desktop: "Ücretsiz iPhone uygulamasıyla elektrik ve yakıt maliyetlerini karşılaştır.",
-      link: "App Store’a git",
-      qr: "App Store’daki uygulamanın QR kodu",
+      subtitle: "Elektrik ve yakıt maliyetlerini karşılaştır",
+      link: "EVSpendPure’u App Store’da görüntüle",
+      desktopLink: "App Store’da görüntüle",
+      qr: "QR kodu",
+      qrHint: "iPhone ile tara",
+      scan: "EVSpendPure’un App Store sayfasının QR kodu",
       close: "Uygulama tanıtımını kapat"
     }
   };
 
-  // The calculator resolves the initial market language on DOMContentLoaded.
-  document.addEventListener("DOMContentLoaded", () => {
-    if (!browserMode.matches) return;
-    const template = document.querySelector("#app-discovery-template");
-    const panel = template.content.firstElementChild.cloneNode(true);
-    const title = panel.querySelector("h2");
-    const description = panel.querySelector("p");
-    const link = panel.querySelector("a");
-    const art = panel.querySelector("img");
-    const close = panel.querySelector("button");
-    panel.dataset.layout = desktop ? "desktop" : "mobile";
-    panel.toggleAttribute("data-download", downloadEnabled);
-    if (desktop) close.remove();
-    if (downloadEnabled) {
-      link.href = "https://apps.apple.com/app/evspendpure/id" + appId;
-    } else {
-      link.remove();
-    }
-    const showQr = desktop && downloadEnabled;
+  const template = document.querySelector("#app-discovery-template");
+  const panel = template.content.firstElementChild.cloneNode(true);
+  const subtitle = panel.querySelector(".app-discovery-subtitle");
+  const link = panel.querySelector(".app-discovery-link");
+  const close = panel.querySelector(".app-discovery-close");
+  const qrButton = panel.querySelector(".app-discovery-qr");
+  const qrPanel = panel.querySelector(".app-discovery-qr-panel");
+  const qrHint = qrPanel.querySelector("p");
+  const qrImage = qrPanel.querySelector("img");
+  panel.dataset.layout = desktop ? "desktop" : "mobile";
 
-    const translate = () => {
-      const labels = copy[document.documentElement.lang] || copy.en;
-      title.textContent = desktop ? labels.title : "EVSpendPure";
-      description.textContent = downloadEnabled ? (desktop ? labels.desktop : labels.mobile) : labels.soon;
-      if (downloadEnabled) link.textContent = labels.link;
-      art.alt = showQr ? labels.qr : "";
-      if (!desktop) close.setAttribute("aria-label", labels.close);
-    };
-    translate();
-    art.src = showQr ? "/app-discovery-qr.png" : "/app-discovery-icon.png";
-    art.width = art.height = showQr ? 172 : 180;
-    document.querySelector(desktop ? "footer" : ".hero .hdr").after(panel);
-    document.addEventListener("eaf:languagechange", translate);
-
-    if (!desktop) {
-      close.addEventListener("click", () => {
-        document.removeEventListener("eaf:languagechange", translate);
-        panel.remove();
-        document.querySelector("#modeSingleBtn")?.focus({ preventScroll: true });
-      });
+  const translate = () => {
+    const labels = copy[document.documentElement.lang] || copy.en;
+    subtitle.textContent = labels.subtitle;
+    link.textContent = desktop ? labels.desktopLink : "App Store";
+    link.setAttribute("aria-label", desktop ? `${labels.desktopLink}, EVSpendPure` : labels.link);
+    close.setAttribute("aria-label", labels.close);
+    if (desktop) {
+      qrButton.textContent = labels.qr;
+      qrHint.textContent = labels.qrHint;
+      qrImage.alt = labels.scan;
     }
-  }, { once: true });
+  };
+  translate();
+  const language = new MutationObserver(translate);
+  language.observe(document.documentElement, { attributes: true, attributeFilter: ["lang"] });
+
+  if (desktop) {
+    qrButton.addEventListener("click", () => {
+      qrPanel.hidden = !qrPanel.hidden;
+      qrButton.setAttribute("aria-expanded", String(!qrPanel.hidden));
+      if (!qrPanel.hidden && !qrImage.hasAttribute("src")) qrImage.src = "/app-discovery-qr.png";
+    });
+  } else {
+    qrButton.remove();
+    qrPanel.remove();
+  }
+
+  close.addEventListener("click", () => {
+    language.disconnect();
+    panel.remove();
+    document.querySelector("#marketSwitch")?.focus({ preventScroll: true });
+  });
+  // The template and this script precede the toolbar, so mounting is part of initial layout.
+  document.currentScript.after(panel);
 })();

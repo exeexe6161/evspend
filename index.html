@@ -19,6 +19,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EVSpendPure">
+<meta name="apple-itunes-app" content="app-id=6832245694">
 <meta name="theme-color" content="#f5f7fa" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0f1115" media="(prefers-color-scheme: dark)">
 <meta name="referrer" content="same-origin">
@@ -48,7 +49,7 @@
 <title>EVSpendPure · Strom und Kraftstoffkosten berechnen</title>
 <script src="./theme-init.js?v=20261012-evspendpure"></script>
 <link rel="stylesheet" href="./styles-app.min.css?v=km-4ceb389ad54f">
-<link rel="stylesheet" href="/app-discovery.css?v=ff259c797c71" data-web-only="app-discovery">
+<link rel="stylesheet" href="/app-discovery.css?v=787a61eecc14" data-web-only="app-discovery">
 <link rel="stylesheet" href="./styles-duo.min.css?v=d1-03f0a3d87bea" data-web-only="duo">
 <!-- UI icon provenance:
      Some UI symbols structurally match verified Lucide or Feather sources.
@@ -71,6 +72,26 @@
 
 <!-- Screen-reader live region for slider change announcements (BFSG / WCAG 2.1) -->
 <div id="sliderAnnouncer" class="sr-only" role="status" aria-live="polite" aria-atomic="true"></div>
+
+<template id="app-discovery-template">
+  <section class="app-discovery" aria-labelledby="app-discovery-title">
+    <div class="app-discovery-row">
+      <img class="app-discovery-icon" src="/app-discovery-icon.png" width="40" height="40" alt="">
+      <div class="app-discovery-copy">
+        <p id="app-discovery-title">EVSpendPure</p>
+        <p class="app-discovery-subtitle"></p>
+      </div>
+      <a class="app-discovery-link" href="https://apps.apple.com/app/evspendpure/id6832245694" rel="noreferrer">App Store</a>
+      <button class="app-discovery-qr" type="button" aria-expanded="false" aria-controls="app-discovery-qr-panel"></button>
+      <button class="app-discovery-close" type="button">×</button>
+    </div>
+    <div class="app-discovery-qr-panel" id="app-discovery-qr-panel" hidden>
+      <p></p>
+      <img width="172" height="172" alt="">
+    </div>
+  </section>
+</template>
+<script src="/app-discovery.js?v=d352bbbd826b"></script>
 
 <div class="top-controls" role="toolbar" data-i18n-aria="ariaSettings" aria-label="Einstellungen">
   <div class="top-pill-wrap">
@@ -514,18 +535,6 @@
     </div>
   </div>
 
-  <template id="app-discovery-template">
-    <section class="app-discovery" aria-labelledby="app-discovery-title">
-      <img alt="" decoding="async">
-      <div class="app-discovery-copy">
-        <h2 id="app-discovery-title"></h2>
-        <p></p>
-      </div>
-      <a rel="noreferrer"></a>
-      <button type="button">×</button>
-    </section>
-  </template>
-  <script src="/app-discovery.js?v=00494e0134f2" defer></script>
 </div>
 
 <script src="/history-store.js?v=20260927-h1"></script>

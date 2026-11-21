@@ -12,6 +12,7 @@ export const PUBLIC_FILES = Object.freeze([
   'android-chrome-192x192.png',
   'android-chrome-512x512.png',
   'app-discovery-icon.png',
+  'app-discovery-qr.png',
   'app-discovery.css',
   'app-discovery.js',
   'apple-touch-icon.png',
